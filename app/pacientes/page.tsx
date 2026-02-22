@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/layout/AdminLayout";
-import { PageHeader, SearchBar, Table, TR, TD, Modal, EmptyState, Skeleton, Btn } from "@/components/ui";
-import { api, Patient, Appointment } from "@/lib/api";
+import { PageHeader, SearchBar, Table, TR, TD, EmptyState, Skeleton, Btn } from "@/components/ui";
+import Portal from "@/components/ui/Portal";
+import { api, Patient, Appointment, Service } from "@/lib/api";
 import { fullName, formatDateShort, statusBadgeClass, statusLabel } from "@/lib/utils";
-import { Users, Edit2, X } from "lucide-react";
+import { Users, Edit2, X, Save } from "lucide-react";
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const BASE = `${API_URL}/api/v1`;
@@ -13,40 +15,51 @@ const BASE = `${API_URL}/api/v1`;
 interface Toast { msg: string; type: "success" | "error"; }
 
 function ToastNotif({ toast, onClose }: { toast: Toast; onClose: () => void }) {
-  useEffect(() => {
-    const t = setTimeout(onClose, 3000);
-    return () => clearTimeout(t);
-  }, [onClose]);
+  useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, [onClose]);
   return (
-    <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-sm font-medium
-      ${toast.type === "success"
-        ? "bg-green-500/20 border border-green-500/30 text-green-300"
-        : "bg-red-500/20 border border-red-500/30 text-red-300"
-      }`}>
-      <span>{toast.type === "success" ? "✅" : "❌"}</span>
-      {toast.msg}
-    </div>
+    <Portal>
+      <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[300] flex items-center gap-2 px-5 py-3 rounded-2xl shadow-2xl text-sm font-medium border
+        ${toast.type === "success" ? "bg-green-500/20 border-green-500/30 text-green-300" : "bg-red-500/20 border-red-500/30 text-red-300"}`}>
+        {toast.type === "success" ? "✅" : "❌"} {toast.msg}
+      </div>
+    </Portal>
   );
 }
 
-const initialEdit = {
-  phone: "",
-  email: "",
-  emergency_contact_name: "",
-  emergency_contact_relationship: "",
-  emergency_contact_phone: "",
-};
+const ROField = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <p className="text-white/40 text-xs mb-1">{label}</p>
+    <div className="bg-white/[0.03] border border-white/5 rounded-xl px-3 py-2.5 opacity-60">
+      <p className="text-white/70 text-sm">{value || "—"}</p>
+    </div>
+  </div>
+);
+
+const EditField = ({ label, value, onChange, type = "text", placeholder = "" }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string;
+}) => (
+  <div>
+    <p className="text-white/60 text-xs mb-1">{label}</p>
+    <input type={type} value={value} onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder} className="form-input text-sm" />
+  </div>
+);
 
 export default function PacientesPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [services, setServices] = useState<Service[]>([]);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Patient | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [editForm, setEditForm] = useState(initialEdit);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
+  const [editForm, setEditForm] = useState({
+    phone: "", email: "",
+    emergency_contact_name: "", emergency_contact_relationship: "", emergency_contact_phone: "",
+  });
+  const [originalForm, setOriginalForm] = useState({ ...editForm });
 
   const showToast = (msg: string, type: "success" | "error") => setToast({ msg, type });
 
@@ -54,46 +67,45 @@ export default function PacientesPage() {
     Promise.all([
       api.getPatients().catch(() => []),
       api.getAppointments().catch(() => []),
-    ]).then(([p, a]) => {
-      setPatients(p);
-      setAppointments(a);
-      setLoading(false);
-    });
+      api.getServices().catch(() => []),   // ← Es para visualizar el nombre del servicio en el historial del paciente, no eliminar aunque no se use directamente aquí
+    ]).then(([p, a, s]) => { setPatients(p); setAppointments(a); setServices(s); setLoading(false); });
   }, []);
 
   const filtered = patients.filter((p) => {
     const q = search.toLowerCase();
-    return !q ||
-      fullName(p).toLowerCase().includes(q) ||
-      p.document_number?.includes(q) ||
-      p.email?.toLowerCase().includes(q);
+    return !q || fullName(p).toLowerCase().includes(q) ||
+      p.document_number?.includes(q) || p.email?.toLowerCase().includes(q);
   });
 
-  const patientAppointments = (id: number) => appointments.filter((a) => a.patient_id === id);
-
+  const patientAppts = (id: number) => appointments.filter((a) => a.patient_id === id);
+  const getServiceName = (a: Appointment) => {
+    if (a.service?.name) return a.service.name;
+    const s = services.find((sv) => sv.id === a.service_id);
+    return s ? s.name : `Servicio #${a.service_id}`;
+  };
   const openModal = (p: Patient) => {
     setSelected(p);
     setEditMode(false);
-    setEditForm({
+    const form = {
       phone: p.phone || "",
       email: p.email || "",
-      emergency_contact_name: p.emergency_contact_name || "",
+      emergency_contact_name: (p as any).emergency_contact_name || "",
       emergency_contact_relationship: (p as any).emergency_contact_relationship || "",
       emergency_contact_phone: (p as any).emergency_contact_phone || "",
-    });
+    };
+    setEditForm(form);
+    setOriginalForm(form); // ← agrega esta línea
   };
 
   const handleCancel = () => {
     setEditMode(false);
-    if (selected) {
-      setEditForm({
-        phone: selected.phone || "",
-        email: selected.email || "",
-        emergency_contact_name: selected.emergency_contact_name || "",
-        emergency_contact_relationship: (selected as any).emergency_contact_relationship || "",
-        emergency_contact_phone: (selected as any).emergency_contact_phone || "",
-      });
-    }
+    if (selected) setEditForm({
+      phone: selected.phone || "",
+      email: selected.email || "",
+      emergency_contact_name: (selected as any).emergency_contact_name || "",
+      emergency_contact_relationship: (selected as any).emergency_contact_relationship || "",
+      emergency_contact_phone: (selected as any).emergency_contact_phone || "",
+    });
   };
 
   const handleSave = async () => {
@@ -103,14 +115,18 @@ export default function PacientesPage() {
       const res = await fetch(`${BASE}/patients/${selected.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify({
+          phone: editForm.phone,
+          email: editForm.email,
+          emergency_contact_name: editForm.emergency_contact_name,
+          emergency_contact_relationship: editForm.emergency_contact_relationship,
+          emergency_contact_phone: editForm.emergency_contact_phone,
+        }),
       });
       if (!res.ok) throw new Error();
-
-      // Update local state
-      const updatedPatient = { ...selected, ...editForm };
-      setPatients((prev) => prev.map((p) => p.id === selected.id ? updatedPatient : p));
-      setSelected(updatedPatient);
+      const updated = { ...selected, ...editForm };
+      setPatients((prev) => prev.map((p) => p.id === selected.id ? updated : p));
+      setSelected(updated);
       setEditMode(false);
       showToast("Paciente actualizado correctamente", "success");
     } catch {
@@ -119,7 +135,7 @@ export default function PacientesPage() {
       setSaving(false);
     }
   };
-
+  const hasChanges = JSON.stringify(editForm) !== JSON.stringify(originalForm);
   return (
     <AdminLayout>
       {toast && <ToastNotif toast={toast} onClose={() => setToast(null)} />}
@@ -134,32 +150,29 @@ export default function PacientesPage() {
         <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}</div>
       ) : (
         <Table headers={["Nombre", "Documento", "Teléfono", "Email", "Registro", "Citas", "Acciones"]} empty={filtered.length === 0}>
-          {filtered.map((p) => {
-            const citasCount = patientAppointments(p.id).length;
-            return (
-              <TR key={p.id} onClick={() => openModal(p)}>
-                <TD>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/30 to-blue-600/30 flex items-center justify-center text-cyan-400 text-xs font-bold shrink-0">
-                      {p.first_name?.[0]?.toUpperCase()}
-                    </div>
-                    <span className="font-medium text-white">{fullName(p)}</span>
+          {filtered.map((p) => (
+            <TR key={p.id} onClick={() => openModal(p)}>
+              <TD>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/30 to-blue-600/30 flex items-center justify-center text-cyan-400 text-xs font-bold shrink-0">
+                    {p.first_name?.[0]?.toUpperCase()}
                   </div>
-                </TD>
-                <TD className="text-white/60">{p.document_number}</TD>
-                <TD className="text-white/60">{p.phone}</TD>
-                <TD className="text-white/60">{p.email || "—"}</TD>
-                <TD className="text-white/60">{formatDateShort(p.created_at)}</TD>
-                <TD><span className="badge badge-scheduled">{citasCount} citas</span></TD>
-                <TD>
-                  <button onClick={(e) => { e.stopPropagation(); openModal(p); }}
-                    className="text-cyan-400 hover:text-cyan-300 text-xs font-medium">
-                    Ver detalle
-                  </button>
-                </TD>
-              </TR>
-            );
-          })}
+                  <span className="font-medium text-white">{fullName(p)}</span>
+                </div>
+              </TD>
+              <TD className="text-white/60">{p.document_number}</TD>
+              <TD className="text-white/60">{p.phone}</TD>
+              <TD className="text-white/60">{p.email || "—"}</TD>
+              <TD className="text-white/60">{formatDateShort(p.created_at)}</TD>
+              <TD><span className="badge badge-scheduled">{patientAppts(p.id).length} citas</span></TD>
+              <TD>
+                <button onClick={(e) => { e.stopPropagation(); openModal(p); }}
+                  className="text-cyan-400 hover:text-cyan-300 text-xs font-medium">
+                  Ver detalle
+                </button>
+              </TD>
+            </TR>
+          ))}
         </Table>
       )}
 
@@ -167,164 +180,150 @@ export default function PacientesPage() {
         <EmptyState icon={<Users size={40} />} message="No se encontraron pacientes" />
       )}
 
-      {/* ── DETAIL / EDIT MODAL ── */}
-      <Modal
-        isOpen={!!selected}
-        onClose={() => { setSelected(null); setEditMode(false); }}
-        title="Detalle del Paciente"
-        wide
-      >
-        {selected && (
-          <div className="space-y-5">
+      {/* ── MODAL via Portal ── */}
+      {selected && (
+        <Portal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+              onClick={() => { if (!editMode) { setSelected(null); } }}
+            />
 
-            {/* Header paciente */}
-            <div className="flex items-center justify-between pb-4 border-b border-white/8">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-blue-600/30 flex items-center justify-center text-cyan-400 text-xl font-bold">
-                  {selected.first_name?.[0]?.toUpperCase()}
+            {/* Panel */}
+            <div
+              className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col"
+              style={{ maxHeight: "88vh" }}
+            >
+              {/* Header fijo */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 flex items-center justify-center text-cyan-400 font-bold text-lg shrink-0">
+                    {selected.first_name?.[0]?.toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="text-white font-bold">{fullName(selected)}</h2>
+                    <p className="text-white/40 text-xs">CC: {selected.document_number} · Reg: {formatDateShort(selected.created_at)}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-white font-bold text-lg">{fullName(selected)}</h3>
-                  <p className="text-white/50 text-sm">CC: {selected.document_number}</p>
-                  <p className="text-white/40 text-xs">Registrado: {formatDateShort(selected.created_at)}</p>
+                <div className="flex items-center gap-2">
+                  {!editMode ? (
+                    <Btn variant="secondary" size="sm" onClick={() => setEditMode(true)}>
+                      <Edit2 size={13} /> Editar
+                    </Btn>
+                  ) : (
+                    <Btn variant="ghost" size="sm" onClick={handleCancel}>
+                      <X size={13} /> Cancelar
+                    </Btn>
+                  )}
+                  <button
+                    onClick={() => { setSelected(null); setEditMode(false); }}
+                    className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center text-xl leading-none transition-all"
+                  >
+                    ×
+                  </button>
                 </div>
               </div>
 
-              {/* Botón editar / cancelar */}
-              {!editMode ? (
-                <Btn variant="secondary" size="sm" onClick={() => setEditMode(true)}>
-                  <Edit2 size={13} /> Editar
-                </Btn>
-              ) : (
-                <Btn variant="ghost" size="sm" onClick={handleCancel}>
-                  <X size={13} /> Cancelar edición
-                </Btn>
-              )}
-            </div>
+              {/* Cuerpo scrolleable */}
+              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-6">
 
-            {/* Campos solo lectura */}
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                ["Nombre completo", fullName(selected)],
-                ["Cédula (CC)", selected.document_number],
-              ].map(([label, value]) => (
-                <div key={label} className="glass-card rounded-xl p-3 opacity-60">
-                  <p className="text-white/40 text-xs mb-0.5">{label}</p>
-                  <p className="text-white text-sm font-medium">{value}</p>
+                {/* Datos personales — siempre solo lectura */}
+                <div>
+                  <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Datos personales</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ROField label="Nombre completo" value={fullName(selected)} />
+                    <ROField label="Cédula (CC)" value={selected.document_number} />
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            {/* Campos editables */}
-            <div>
-              <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-3">Información de contacto</p>
-              <div className="grid grid-cols-2 gap-4">
+                {/* Contacto */}
                 <div>
-                  <label className="text-white/50 text-xs mb-1.5 block">Teléfono</label>
-                  {editMode ? (
-                    <input type="tel" value={editForm.phone}
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                      className="form-input text-sm" placeholder="3001234567" />
-                  ) : (
-                    <div className="glass-card rounded-xl p-3">
-                      <p className="text-white text-sm">{selected.phone || "—"}</p>
-                    </div>
-                  )}
+                  <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Información de contacto</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {editMode ? (
+                      <>
+                        <EditField label="Teléfono" value={editForm.phone}
+                          onChange={(v) => setEditForm({ ...editForm, phone: v })}
+                          type="tel" placeholder="3001234567" />
+                        <EditField label="Email" value={editForm.email}
+                          onChange={(v) => setEditForm({ ...editForm, email: v })}
+                          type="email" placeholder="correo@ejemplo.com" />
+                      </>
+                    ) : (
+                      <>
+                        <ROField label="Teléfono" value={selected.phone} />
+                        <ROField label="Email" value={selected.email || ""} />
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <label className="text-white/50 text-xs mb-1.5 block">Email</label>
-                  {editMode ? (
-                    <input type="email" value={editForm.email}
-                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      className="form-input text-sm" placeholder="correo@ejemplo.com" />
-                  ) : (
-                    <div className="glass-card rounded-xl p-3">
-                      <p className="text-white text-sm">{selected.email || "—"}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
 
-            {/* Contacto de emergencia */}
-            <div>
-              <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-3">Contacto de emergencia</p>
-              <div className="grid grid-cols-3 gap-4">
+                {/* Contacto de emergencia */}
                 <div>
-                  <label className="text-white/50 text-xs mb-1.5 block">Nombre</label>
-                  {editMode ? (
-                    <input type="text" value={editForm.emergency_contact_name}
-                      onChange={(e) => setEditForm({ ...editForm, emergency_contact_name: e.target.value })}
-                      className="form-input text-sm" placeholder="Nombre completo" />
-                  ) : (
-                    <div className="glass-card rounded-xl p-3">
-                      <p className="text-white text-sm">{selected.emergency_contact_name || "—"}</p>
-                    </div>
-                  )}
+                  <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Contacto de emergencia</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    {editMode ? (
+                      <>
+                        <EditField label="Nombre" value={editForm.emergency_contact_name}
+                          onChange={(v) => setEditForm({ ...editForm, emergency_contact_name: v })}
+                          placeholder="Nombre completo" />
+                        <EditField label="Relación" value={editForm.emergency_contact_relationship}
+                          onChange={(v) => setEditForm({ ...editForm, emergency_contact_relationship: v })}
+                          placeholder="Pareja, Hijo..." />
+                        <EditField label="Teléfono" value={editForm.emergency_contact_phone}
+                          onChange={(v) => setEditForm({ ...editForm, emergency_contact_phone: v })}
+                          type="tel" placeholder="3009876543" />
+                      </>
+                    ) : (
+                      <>
+                        <ROField label="Nombre" value={(selected as any).emergency_contact_name || ""} />
+                        <ROField label="Relación" value={(selected as any).emergency_contact_relationship || ""} />
+                        <ROField label="Teléfono" value={(selected as any).emergency_contact_phone || ""} />
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <label className="text-white/50 text-xs mb-1.5 block">Relación</label>
-                  {editMode ? (
-                    <input type="text" value={editForm.emergency_contact_relationship}
-                      onChange={(e) => setEditForm({ ...editForm, emergency_contact_relationship: e.target.value })}
-                      className="form-input text-sm" placeholder="Ej: Pareja, Hijo..." />
-                  ) : (
-                    <div className="glass-card rounded-xl p-3">
-                      <p className="text-white text-sm">{(selected as any).emergency_contact_relationship || "—"}</p>
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <label className="text-white/50 text-xs mb-1.5 block">Teléfono</label>
-                  {editMode ? (
-                    <input type="tel" value={editForm.emergency_contact_phone}
-                      onChange={(e) => setEditForm({ ...editForm, emergency_contact_phone: e.target.value })}
-                      className="form-input text-sm" placeholder="3009876543" />
-                  ) : (
-                    <div className="glass-card rounded-xl p-3">
-                      <p className="text-white text-sm">{(selected as any).emergency_contact_phone || "—"}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
 
-            {/* Guardar */}
-            {editMode && (
-              <div className="flex gap-3 pt-2 border-t border-white/8">
-                <Btn variant="secondary" onClick={handleCancel}>Cancelar</Btn>
-                <Btn variant="primary" onClick={handleSave} disabled={saving}>
-                  {saving ? "Guardando..." : "Guardar cambios"}
-                </Btn>
-              </div>
-            )}
+                {/* Guardar — solo en modo edición */}
+                {editMode && (
+                  <div className="flex gap-3 pt-1 border-t border-white/8">
+                    <Btn variant="secondary" onClick={handleCancel}>Cancelar</Btn>
+                    <Btn variant="primary" onClick={handleSave} disabled={saving || !hasChanges}>  {/* ← cambia esta línea */}
+                      <Save size={13} />
+                      {saving ? "Guardando..." : "Guardar cambios"}
+                    </Btn>
+                  </div>
+                )}
 
-            {/* Historial de citas */}
-            {!editMode && (
-              <div>
-                <h4 className="text-white font-semibold text-sm mb-3">
-                  Historial de citas ({patientAppointments(selected.id).length})
-                </h4>
-                {patientAppointments(selected.id).length === 0 ? (
-                  <p className="text-white/30 text-sm">Sin citas registradas</p>
-                ) : (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {patientAppointments(selected.id).map((a) => (
-                      <div key={a.id} className="flex items-center justify-between glass-card rounded-xl p-3">
-                        <div>
-                          <p className="text-white text-sm">{a.service?.name || `Servicio #${a.service_id}`}</p>
-                          <p className="text-white/40 text-xs">{formatDateShort(a.start_time)}</p>
-                        </div>
-                        <span className={statusBadgeClass(a.status)}>{statusLabel(a.status)}</span>
+                {/* Historial — solo en modo lectura */}
+                {!editMode && (
+                  <div>
+                    <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">
+                      Historial de citas ({patientAppts(selected.id).length})
+                    </p>
+                    {patientAppts(selected.id).length === 0 ? (
+                      <p className="text-white/30 text-sm py-4 text-center">Sin citas registradas</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {patientAppts(selected.id).map((a) => (
+                          <div key={a.id} className="flex items-center justify-between glass-card rounded-xl px-4 py-3">
+                            <div>
+                              <p className="text-white text-sm">{getServiceName(a)}</p>
+                              <p className="text-white/40 text-xs">{formatDateShort(a.start_time)}</p>
+                            </div>
+                            <span className={statusBadgeClass(a.status)}>{statusLabel(a.status)}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
-        )}
-      </Modal>
+        </Portal>
+      )}
     </AdminLayout>
   );
 }
