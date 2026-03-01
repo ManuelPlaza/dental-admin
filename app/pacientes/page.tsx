@@ -7,7 +7,7 @@ import Portal from "@/components/ui/Portal";
 import { api, Patient, Appointment, Service } from "@/lib/api";
 import { fullName, formatDateShort, statusBadgeClass, statusLabel } from "@/lib/utils";
 import { Users, Edit2, X, Save } from "lucide-react";
-
+import { authFetch } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const BASE = `${API_URL}/api/v1`;
@@ -112,7 +112,7 @@ export default function PacientesPage() {
     if (!selected) return;
     setSaving(true);
     try {
-      const res = await fetch(`${BASE}/patients/${selected.id}`, {
+      const res = await authFetch(`${BASE}/patients/${selected.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

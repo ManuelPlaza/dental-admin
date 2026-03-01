@@ -7,6 +7,7 @@ import Portal from "@/components/ui/Portal";
 import { Appointment, Service, Specialist } from "@/lib/api";
 import { formatDate, formatCOP, fullName, statusBadgeClass, statusLabel } from "@/lib/utils";
 import { Calendar, Clock, CheckCircle, XCircle, ChevronLeft, ChevronRight, Save, Plus, Loader2, FileText, AlertTriangle } from "lucide-react";
+import { authFetch } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const BASE = `${API_URL}/api/v1`;
@@ -118,19 +119,19 @@ export default function CitasPage() {
   const showToast = (msg: string, type: Toast["type"] = "success") => setToast({ msg, type });
 
   const fetchSummary = useCallback(async () => {
-    try { const r = await fetch(`${BASE}/appointments/summary`); if (r.ok) setSummary(await r.json()); } catch {}
+    try { const r = await authFetch(`${BASE}/appointments/summary`); if (r.ok) setSummary(await r.json()); } catch {}
   }, []);
 
   const fetchPage = useCallback(async (p: number, l: number, f: string) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: String(p), limit: String(l), ...(f !== "all" && { status: f }) });
-      const res = await fetch(`${BASE}/appointments/paginated?${params}`);
+      const res = await authFetch(`${BASE}/appointments/paginated?${params}`);
       if (res.ok) {
         const json: PaginatedResponse = await res.json();
         setAppointments(json.data || []); setTotal(json.total); setTotalPages(json.total_pages); setPage(json.page);
       } else {
-        const r2 = await fetch(`${BASE}/appointments`);
+        const r2 = await authFetch(`${BASE}/appointments`);
         const data = r2.ok ? await r2.json() : [];
         setAppointments(data); setTotal(data.length); setTotalPages(1);
       }
@@ -138,18 +139,18 @@ export default function CitasPage() {
   }, []);
 
   const loadCatalogs = () => {
-    fetch(`${BASE}/services`).then((r) => r.json()).then((d) => setServices(d.filter((s: Service) => s.is_active))).catch(() => {});
-    fetch(`${BASE}/specialists`).then((r) => r.json()).then((d) => setSpecialists(d.filter((s: Specialist) => s.is_active))).catch(() => {});
+    authFetch(`${BASE}/services`).then((r) => r.json()).then((d) => setServices(d.filter((s: Service) => s.is_active))).catch(() => {});
+    authFetch(`${BASE}/specialists`).then((r) => r.json()).then((d) => setSpecialists(d.filter((s: Specialist) => s.is_active))).catch(() => {});
   };
 
   useEffect(() => {
     fetchSummary(); fetchPage(1, 10, "all"); loadCatalogs();
-    fetch(`${BASE}/medical-history`)
+    authFetch(`${BASE}/medical-history`)
       .then((r) => r.json())
       .then((d) => setHistoriasDone(new Set<number>(d.map((h: any) => h.appointment_id))))
       .catch(() => {});
     // Pre-cargar motivos de cancelación
-    fetch(`${BASE}/appointments/cancellation-reasons`)
+    authFetch(`${BASE}/appointments/cancellation-reasons`)
       .then((r) => r.json())
       .then(setCancelReasons)
       .catch(() => {
@@ -173,7 +174,7 @@ export default function CitasPage() {
     if (!cancelForm.reason) { setCancelError("Debes seleccionar un motivo de cancelación"); return; }
     setSavingCancel(true);
     try {
-      const res = await fetch(`${BASE}/admin/appointments/${cancelTarget.id}`, {
+      const res = await authFetch(`${BASE}/admin/appointments/${cancelTarget.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -222,7 +223,7 @@ export default function CitasPage() {
     }
     setSaving(true);
     try {
-      const res = await fetch(`${BASE}/admin/appointments/${id}`, {
+      const res = await authFetch(`${BASE}/admin/appointments/${id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
@@ -239,7 +240,7 @@ export default function CitasPage() {
       showToast("Estado actualizado correctamente");
       if (newStatus === "completed") {
         // Auto-crear pago pendiente
-        fetch(`${BASE}/payments`, {
+        authFetch(`${BASE}/payments`, {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ appointment_id: id, amount: 0, method: "pending", notes: "Pago pendiente - generado al completar cita" }),
         }).then((r) => { if (r.ok) showToast(`Nuevo registro de pago generado para la cita #${id}`, "info"); }).catch(() => {});
@@ -256,7 +257,7 @@ export default function CitasPage() {
       if (editForm.service_id)    body.service_id    = Number(editForm.service_id);
       if (editForm.start_time)    body.start_time    = new Date(editForm.start_time).toISOString();
       if (editForm.end_time)      body.end_time      = new Date(editForm.end_time).toISOString();
-      const res = await fetch(`${BASE}/admin/appointments/${selected.id}`, {
+      const res = await authFetch(`${BASE}/admin/appointments/${selected.id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error();
@@ -286,7 +287,7 @@ export default function CitasPage() {
     if (!newForm.document_number.trim()) return;
     setLookingUp(true); setPatientStatus("idle");
     try {
-      const res = await fetch(`${BASE}/patients/document/${newForm.document_number.trim()}`);
+      const res = await authFetch(`${BASE}/patients/document/${newForm.document_number.trim()}`);
       if (res.ok) {
         const p = await res.json();
         setNewForm((prev) => ({ ...prev, first_name: p.first_name || "", last_name: p.last_name || "", phone: p.phone || "", email: p.email || "" }));
@@ -334,7 +335,7 @@ export default function CitasPage() {
         start_time: new Date(start_time).toISOString(), end_time: new Date(end_time).toISOString(),
         ...(newForm.notes.trim() && { notes: newForm.notes.trim() }),
       };
-      const res = await fetch(`${BASE}/appointments`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const res = await authFetch(`${BASE}/appointments`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (!res.ok) throw new Error();
       showToast("Cita creada correctamente");
       setShowNewModal(false); setNewForm(emptyNewForm); setPatientStatus("idle"); setPatientLocked(false);
@@ -353,7 +354,7 @@ export default function CitasPage() {
         ...(historiaForm.attachments && { attachments: historiaForm.attachments }),
         ...(historiaForm.next_appointment_date && { next_appointment_date: new Date(historiaForm.next_appointment_date).toISOString() }),
       };
-      const res = await fetch(`${BASE}/medical-history`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const res = await authFetch(`${BASE}/medical-history`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (res.status === 400) { const err = await res.json().catch(() => ({})); showToast(err.error || "Datos inválidos", "error"); return; }
       if (!res.ok) throw new Error();
       setHistoriasDone((prev) => new Set(prev).add(historiaAppt.id));

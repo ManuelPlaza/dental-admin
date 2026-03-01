@@ -1,8 +1,14 @@
+import { authFetch } from "@/lib/auth";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const BASE = `${API_URL}/api/v1`;
 
+// Todas las peticiones pasan por authFetch:
+//  - Agrega Authorization: Bearer <access_token> automáticamente
+//  - Hace refresh automático si el backend responde 401
+//  - Redirige a /login si el refresh falla
 async function req<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await authFetch(`${BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
     ...options,
   });
@@ -16,12 +22,6 @@ export const api = {
   getAppointment: (id: number) => req<Appointment>(`/appointments/${id}`),
   updateAppointment: (id: number, data: Partial<Appointment>) =>
     req<Appointment>(`/appointments/${id}`, { method: "PUT", body: JSON.stringify(data) }),
-
-  updateAppointmentAdmin: (id: number, status: string) =>
-  req(`/admin/appointments/${id}/status`, { 
-    method: "PUT", 
-    body: JSON.stringify({ status }) 
-  }),
 
   // Patients
   getPatients: () => req<Patient[]>("/patients"),

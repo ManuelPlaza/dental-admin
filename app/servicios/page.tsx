@@ -6,6 +6,7 @@ import { PageHeader, SearchBar, Table, TR, TD, EmptyState, Skeleton } from "@/co
 import { api, Service } from "@/lib/api";
 import { formatCOP } from "@/lib/utils";
 import { Briefcase } from "lucide-react";
+import { authFetch } from "@/lib/auth";
 
 export default function ServiciosPage() {
   const [services, setServices] = useState<Service[]>([]);

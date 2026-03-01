@@ -7,20 +7,22 @@ import {
   LayoutDashboard, Calendar, Users, UserCog,
   Briefcase, FileText, CreditCard, Menu, X, LogOut,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth"; // Ajusta la ruta si es diferente
 
 const navItems = [
-  { label: "Dashboard",          href: "/dashboard",      icon: LayoutDashboard },
-  { label: "Citas",              href: "/citas",          icon: Calendar },
-  { label: "Pacientes",          href: "/pacientes",      icon: Users },
-  { label: "Especialistas",      href: "/especialistas",  icon: UserCog },
-  { label: "Servicios",          href: "/servicios",      icon: Briefcase },
-  { label: "Historias Clínicas", href: "/historias",      icon: FileText },
-  { label: "Pagos",              href: "/pagos",          icon: CreditCard },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Citas", href: "/citas", icon: Calendar },
+  { label: "Pacientes", href: "/pacientes", icon: Users },
+  { label: "Especialistas", href: "/especialistas", icon: UserCog },
+  { label: "Servicios", href: "/servicios", icon: Briefcase },
+  { label: "Historias Clínicas", href: "/historias", icon: FileText },
+  { label: "Pagos", href: "/pagos", icon: CreditCard },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { logout } = useAuth(); // <--- Añade esta línea
 
   return (
     <>
@@ -94,9 +96,13 @@ export default function Sidebar() {
               <p className="text-white text-sm font-semibold truncate">Administradora</p>
               <p className="text-white/40 text-xs truncate">Dental JC</p>
             </div>
-            <Link href="/login" className="text-white/40 hover:text-red-400 transition-colors">
+            <button
+              onClick={(e) => logout(e)}
+              className="text-white/40 hover:text-red-400 transition-colors cursor-pointer"
+              title="Cerrar sesión"
+            >
               <LogOut size={16} />
-            </Link>
+            </button>
           </div>
         </div>
       </aside>

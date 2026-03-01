@@ -7,6 +7,7 @@ import Portal from "@/components/ui/Portal";
 import { api, Specialist } from "@/lib/api";
 import { fullName } from "@/lib/utils";
 import { UserCog, Plus, Save } from "lucide-react";
+import { authFetch } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const BASE = `${API_URL}/api/v1`;
@@ -58,7 +59,7 @@ export default function EspecialistasPage() {
   const handleInactivate = async (s: Specialist) => {
     setActionLoading(s.id);
     try {
-      const res = await fetch(`${BASE}/specialists/${s.id}/inactivate`, { method: "PATCH" });
+      const res = await authFetch(`${BASE}/specialists/${s.id}/inactivate`, { method: "PATCH" });
       if (!res.ok) throw new Error();
       setSpecialists((prev) => prev.map((sp) => sp.id === s.id ? { ...sp, is_active: false } : sp));
       showToast(`${fullName(s)} fue inactivado`, "success");
@@ -71,7 +72,7 @@ export default function EspecialistasPage() {
   const handleActivate = async (s: Specialist) => {
     setActionLoading(s.id);
    try {
-    const res = await fetch(`${BASE}/specialists/${s.id}/activate`, { method: "PATCH" });  // ← PATCH /specialists/9/activate
+    const res = await authFetch(`${BASE}/specialists/${s.id}/activate`, { method: "PATCH" });  // ← PATCH /specialists/9/activate
     if (!res.ok) throw new Error();
       setSpecialists((prev) => prev.map((sp) => sp.id === s.id ? { ...sp, is_active: true } : sp));
       showToast(`${fullName(s)} fue activado`, "success");
@@ -89,7 +90,7 @@ export default function EspecialistasPage() {
     }
     setSaving(true);
     try {
-      const res = await fetch(`${BASE}/specialists`, {
+      const res = await authFetch(`${BASE}/specialists`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, is_active: true }),

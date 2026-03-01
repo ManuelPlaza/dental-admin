@@ -5,6 +5,7 @@ import AdminLayout from "@/components/layout/AdminLayout";
 import { PageHeader, SearchBar, Table, TR, TD, EmptyState, Skeleton, Btn } from "@/components/ui";
 import { fullName, formatDateShort } from "@/lib/utils";
 import { ClipboardList, FileDown } from "lucide-react";
+import { authFetch } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const BASE = `${API_URL}/api/v1`;
@@ -31,7 +32,7 @@ export default function HistoriasPage() {
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch(`${BASE}/medical-history`)
+    authFetch(`${BASE}/medical-history`)
       .then((r) => r.json())
       .then((d) => setRecords(Array.isArray(d) ? d : []))
       .catch(() => setRecords([]))
@@ -56,7 +57,7 @@ export default function HistoriasPage() {
     if (!patientId) return;
     setDownloadingId(record.id);
     try {
-      const res = await fetch(`${BASE}/patients/${patientId}/medical-history/pdf`);
+      const res = await authFetch(`${BASE}/patients/${patientId}/medical-history/pdf`);
       if (!res.ok) throw new Error();
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);

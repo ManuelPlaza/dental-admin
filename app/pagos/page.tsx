@@ -6,6 +6,7 @@ import { PageHeader, SearchBar, Table, TR, TD, EmptyState, Skeleton, Btn } from 
 import Portal from "@/components/ui/Portal";
 import { formatCOP, formatDateShort, fullName } from "@/lib/utils";
 import { CreditCard, DollarSign, Save } from "lucide-react";
+import { authFetch } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const BASE = `${API_URL}/api/v1`;
@@ -80,7 +81,7 @@ export default function PagosPage() {
 
   const loadBalance = async (appointmentId: number) => {
     try {
-      const r = await fetch(`${BASE}/appointments/${appointmentId}/balance`);
+      const r = await authFetch(`${BASE}/appointments/${appointmentId}/balance`);
       if (r.ok) {
         const b: Balance = await r.json();
         setBalances((prev) => ({ ...prev, [appointmentId]: b }));
@@ -93,11 +94,11 @@ export default function PagosPage() {
   const loadPayments = async () => {
     setLoading(true);
     try {
-      const r = await fetch(`${BASE}/payments`);
+      const r = await authFetch(`${BASE}/payments`);
       const data: PaymentRecord[] = r.ok ? await r.json() : [];
       setPayments(data);
       // Load balances for all unique appointment_ids
-      const ids = [...new Set(data.map((p) => p.appointment_id))];
+      const ids = Array.from(new Set(data.map((p) => p.appointment_id)));
       await Promise.all(ids.map(loadBalance));
     } catch { setPayments([]); }
     finally { setLoading(false); }
@@ -136,7 +137,7 @@ export default function PagosPage() {
         ...(payForm.reference_code.trim() && { reference_code: payForm.reference_code.trim() }),
         ...(payForm.notes.trim() && { notes: payForm.notes.trim() }),
       };
-      const res = await fetch(`${BASE}/payments`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const res = await authFetch(`${BASE}/payments`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (!res.ok) throw new Error();
       showToast("Pago registrado correctamente", "success");
       setPayModal(null);

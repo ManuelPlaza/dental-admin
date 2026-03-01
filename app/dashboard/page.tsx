@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { StatCard, Skeleton } from "@/components/ui";
@@ -9,6 +9,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend, BarChart, Bar,
 } from "recharts";
+import { authFetch, useAuth } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const BASE = `${API_URL}/api/v1`;
@@ -80,19 +81,61 @@ const timeFromISO = (iso: string) => {
 };
 
 export default function DashboardPage() {
+  const { user, loading: authLoading } = useAuth(); // Extraemos el estado de la sesión
+  const router = useRouter();
+
   const [data, setData]           = useState<DashboardData | null>(null);
   const [totalPatients, setTotal] = useState(0);
   const [loading, setLoading]     = useState(true);
 
+  // ── 1. EFECTO DE REDIRECCIÓN DE SEGURIDAD ──
   useEffect(() => {
+    // Si la autenticación ya cargó y NO hay usuario, lo expulsamos al login
+    if (!authLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, authLoading, router]);
+
+  // ── 2. EFECTO DE CARGA DE DATOS ──
+  useEffect(() => {
+    // Solo intentamos cargar datos si el usuario está autenticado
+    if (!user) return; 
+
+    setLoading(true);
     Promise.all([
-      fetch(`${BASE}/dashboard`).then((r) => r.json()),
-      fetch(`${BASE}/patients`).then((r) => r.json()).catch(() => []),
-    ]).then(([dash, patients]) => {
-      setData(dash);
-      setTotal(Array.isArray(patients) ? patients.length : 0);
-    }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+      authFetch(`${BASE}/dashboard`).then((r) => {
+        if (!r.ok) throw new Error("Dashboard fetch failed");
+        return r.json();
+      }),
+      authFetch(`${BASE}/patients`).then((r) => {
+        if (!r.ok) throw new Error("Patients fetch failed");
+        return r.json();
+      }).catch(() => []), // Si fallan pacientes, retornamos arreglo vacío
+    ])
+      .then(([dash, patients]) => {
+        setData(dash);
+        setTotal(Array.isArray(patients) ? patients.length : 0);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [user]); // Dependemos de que exista el 'user'
+
+  // ── 3. ESTADOS DE ESPERA (EVITAN EL CRASH) ──
+  
+  // Si Next.js todavía está revisando el sessionStorage...
+  if (authLoading) {
+    return (
+      <AdminLayout>
+        <div className="flex h-screen items-center justify-center">
+          <p className="text-white/50 text-sm animate-pulse">Verificando sesión...</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  // Si no hay usuario, retornamos null para que la pantalla quede en blanco 
+  // la fracción de segundo antes de que el router lo mande al /login
+  if (!user) return null;
 
   // ── Derived data ──
   const lastMonthIncome = data?.monthly_income?.length
@@ -126,11 +169,13 @@ export default function DashboardPage() {
   const maxCitas = Math.max(...(data?.top_patients || []).map((p) => p.total_citas), 1);
 
   const statusOrder = ["scheduled", "pending", "completed", "cancelled"];
+  
+  // ── 4. EL ARREGLO DEL "OPTIONAL CHAINING" (?.) ──
   const summaryCards = [
-    { label: "Total Pacientes",   value: totalPatients,           sub: "Registrados",      icon: <Users      size={22} className="text-white" />, color: "bg-gradient-to-br from-cyan-500 to-blue-600" },
-    { label: "Citas del Mes",     value: data?.summary.total ?? 0, sub: "Programadas",     icon: <Calendar   size={22} className="text-white" />, color: "bg-gradient-to-br from-violet-500 to-purple-600" },
-    { label: "Ingresos del Mes",  value: formatCOP(lastMonthIncome), sub: "Último mes",    icon: <DollarSign size={22} className="text-white" />, color: "bg-gradient-to-br from-green-500 to-emerald-600" },
-    { label: "Citas Pendientes",  value: data?.summary.pending ?? 0, sub: "Por confirmar", icon: <Clock      size={22} className="text-white" />, color: "bg-gradient-to-br from-amber-500 to-orange-500" },
+    { label: "Total Pacientes",   value: totalPatients,            sub: "Registrados",      icon: <Users      size={22} className="text-white" />, color: "bg-gradient-to-br from-cyan-500 to-blue-600" },
+    { label: "Citas del Mes",     value: data?.summary?.total ?? 0,   sub: "Programadas",     icon: <Calendar   size={22} className="text-white" />, color: "bg-gradient-to-br from-violet-500 to-purple-600" },
+    { label: "Ingresos del Mes",  value: formatCOP(lastMonthIncome), sub: "Último mes",     icon: <DollarSign size={22} className="text-white" />, color: "bg-gradient-to-br from-green-500 to-emerald-600" },
+    { label: "Citas Pendientes",  value: data?.summary?.pending ?? 0, sub: "Por confirmar", icon: <Clock      size={22} className="text-white" />, color: "bg-gradient-to-br from-amber-500 to-orange-500" },
   ];
 
   return (
