@@ -59,8 +59,8 @@ const METHOD_ICONS: Record<string, string> = {
 
 function paymentStatusInfo(balance?: Balance): { label: string; cls: string } {
   if (!balance) return { label: "Pendiente", cls: "badge-cancelled" };
-  if (balance.status === "PAID")    return { label: "Pagado",   cls: "badge-completed" };
-  if (balance.status === "PARTIAL") return { label: "Parcial",  cls: "badge-pending" };
+  if (balance.status === "PAID") return { label: "Pagado", cls: "badge-completed" };
+  if (balance.status === "PARTIAL") return { label: "Parcial", cls: "badge-pending" };
   return { label: "Pendiente", cls: "badge-cancelled" };
 }
 
@@ -77,17 +77,17 @@ function ToastNotif({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 }
 
 export default function PagosPage() {
-  const [payments, setPayments]   = useState<PaymentRecord[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [search, setSearch]       = useState("");
-  const [toast, setToast]         = useState<Toast | null>(null);
-  const [balances, setBalances]   = useState<Record<number, Balance>>({});
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [toast, setToast] = useState<Toast | null>(null);
+  const [balances, setBalances] = useState<Record<number, Balance>>({});
   const [detailRecord, setDetailRecord] = useState<PaymentRecord | null>(null);
-  const [history, setHistory]           = useState<HistoryEntry[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [showPayForm, setShowPayForm] = useState(false);
-  const [payForm, setPayForm]         = useState({ amount: "", method: "cash", reference_code: "", notes: "" });
-  const [savingPay, setSavingPay]     = useState(false);
+  const [payForm, setPayForm] = useState({ amount: "", method: "cash", reference_code: "", notes: "" });
+  const [savingPay, setSavingPay] = useState(false);
 
   const showToast = (msg: string, type: "success" | "error") => setToast({ msg, type });
 
@@ -99,7 +99,7 @@ export default function PagosPage() {
         setBalances((prev) => ({ ...prev, [appointmentId]: b }));
         return b;
       }
-    } catch {}
+    } catch { }
     return null;
   };
 
@@ -185,13 +185,13 @@ export default function PagosPage() {
     new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime()
   );
 
-  const detailBal     = detailRecord ? balances[detailRecord.appointment_id] : undefined;
-  const detailTotal   = detailBal?.total_cost   ?? detailRecord?.appointment?.historical_price ?? 0;
-  const detailPaid    = detailBal?.total_paid   ?? 0;
+  const detailBal = detailRecord ? balances[detailRecord.appointment_id] : undefined;
+  const detailTotal = detailBal?.total_cost ?? detailRecord?.appointment?.historical_price ?? 0;
+  const detailPaid = detailBal?.total_paid ?? 0;
   const detailPending = detailBal?.pending_balance ?? (detailTotal - detailPaid);
-  const detailPct     = detailTotal > 0 ? Math.min(100, Math.round((detailPaid / detailTotal) * 100)) : 0;
-  const detailSI      = paymentStatusInfo(detailBal);
-  const detailIsPaid  = detailBal?.status === "PAID" || detailPending <= 0;
+  const detailPct = detailTotal > 0 ? Math.min(100, Math.round((detailPaid / detailTotal) * 100)) : 0;
+  const detailSI = paymentStatusInfo(detailBal);
+  const detailIsPaid = detailBal?.status === "PAID" || detailPending <= 0;
 
   return (
     <AdminLayout>
@@ -272,10 +272,10 @@ export default function PagosPage() {
                     </div>
                     <div className="space-y-2.5">
                       {[
-                        { label: "Servicio",          val: detailRecord.appointment?.service?.name || "—" },
-                        { label: "Especialista",       val: detailRecord.appointment?.specialist ? fullName(detailRecord.appointment.specialist) : "—" },
+                        { label: "Servicio", val: detailRecord.appointment?.service?.name || "—" },
+                        { label: "Especialista", val: detailRecord.appointment?.specialist ? fullName(detailRecord.appointment.specialist) : "—" },
                         { label: "Método último pago", val: `${METHOD_ICONS[detailRecord.method] || ""} ${METHOD_LABELS[detailRecord.method] || detailRecord.method}` },
-                        { label: "Último pago",        val: formatDate(detailRecord.payment_date) },
+                        { label: "Último pago", val: formatDate(detailRecord.payment_date) },
                       ].map(({ label, val }) => (
                         <div key={label} className="flex items-start justify-between gap-3">
                           <span className="text-white/40 text-xs shrink-0">{label}</span>
@@ -307,10 +307,13 @@ export default function PagosPage() {
                       </div>
                     </div>
 
+                    {/* Busca este bloque cerca de la línea 311 y reemplázalo */}
                     {!detailIsPaid && !showPayForm && (
-                      <Btn variant="primary" onClick={() => setShowPayForm(true)} className="w-full justify-center">
-                        <DollarSign size={14} /> Registrar Pago
-                      </Btn>
+                      <div className="w-full flex justify-center"> {/* El div maneja el estilo */}
+                        <Btn variant="primary" onClick={() => setShowPayForm(true)}>
+                          <DollarSign size={14} /> Registrar Pago
+                        </Btn>
+                      </div>
                     )}
 
                     {showPayForm && (
