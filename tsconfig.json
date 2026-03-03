@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "target": "es5", // o el que tengas
+    "downlevelIteration": true,  // <-- AÑADE ESTA LÍNEA
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
