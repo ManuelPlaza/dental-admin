@@ -243,7 +243,7 @@ export default function PagosPage() {
             const isPaid  = bal?.status === "PAID" || pending <= 0;
 
             return (
-              <TR key={p.id} onClick={() => openDetail(p)} className="cursor-pointer group">
+              <tr key={p.id} onClick={() => openDetail(p)} className="cursor-pointer group">
                 <TD>
                   <p className="font-medium text-white group-hover:text-cyan-300 transition-colors">{fullName(p.appointment?.patient)}</p>
                   <p className="text-white/40 text-xs">{p.appointment?.patient?.document_number}</p>
