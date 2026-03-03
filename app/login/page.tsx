@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { Suspense } from 'react';
 
 export default function LoginPage() {
   const router          = useRouter();
