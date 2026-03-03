@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { Suspense } from 'react';
 
-export default function LoginPage() {
+// 1. Componente que contiene toda la lógica del formulario
+function LoginForm() {
   const router          = useRouter();
   const params          = useSearchParams();
   const { user, login } = useAuth();
@@ -17,12 +17,12 @@ export default function LoginPage() {
   const [error, setError]       = useState("");
   const [expiredMsg, setExpiredMsg] = useState("");
 
-  // Si ya está autenticado → redirigir directo
+  // Redirigir si ya está autenticado
   useEffect(() => {
     if (user) router.replace("/dashboard");
   }, [user, router]);
 
-  // Mensaje de sesión expirada cuando viene ?expired=1
+  // Mensaje de sesión expirada
   useEffect(() => {
     if (params?.get("expired") === "1") {
       setExpiredMsg("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
@@ -36,7 +36,6 @@ export default function LoginPage() {
     setError("");
     try {
       await login(form.email, form.password);
-      // login() redirige a /dashboard internamente al tener éxito
     } catch (err: any) {
       const msg = err?.message || "";
       if (msg === "credentials") setError("Credenciales incorrectas. Verifica tu email y contraseña.");
@@ -49,7 +48,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0f1e] flex items-center justify-center p-4 relative overflow-hidden">
-
       {/* Fondo decorativo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
@@ -58,7 +56,6 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full max-w-md relative z-10">
-
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
           <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white text-3xl shadow-2xl shadow-cyan-500/30 mb-5">
@@ -81,7 +78,6 @@ export default function LoginPage() {
           <h2 className="text-white font-semibold text-lg mb-6">Iniciar Sesión</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-
             {/* Email */}
             <div>
               <label className="text-white/50 text-xs mb-1.5 block">Correo electrónico</label>
@@ -156,5 +152,14 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+// 2. Exportación principal envuelta en Suspense para cumplir con Next.js 14
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0f1e] flex items-center justify-center text-white/30">Cargando...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
