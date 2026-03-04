@@ -23,6 +23,12 @@ interface Service {
   is_active: boolean;
 }
 
+interface ServiceCategory {
+  id: number;
+  name: string;
+  description: string;
+}
+
 interface Toast { msg: string; type: "success" | "error"; }
 
 const emptyForm = { name: "", description: "", price: "", duration_minutes: "60", category_id: "" };
@@ -52,6 +58,15 @@ interface ServiceModalProps {
 }
 
 function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceModalProps) {
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+
+  useEffect(() => {
+    fetch(`${BASE}/service-categories`)
+      .then((r) => r.json())
+      .then(setCategories)
+      .catch(() => setCategories([]));
+  }, []);
+
   const [form, setForm] = useState(
     initial
       ? {
@@ -178,8 +193,20 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
 
             {/* Categoría */}
             <div>
-              <p className="text-white/50 text-xs mb-1">Categoría ID <span className="text-white/25">(opcional)</span></p>
-              <input type="number" min="1" placeholder="Ej: 1" className="form-input text-sm" {...field("category_id")} />
+              <p className="text-white/50 text-xs mb-1">Categoría <span className="text-white/25">(opcional)</span></p>
+              <select
+                value={form.category_id}
+                onChange={(e) => {
+                  setForm((prev) => ({ ...prev, category_id: e.target.value }));
+                  setErrors((prev) => { const n = { ...prev }; delete n.category_id; return n; });
+                }}
+                className="form-input text-sm w-full"
+              >
+                <option value="" className="bg-slate-900">Sin categoría</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={String(cat.id)} className="bg-slate-900">{cat.name}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -199,11 +226,16 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function ServiciosPage() {
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [search, setSearch]     = useState("");
-  const [toast, setToast]       = useState<Toast | null>(null);
+  const [services, setServices]     = useState<Service[]>([]);
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [search, setSearch]         = useState("");
+  const [toast, setToast]           = useState<Toast | null>(null);
   const [togglingId, setTogglingId] = useState<number | null>(null);
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage]  = useState(10);
 
   // Modal state
   const [showCreate, setShowCreate] = useState(false);
@@ -220,7 +252,15 @@ export default function ServiciosPage() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { loadServices(); }, []);
+  useEffect(() => {
+    loadServices();
+    fetch(`${BASE}/service-categories`)
+      .then((r) => r.json())
+      .then(setCategories)
+      .catch(() => setCategories([]));
+  }, []);
+
+  useEffect(() => { setCurrentPage(1); }, [search, rowsPerPage]);
 
   const toggleActive = async (s: Service) => {
     setTogglingId(s.id);
@@ -254,6 +294,12 @@ export default function ServiciosPage() {
     return !q || s.name?.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q);
   });
 
+  const totalPages = Math.ceil(filtered.length / rowsPerPage);
+  const paginated  = filtered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+  const getCategoryName = (categoryId?: number) =>
+    categoryId ? (categories.find((c) => c.id === categoryId)?.name ?? "—") : "—";
+
   return (
     <AdminLayout>
       {toast && <ToastNotif toast={toast} onClose={() => setToast(null)} />}
@@ -275,8 +321,8 @@ export default function ServiciosPage() {
       {loading ? (
         <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}</div>
       ) : (
-        <Table headers={["Nombre", "Descripción", "Precio", "Duración", "Estado", "Acción"]} empty={filtered.length === 0}>
-          {filtered.map((s) => (
+        <Table headers={["Nombre", "Categoría", "Descripción", "Precio", "Duración", "Estado", "Acción"]} empty={filtered.length === 0}>
+          {paginated.map((s) => (
             <TR key={s.id} onClick={() => setEditTarget(s)}>
               <TD>
                 <div className="flex items-center gap-2">
@@ -284,6 +330,7 @@ export default function ServiciosPage() {
                   <span className="font-medium text-white">{s.name}</span>
                 </div>
               </TD>
+              <TD className="text-white/60 text-sm">{getCategoryName(s.category_id)}</TD>
               <TD className="text-white/50 text-xs max-w-[220px] truncate">{s.description || "—"}</TD>
               <TD className="text-cyan-400 font-semibold font-mono text-sm">{formatCOP(s.price)}</TD>
               <TD className="text-white/60 text-sm">{s.duration_minutes} min</TD>
@@ -315,6 +362,42 @@ export default function ServiciosPage() {
 
       {filtered.length === 0 && !loading && (
         <EmptyState icon={<Briefcase size={40} />} message="No se encontraron servicios" />
+      )}
+
+      {/* Paginador */}
+      {!loading && filtered.length > 0 && (
+        <div className="flex items-center justify-between mt-4 px-2 flex-wrap gap-3">
+          <div className="flex items-center gap-2 text-white/50 text-sm">
+            <span>Mostrar</span>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => setRowsPerPage(Number(e.target.value))}
+              className="bg-[#1a2235] border border-white/10 rounded-lg px-2 py-1 text-white text-sm"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+            <span>por página — <span className="text-white/70">{filtered.length}</span> total</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-white/50">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition"
+            >
+              ← Anterior
+            </button>
+            <span className="text-white/70">Página {currentPage} de {totalPages || 1}</span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="px-3 py-1 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition"
+            >
+              Siguiente →
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Modal crear */}
