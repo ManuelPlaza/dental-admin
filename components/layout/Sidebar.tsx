@@ -4,25 +4,35 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Calendar, Users, UserCog,
+  LayoutDashboard, Calendar, CalendarDays, Users, UserCog,
   Briefcase, FileText, CreditCard, Menu, X, LogOut,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth"; // Ajusta la ruta si es diferente
+import { useAuth } from "@/lib/auth";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Citas", href: "/citas", icon: Calendar },
-  { label: "Pacientes", href: "/pacientes", icon: Users },
-  { label: "Especialistas", href: "/especialistas", icon: UserCog },
-  { label: "Servicios", href: "/servicios", icon: Briefcase },
-  { label: "Historias Clínicas", href: "/historias", icon: FileText },
-  { label: "Pagos", href: "/pagos", icon: CreditCard },
+  { label: "Dashboard",          href: "/dashboard",      icon: LayoutDashboard },
+  { label: "Mi Agenda",          href: "/agenda",         icon: CalendarDays },
+  { label: "Citas",              href: "/citas",          icon: Calendar },
+  { label: "Pacientes",          href: "/pacientes",      icon: Users },
+  { label: "Especialistas",      href: "/especialistas",  icon: UserCog },
+  { label: "Servicios",          href: "/servicios",      icon: Briefcase },
+  { label: "Historias Clínicas", href: "/historias",      icon: FileText },
+  { label: "Pagos",              href: "/pagos",          icon: CreditCard },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const { logout } = useAuth(); // <--- Añade esta línea
+  const { user, logout } = useAuth();
+
+  const initials = user?.name
+    ? user.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+    : "A";
+
+  const handleLogout = async () => {
+    setOpen(false);
+    await logout();
+  };
 
   return (
     <>
@@ -36,10 +46,7 @@ export default function Sidebar() {
 
       {/* Overlay */}
       {open && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/60 z-40"
-          onClick={() => setOpen(false)}
-        />
+        <div className="lg:hidden fixed inset-0 bg-black/60 z-40" onClick={() => setOpen(false)} />
       )}
 
       {/* Sidebar */}
@@ -86,20 +93,24 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* User */}
+        {/* User + Logout */}
         <div className="p-4 border-t border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
-              A
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-semibold truncate">Administradora</p>
-              <p className="text-white/40 text-xs truncate">Dental JC</p>
+              <p className="text-white text-sm font-semibold truncate">
+                {user?.name || "Administrador"}
+              </p>
+              <p className="text-white/40 text-xs truncate">
+                {user?.email || ""}
+              </p>
             </div>
             <button
-              onClick={(e) => logout(e)}
-              className="text-white/40 hover:text-red-400 transition-colors cursor-pointer"
+              onClick={handleLogout}
               title="Cerrar sesión"
+              className="text-white/40 hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-red-400/10"
             >
               <LogOut size={16} />
             </button>
