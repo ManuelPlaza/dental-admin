@@ -14,32 +14,32 @@ const BASE = `${API_URL}/api/v1`;
 
 // ── Máquina de estados ──
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-  pending:   ["scheduled", "cancelled"],
+  pending: ["scheduled", "cancelled"],
   scheduled: ["completed", "cancelled"],
   completed: [],
   cancelled: [],
 };
-const isFrozen      = (s: string) => s === "completed" || s === "cancelled";
+const isFrozen = (s: string) => s === "completed" || s === "cancelled";
 const canTransition = (from: string, to: string) => ALLOWED_TRANSITIONS[from]?.includes(to) ?? false;
 
 // ── Mapa de codes → labels ──
 const CANCELLATION_LABELS: Record<string, string> = {
-  no_show:                "No se presentó",
-  patient_request:        "Solicitud del paciente",
-  auto_expired:           "Expiró sin confirmar",
-  emergency:              "Emergencia del paciente",
-  scheduling_conflict:    "Conflicto de horario",
+  no_show: "No se presentó",
+  patient_request: "Solicitud del paciente",
+  auto_expired: "Expiró sin confirmar",
+  emergency: "Emergencia del paciente",
+  scheduling_conflict: "Conflicto de horario",
   specialist_unavailable: "Especialista no disponible",
-  clinic_decision:        "Decisión administrativa",
-  other:                  "Otro motivo",
+  clinic_decision: "Decisión administrativa",
+  other: "Otro motivo",
 };
 
 const STATUS_FILTERS = [
-  { label: "Todas",       value: "all" },
-  { label: "Pendientes",  value: "pending" },
-  { label: "Aprobadas",   value: "scheduled" },
+  { label: "Todas", value: "all" },
+  { label: "Pendientes", value: "pending" },
+  { label: "Aprobadas", value: "scheduled" },
   { label: "Completadas", value: "completed" },
-  { label: "Canceladas",  value: "cancelled" },
+  { label: "Canceladas", value: "cancelled" },
 ];
 const STATUS_OPTIONS = ["pending", "scheduled", "completed", "cancelled"];
 
@@ -61,8 +61,8 @@ function ToastNotif({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   useEffect(() => { const t = setTimeout(onClose, 4000); return () => clearTimeout(t); }, [onClose]);
   const styles = {
     success: "bg-green-500/20 border-green-500/30 text-green-300",
-    error:   "bg-red-500/20 border-red-500/30 text-red-300",
-    info:    "bg-cyan-500/20 border-cyan-500/30 text-cyan-300",
+    error: "bg-red-500/20 border-red-500/30 text-red-300",
+    info: "bg-cyan-500/20 border-cyan-500/30 text-cyan-300",
   };
   const icons = { success: "✅", error: "❌", info: "💳" };
   return (
@@ -80,46 +80,46 @@ const reqLabel = (label: string) => (
 
 export default function CitasPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [search, setSearch]             = useState("");
-  const [filter, setFilter]             = useState("all");
-  const [selected, setSelected]         = useState<Appointment | null>(null);
-  const [saving, setSaving]             = useState(false);
-  const [toast, setToast]               = useState<Toast | null>(null);
-  const [services, setServices]         = useState<Service[]>([]);
-  const [specialists, setSpecialists]   = useState<Specialist[]>([]);
-  const [summary, setSummary]           = useState<Summary>({ total: 0, pending: 0, scheduled: 0, completed: 0, cancelled: 0 });
-  const [editForm, setEditForm]         = useState({ specialist_id: "", service_id: "", start_time: "", end_time: "", status: "" });
-  const [page, setPage]                 = useState(1);
-  const [limit, setLimit]               = useState(10);
-  const [totalPages, setTotalPages]     = useState(1);
-  const [total, setTotal]               = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [selected, setSelected] = useState<Appointment | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<Toast | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [specialists, setSpecialists] = useState<Specialist[]>([]);
+  const [summary, setSummary] = useState<Summary>({ total: 0, pending: 0, scheduled: 0, completed: 0, cancelled: 0 });
+  const [editForm, setEditForm] = useState({ specialist_id: "", service_id: "", start_time: "", end_time: "", status: "" });
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   // Nueva Cita
-  const [showNewModal, setShowNewModal]     = useState(false);
-  const [newForm, setNewForm]               = useState(emptyNewForm);
-  const [lookingUp, setLookingUp]           = useState(false);
-  const [patientStatus, setPatientStatus]   = useState<"idle"|"found"|"new">("idle");
-  const [patientLocked, setPatientLocked]   = useState(false);
-  const [creatingAppt, setCreatingAppt]     = useState(false);
+  const [showNewModal, setShowNewModal] = useState(false);
+  const [newForm, setNewForm] = useState(emptyNewForm);
+  const [lookingUp, setLookingUp] = useState(false);
+  const [patientStatus, setPatientStatus] = useState<"idle" | "found" | "new">("idle");
+  const [patientLocked, setPatientLocked] = useState(false);
+  const [creatingAppt, setCreatingAppt] = useState(false);
 
   // Historia Clínica
-  const [historiaAppt, setHistoriaAppt]     = useState<Appointment | null>(null);
-  const [historiaForm, setHistoriaForm]     = useState(emptyHistoriaForm);
+  const [historiaAppt, setHistoriaAppt] = useState<Appointment | null>(null);
+  const [historiaForm, setHistoriaForm] = useState(emptyHistoriaForm);
   const [savingHistoria, setSavingHistoria] = useState(false);
-  const [historiasDone, setHistoriasDone]   = useState<Set<number>>(new Set());
+  const [historiasDone, setHistoriasDone] = useState<Set<number>>(new Set());
 
   // Modal cancelación
-  const [cancelTarget, setCancelTarget]     = useState<{ id: number; currentStatus: string } | null>(null);
-  const [cancelReasons, setCancelReasons]   = useState<CancellationReason[]>([]);
-  const [cancelForm, setCancelForm]         = useState({ reason: "", notes: "" });
-  const [cancelError, setCancelError]       = useState("");
-  const [savingCancel, setSavingCancel]     = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<{ id: number; currentStatus: string } | null>(null);
+  const [cancelReasons, setCancelReasons] = useState<CancellationReason[]>([]);
+  const [cancelForm, setCancelForm] = useState({ reason: "", notes: "" });
+  const [cancelError, setCancelError] = useState("");
+  const [savingCancel, setSavingCancel] = useState(false);
 
   const showToast = (msg: string, type: Toast["type"] = "success") => setToast({ msg, type });
 
   const fetchSummary = useCallback(async () => {
-    try { const r = await authFetch(`${BASE}/appointments/summary`); if (r.ok) setSummary(await r.json()); } catch {}
+    try { const r = await authFetch(`${BASE}/appointments/summary`); if (r.ok) setSummary(await r.json()); } catch { }
   }, []);
 
   const fetchPage = useCallback(async (p: number, l: number, f: string) => {
@@ -139,8 +139,8 @@ export default function CitasPage() {
   }, []);
 
   const loadCatalogs = () => {
-    authFetch(`${BASE}/services`).then((r) => r.json()).then((d) => setServices(d.filter((s: Service) => s.is_active))).catch(() => {});
-    authFetch(`${BASE}/specialists`).then((r) => r.json()).then((d) => setSpecialists(d.filter((s: Specialist) => s.is_active))).catch(() => {});
+    authFetch(`${BASE}/services`).then((r) => r.json()).then((d) => setServices(d.filter((s: Service) => s.is_active))).catch(() => { });
+    authFetch(`${BASE}/specialists`).then((r) => r.json()).then((d) => setSpecialists(d.filter((s: Specialist) => s.is_active))).catch(() => { });
   };
 
   useEffect(() => {
@@ -148,7 +148,7 @@ export default function CitasPage() {
     authFetch(`${BASE}/medical-history`)
       .then((r) => r.json())
       .then((d) => setHistoriasDone(new Set<number>(d.map((h: any) => h.appointment_id))))
-      .catch(() => {});
+      .catch(() => { });
     // Pre-cargar motivos de cancelación
     authFetch(`${BASE}/appointments/cancellation-reasons`)
       .then((r) => r.json())
@@ -243,7 +243,7 @@ export default function CitasPage() {
         authFetch(`${BASE}/payments`, {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ appointment_id: id, amount: 0, method: "pending", notes: "Pago pendiente - generado al completar cita" }),
-        }).then((r) => { if (r.ok) showToast(`Nuevo registro de pago generado para la cita #${id}`, "info"); }).catch(() => {});
+        }).then((r) => { if (r.ok) showToast(`Nuevo registro de pago generado para la cita #${id}`, "info"); }).catch(() => { });
       }
     } catch { showToast("Error al actualizar el estado", "error"); } finally { setSaving(false); }
   };
@@ -254,23 +254,23 @@ export default function CitasPage() {
     try {
       const body: Record<string, unknown> = { status: editForm.status };
       if (editForm.specialist_id) body.specialist_id = Number(editForm.specialist_id);
-      if (editForm.service_id)    body.service_id    = Number(editForm.service_id);
-      if (editForm.start_time)    body.start_time    = new Date(editForm.start_time).toISOString();
-      if (editForm.end_time)      body.end_time      = new Date(editForm.end_time).toISOString();
+      if (editForm.service_id) body.service_id = Number(editForm.service_id);
+      if (editForm.start_time) body.start_time = new Date(editForm.start_time).toISOString();
+      if (editForm.end_time) body.end_time = new Date(editForm.end_time).toISOString();
       const res = await authFetch(`${BASE}/admin/appointments/${selected.id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error();
       const newSpecialist = specialists.find((s) => s.id === Number(editForm.specialist_id));
-      const newService    = services.find((s) => s.id === Number(editForm.service_id));
+      const newService = services.find((s) => s.id === Number(editForm.service_id));
       const updated: Appointment = {
         ...selected, status: editForm.status as Appointment["status"],
         specialist_id: Number(editForm.specialist_id) || selected.specialist_id,
-        service_id:    Number(editForm.service_id)    || selected.service_id,
+        service_id: Number(editForm.service_id) || selected.service_id,
         start_time: editForm.start_time ? new Date(editForm.start_time).toISOString() : selected.start_time,
-        end_time:   editForm.end_time   ? new Date(editForm.end_time).toISOString()   : selected.end_time,
+        end_time: editForm.end_time ? new Date(editForm.end_time).toISOString() : selected.end_time,
         ...(newSpecialist && { specialist: newSpecialist }),
-        ...(newService    && { service: newService }),
+        ...(newService && { service: newService }),
       };
       setAppointments((prev) => {
         const list = prev.map((a) => a.id === selected.id ? updated : a);
@@ -303,7 +303,7 @@ export default function CitasPage() {
       if (svc && prev.start_time) {
         const start = new Date(prev.start_time);
         start.setMinutes(start.getMinutes() + svc.duration_minutes);
-        end_time = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,"0")}-${String(start.getDate()).padStart(2,"0")}T${String(start.getHours()).padStart(2,"0")}:${String(start.getMinutes()).padStart(2,"0")}`;
+        end_time = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}T${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`;
       }
       return { ...prev, service_id: serviceId, end_time };
     });
@@ -316,7 +316,7 @@ export default function CitasPage() {
       if (svc && val) {
         const start = new Date(val);
         start.setMinutes(start.getMinutes() + svc.duration_minutes);
-        end_time = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,"0")}-${String(start.getDate()).padStart(2,"0")}T${String(start.getHours()).padStart(2,"0")}:${String(start.getMinutes()).padStart(2,"0")}`;
+        end_time = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}T${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`;
       }
       return { ...prev, start_time: val, end_time };
     });
@@ -363,9 +363,20 @@ export default function CitasPage() {
     } catch { showToast("Error al crear la historia clínica", "error"); } finally { setSavingHistoria(false); }
   };
 
-  const openEditModal = (a: Appointment) => {
+ const openEditModal = (a: Appointment) => {
     setSelected(a);
-    const toLocal = (iso: string) => { if (!iso) return ""; const d = new Date(iso); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}T${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; };
+    const toLocal = (iso: string) => {
+      if (!iso) return "";
+      // Extraer números literales del ISO — sin pasar por new Date()
+      // Así evitamos que el entorno (Railway UTC o browser) convierta la hora
+      const clean = iso
+        .replace(/Z$/, "")
+        .replace(/\.\d+$/, "")
+        .replace(/[+-]\d{2}:\d{2}$/, "");
+      const [dp, tp = "00:00"] = clean.split("T");
+      const [hh, mi] = tp.split(":");
+      return `${dp}T${hh.padStart(2,"0")}:${mi.padStart(2,"0")}`;
+    };
     setEditForm({ specialist_id: String(a.specialist_id || ""), service_id: String(a.service_id || ""), start_time: toLocal(a.start_time), end_time: toLocal(a.end_time), status: a.status });
   };
 
@@ -375,7 +386,7 @@ export default function CitasPage() {
     return fullName(a.patient).toLowerCase().includes(q) || a.patient?.document_number?.includes(q) || a.patient?.email?.toLowerCase().includes(q);
   });
 
-  const getServiceName    = (a: Appointment) => { if (a.service?.name) return a.service.name; const s = services.find((sv) => sv.id === a.service_id); return s ? s.name : `#${a.service_id}`; };
+  const getServiceName = (a: Appointment) => { if (a.service?.name) return a.service.name; const s = services.find((sv) => sv.id === a.service_id); return s ? s.name : `#${a.service_id}`; };
   const getSpecialistName = (a: Appointment) => { if (a.specialist && (a.specialist.first_name || a.specialist.last_name)) return fullName(a.specialist); const s = specialists.find((sp) => sp.id === a.specialist_id); return s ? fullName(s) : "—"; };
   const inputClass = (locked?: boolean) => `form-input text-sm ${locked ? "opacity-50 cursor-not-allowed" : ""}`;
 
@@ -389,11 +400,11 @@ export default function CitasPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-        <StatCard label="Total"       value={summary.total}     icon={<Calendar    size={18} className="text-white" />} color="bg-gradient-to-br from-cyan-500 to-blue-600"    />
-        <StatCard label="Pendientes"  value={summary.pending}   icon={<Clock       size={18} className="text-white" />} color="bg-gradient-to-br from-amber-500 to-orange-500"  />
-        <StatCard label="Aprobadas"   value={summary.scheduled} icon={<CheckCircle size={18} className="text-white" />} color="bg-gradient-to-br from-green-500 to-emerald-600" />
-        <StatCard label="Completadas" value={summary.completed} icon={<CheckCircle size={18} className="text-white" />} color="bg-gradient-to-br from-blue-500 to-indigo-600"   />
-        <StatCard label="Canceladas"  value={summary.cancelled} icon={<XCircle     size={18} className="text-white" />} color="bg-gradient-to-br from-slate-500 to-slate-600"   />
+        <StatCard label="Total" value={summary.total} icon={<Calendar size={18} className="text-white" />} color="bg-gradient-to-br from-cyan-500 to-blue-600" />
+        <StatCard label="Pendientes" value={summary.pending} icon={<Clock size={18} className="text-white" />} color="bg-gradient-to-br from-amber-500 to-orange-500" />
+        <StatCard label="Aprobadas" value={summary.scheduled} icon={<CheckCircle size={18} className="text-white" />} color="bg-gradient-to-br from-green-500 to-emerald-600" />
+        <StatCard label="Completadas" value={summary.completed} icon={<CheckCircle size={18} className="text-white" />} color="bg-gradient-to-br from-blue-500 to-indigo-600" />
+        <StatCard label="Canceladas" value={summary.cancelled} icon={<XCircle size={18} className="text-white" />} color="bg-gradient-to-br from-slate-500 to-slate-600" />
       </div>
 
       {/* Filters */}
@@ -467,7 +478,7 @@ export default function CitasPage() {
         {selected && (() => {
           const frozen = isFrozen(selected.status);
           const cancelReason = (selected as any).cancellation_reason;
-          const cancelNotes  = (selected as any).cancellation_notes;
+          const cancelNotes = (selected as any).cancellation_notes;
           return (
             <div className="space-y-5">
               {/* Banner estado terminal */}
@@ -537,7 +548,7 @@ export default function CitasPage() {
                   <div className="flex gap-2 flex-wrap">
                     {STATUS_OPTIONS.map((s) => {
                       const isCurrent = selected.status === s;
-                      const allowed   = canTransition(selected.status, s);
+                      const allowed = canTransition(selected.status, s);
                       return (
                         <Btn key={s} size="sm" variant={editForm.status === s ? "primary" : "secondary"}
                           disabled={saving || (!isCurrent && !allowed)}
@@ -548,7 +559,7 @@ export default function CitasPage() {
                     })}
                   </div>
                   <p className="text-white/25 text-xs mt-2">
-                    {selected.status === "pending"   && "Pendiente → solo puede pasar a Aprobada o Cancelada"}
+                    {selected.status === "pending" && "Pendiente → solo puede pasar a Aprobada o Cancelada"}
                     {selected.status === "scheduled" && "Aprobada → solo puede pasar a Completada o Cancelada"}
                   </p>
                 </div>
@@ -679,11 +690,11 @@ export default function CitasPage() {
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
                         {lookingUp && <Loader2 size={14} className="text-white/40 animate-spin" />}
                         {!lookingUp && patientStatus === "found" && <span className="text-green-400 text-xs font-medium">✅ Encontrado</span>}
-                        {!lookingUp && patientStatus === "new"   && <span className="text-amber-400 text-xs font-medium">⚠️ Nuevo</span>}
+                        {!lookingUp && patientStatus === "new" && <span className="text-amber-400 text-xs font-medium">⚠️ Nuevo</span>}
                       </div>
                     </div>
                     {patientStatus === "found" && <p className="text-green-400/70 text-xs mt-1">Paciente existente — datos autocompletos</p>}
-                    {patientStatus === "new"   && <p className="text-amber-400/70 text-xs mt-1">Paciente nuevo — completa los datos</p>}
+                    {patientStatus === "new" && <p className="text-amber-400/70 text-xs mt-1">Paciente nuevo — completa los datos</p>}
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>{reqLabel("Nombre")}<input type="text" value={newForm.first_name} onChange={(e) => setNewForm({ ...newForm, first_name: e.target.value })} disabled={patientLocked} placeholder="Juan" className={inputClass(patientLocked)} /></div>
