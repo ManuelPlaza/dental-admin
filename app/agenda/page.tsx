@@ -5,6 +5,10 @@ import AdminLayout from "@/components/layout/AdminLayout";
 import Portal from "@/components/ui/Portal";
 import { authFetch } from "@/lib/auth";
 import { formatCOP, fullName } from "@/lib/utils";
+
+// Safe wrapper — evita error TypeScript cuando patient/specialist es undefined
+const safeName = (obj?: { first_name: string; last_name: string } | null): string =>
+  obj ? fullName(obj) : "—";
 import {
   ChevronLeft, ChevronRight, Calendar, Clock,
   User, Stethoscope, RefreshCw, LayoutGrid, List,
@@ -134,7 +138,7 @@ function AppointmentTooltip({ appt, onClose }: { appt: Appointment; onClose: () 
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <p className="text-white font-bold text-base truncate">{fullName(appt.patient)}</p>
+                <p className="text-white font-bold text-base truncate">{safeName(appt.patient)}</p>
                 <p className="text-white/40 text-xs mt-0.5">{appt.patient?.document_number}</p>
               </div>
               <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${st.badge}`}>
@@ -165,7 +169,7 @@ function AppointmentTooltip({ appt, onClose }: { appt: Appointment; onClose: () 
                 <div className="flex items-center gap-3">
                   <User size={14} className="text-white/30 shrink-0" />
                   <span className="text-white/70 text-sm">
-                    {fullName(appt.specialist)}
+                    {safeName(appt.specialist)}
                     {appt.specialist.specialty && (
                       <span className="text-white/30 ml-1">· {appt.specialist.specialty}</span>
                     )}
@@ -223,7 +227,7 @@ function ApptBlock({
   return (
     <div
       onClick={(e) => { e.stopPropagation(); onClick(); }}
-      title={`${fullName(appt.patient)} — ${appt.service?.name ?? ""}`}
+      title={`${safeName(appt.patient)} — ${appt.service?.name ?? ""}`}
       className={`absolute rounded-lg border-l-2 ${st.bg} ${st.border} cursor-pointer
         hover:brightness-125 hover:scale-[1.02] transition-all duration-150 overflow-hidden px-2 py-1
         shadow-md ${st.glow} select-none z-10`}
@@ -235,10 +239,10 @@ function ApptBlock({
       }}
     >
       {isShort ? (
-        <p className={`text-[10px] font-semibold truncate ${st.text}`}>{fullName(appt.patient)}</p>
+        <p className={`text-[10px] font-semibold truncate ${st.text}`}>{safeName(appt.patient)}</p>
       ) : (
         <>
-          <p className={`text-xs font-semibold truncate leading-tight ${st.text}`}>{fullName(appt.patient)}</p>
+          <p className={`text-xs font-semibold truncate leading-tight ${st.text}`}>{safeName(appt.patient)}</p>
           <p className={`text-[10px] truncate mt-0.5 ${st.sub}`}>{appt.service?.name ?? "Cita"}</p>
           {heightPct > 6 && (
             <p className={`text-[10px] mt-0.5 ${st.sub} font-mono`}>{formatTime(appt.start_time)}</p>
@@ -464,12 +468,12 @@ function ListView({
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className={`font-semibold text-sm truncate ${st.text}`}>{fullName(appt.patient)}</p>
+                        <p className={`font-semibold text-sm truncate ${st.text}`}>{safeName(appt.patient)}</p>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${st.badge}`}>{st.label}</span>
                       </div>
                       <p className="text-white/50 text-xs">{appt.service?.name ?? "Cita dental"}</p>
                       {appt.specialist && (
-                        <p className="text-white/30 text-xs mt-0.5">{fullName(appt.specialist)}</p>
+                        <p className="text-white/30 text-xs mt-0.5">{safeName(appt.specialist)}</p>
                       )}
                     </div>
 
