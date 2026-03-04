@@ -2,10 +2,10 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
-// 1. Componente que contiene toda la lógica del formulario
+/* ─── Contenido del formulario ─────────────────────────────────────────────── */
 function LoginForm() {
   const router          = useRouter();
   const params          = useSearchParams();
@@ -15,151 +15,216 @@ function LoginForm() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState("");
-  const [expiredMsg, setExpiredMsg] = useState("");
+  const [expired, setExpired]   = useState(false);
 
-  // Redirigir si ya está autenticado
-  useEffect(() => {
-    if (user) router.replace("/dashboard");
-  }, [user, router]);
-
-  // Mensaje de sesión expirada
-  useEffect(() => {
-    if (params?.get("expired") === "1") {
-      setExpiredMsg("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
-    }
-  }, [params]);
+  useEffect(() => { if (user) router.replace("/dashboard"); }, [user, router]);
+  useEffect(() => { if (params?.get("expired") === "1") setExpired(true); }, [params]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.email || !form.password) { setError("Completa todos los campos"); return; }
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
       await login(form.email, form.password);
     } catch (err: any) {
       const msg = err?.message || "";
-      if (msg === "credentials") setError("Credenciales incorrectas. Verifica tu email y contraseña.");
-      else if (msg === "inactive") setError("Tu cuenta está inactiva. Contacta al administrador.");
+      if (msg === "credentials") setError("Correo o contraseña incorrectos.");
+      else if (msg === "inactive") setError("Cuenta inactiva. Contacta al administrador.");
       else setError("Error del servidor. Intenta nuevamente.");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Fondo decorativo */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-3xl" />
-      </div>
+    <div className="w-full h-full flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-20 py-12">
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white text-3xl shadow-2xl shadow-cyan-500/30 mb-5">
-            JC
+      {/* Logo */}
+      <div className="mb-10">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#1a6fb5] to-[#0d4a8a] flex items-center justify-center shadow-lg shadow-blue-900/40">
+            {/* Tooth SVG */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+              <path d="M12 2C9.5 2 7.5 3.5 6 5c-1 1-2 1.5-3 1.5C2.5 6.5 2 7 2 8c0 2 .5 4 1.5 6.5C4.5 17 5.5 22 7 22c1 0 1.5-1.5 2-3 .5-1.5 1-2.5 3-2.5s2.5 1 3 2.5c.5 1.5 1 3 2 3 1.5 0 2.5-5 3.5-7.5C21.5 12 22 10 22 8c0-1-.5-1.5-1-1.5-1 0-2-.5-3-1.5C16.5 3.5 14.5 2 12 2z"/>
+            </svg>
           </div>
-          <h1 className="text-white text-2xl font-bold tracking-tight">Técnica Dental JC</h1>
-          <p className="text-white/40 text-sm mt-1">Panel de Administración</p>
+          <div>
+            <p className="text-white/90 text-lg font-semibold tracking-tight leading-none">Dental Admin</p>
+            <p className="text-white/35 text-xs tracking-widest uppercase mt-0.5">Panel de Gestión Clínica</p>
+          </div>
         </div>
 
-        {/* Banner sesión expirada */}
-        {expiredMsg && (
-          <div className="mb-5 flex items-start gap-3 px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-300 text-sm">
-            <span className="text-base shrink-0">⏱️</span>
-            {expiredMsg}
+        <div className="w-10 h-px bg-gradient-to-r from-[#1a6fb5] to-transparent mb-7" />
+
+        <h1 className="text-white text-2xl sm:text-3xl font-light tracking-tight leading-snug">
+          Bienvenida de<br />
+          <span className="font-semibold text-white">vuelta</span>
+        </h1>
+        <p className="text-white/35 text-sm mt-2 font-light">Accede a tu panel de administración</p>
+      </div>
+
+      {/* Banner expirado */}
+      {expired && (
+        <div className="mb-5 flex items-start gap-3 px-4 py-3 rounded-xl text-sm border"
+          style={{ background: "rgba(245,158,11,0.08)", borderColor: "rgba(245,158,11,0.2)", color: "#fbbf24" }}>
+          <span className="shrink-0 text-base">⏱</span>
+          Tu sesión expiró. Por favor inicia sesión nuevamente.
+        </div>
+      )}
+
+      {/* Formulario */}
+      <form onSubmit={handleSubmit} className="space-y-5">
+
+        {/* Email */}
+        <div className="space-y-1.5">
+          <label className="text-white/40 text-xs tracking-wider uppercase font-medium">
+            Correo electrónico
+          </label>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(e) => { setForm({ ...form, email: e.target.value }); setError(""); }}
+            placeholder="admin@dentaljc.com"
+            autoComplete="email"
+            disabled={loading}
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20
+              focus:outline-none focus:border-[#1a6fb5]/60 focus:bg-white/8 transition-all duration-200
+              disabled:opacity-50"
+          />
+        </div>
+
+        {/* Contraseña */}
+        <div className="space-y-1.5">
+          <label className="text-white/40 text-xs tracking-wider uppercase font-medium">
+            Contraseña
+          </label>
+          <div className="relative">
+            <input
+              type={showPass ? "text" : "password"}
+              value={form.password}
+              onChange={(e) => { setForm({ ...form, password: e.target.value }); setError(""); }}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              disabled={loading}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-11 text-sm text-white placeholder-white/20
+                focus:outline-none focus:border-[#1a6fb5]/60 focus:bg-white/8 transition-all duration-200
+                disabled:opacity-50"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPass(!showPass)}
+              tabIndex={-1}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors p-1"
+            >
+              {showPass
+                ? <EyeOff size={15} />
+                : <Eye size={15} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm border"
+            style={{ background: "rgba(239,68,68,0.08)", borderColor: "rgba(239,68,68,0.2)", color: "#fca5a5" }}>
+            <span className="shrink-0">✕</span> {error}
           </div>
         )}
 
-        {/* Card login */}
-        <div className="bg-[#0d1526] border border-white/8 rounded-3xl p-8 shadow-2xl">
-          <h2 className="text-white font-semibold text-lg mb-6">Iniciar Sesión</h2>
+        {/* Submit */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full relative overflow-hidden flex items-center justify-center gap-2.5
+            bg-gradient-to-r from-[#1a6fb5] to-[#0d4a8a]
+            hover:from-[#2280cc] hover:to-[#1058a0]
+            text-white font-semibold text-sm py-3.5 px-6 rounded-xl
+            transition-all duration-300 mt-1
+            disabled:opacity-60 disabled:cursor-not-allowed
+            shadow-lg shadow-blue-900/30
+            active:scale-[0.98]"
+          style={{ letterSpacing: "0.02em" }}
+        >
+          {/* Shimmer effect */}
+          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 pointer-events-none" />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <label className="text-white/50 text-xs mb-1.5 block">Correo electrónico</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => { setForm({ ...form, email: e.target.value }); setError(""); }}
-                placeholder="admin@dentaljc.com"
-                autoComplete="email"
-                disabled={loading}
-                className="form-input text-sm"
-              />
-            </div>
+          {loading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Autenticando...
+            </>
+          ) : (
+            <>
+              Iniciar Sesión
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+              </svg>
+            </>
+          )}
+        </button>
+      </form>
 
-            {/* Contraseña */}
-            <div>
-              <label className="text-white/50 text-xs mb-1.5 block">Contraseña</label>
-              <div className="relative">
-                <input
-                  type={showPass ? "text" : "password"}
-                  value={form.password}
-                  onChange={(e) => { setForm({ ...form, password: e.target.value }); setError(""); }}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  disabled={loading}
-                  className="form-input text-sm pr-11"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  tabIndex={-1}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-1"
-                >
-                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Error inline */}
-            {error && (
-              <div className="flex items-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-sm">
-                <span>❌</span> {error}
-              </div>
-            )}
-
-            {/* Botón submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600
-                hover:from-cyan-400 hover:to-blue-500 text-white font-semibold py-3 px-6 rounded-xl
-                transition-all duration-200 mt-2 disabled:opacity-60 disabled:cursor-not-allowed
-                shadow-lg shadow-cyan-500/20 active:scale-[0.98]"
-            >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Iniciando sesión...
-                </>
-              ) : (
-                <>
-                  <LogIn size={16} />
-                  Iniciar Sesión
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        <p className="text-center text-white/20 text-xs mt-6">
-          © {new Date().getFullYear()} Técnica Dental JC · Todos los derechos reservados
-        </p>
-      </div>
+      {/* Footer */}
+      <p className="text-white/15 text-xs mt-10 font-light">
+        © {new Date().getFullYear()} Técnica Dental JC · Todos los derechos reservados
+      </p>
     </div>
   );
 }
 
-// 2. Exportación principal envuelta en Suspense para cumplir con Next.js 14
+/* ─── Page principal ────────────────────────────────────────────────────────── */
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0a0f1e] flex items-center justify-center text-white/30">Cargando...</div>}>
-      <LoginForm />
-    </Suspense>
+    <div className="min-h-screen w-full flex bg-[#07101f]">
+
+      {/* ── LADO IZQUIERDO: imagen de portada ── */}
+      <div className="hidden lg:block lg:w-[58%] xl:w-[62%] relative overflow-hidden">
+        {/* Imagen tal cual */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/cover-login.png"
+          alt="Dental Admin"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          draggable={false}
+        />
+
+        {/* Gradiente sutil en el borde derecho para transición suave con el panel */}
+        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#07101f] to-transparent" />
+
+        {/* Gradiente sutil en el borde inferior */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#07101f]/40 to-transparent" />
+      </div>
+
+      {/* ── LADO DERECHO: panel de login ── */}
+      <div className="w-full lg:w-[42%] xl:w-[38%] flex flex-col relative">
+
+        {/* Fondo con textura sutil */}
+        <div className="absolute inset-0 bg-[#07101f]">
+          {/* Glow azul tenue */}
+          <div className="absolute top-0 right-0 w-72 h-72 bg-[#1a6fb5]/8 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#1a6fb5]/6 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
+          {/* Línea decorativa izquierda */}
+          <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-[#1a6fb5]/20 to-transparent" />
+        </div>
+
+        {/* Contenido del formulario */}
+        <div className="relative z-10 flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
+        </div>
+
+        {/* Imagen de fondo en mobile (cuando la columna izquierda no se ve) */}
+        <div className="lg:hidden absolute inset-0 -z-10 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/cover-login.png"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover object-top opacity-15"
+            draggable={false}
+            aria-hidden
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#07101f]/70 via-[#07101f]/90 to-[#07101f]" />
+        </div>
+      </div>
+    </div>
   );
 }
