@@ -1,52 +1,81 @@
 import { authFetch } from "@/lib/auth";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-const BASE = `${API_URL}/api/v1`;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+const BASE    = `${API_URL}/api/v1`;
 
-// Todas las peticiones pasan por authFetch:
-//  - Agrega Authorization: Bearer <access_token> automáticamente
-//  - Hace refresh automático si el backend responde 401
-//  - Redirige a /login si el refresh falla
+// ── Generic authenticated request ────────────────────────────────────────────
+// Throws a sanitised Error on non-2xx responses (no raw status text exposed to UI).
 async function req<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await authFetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-  if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-  return res.json();
+  let res: Response;
+  try {
+    res = await authFetch(`${BASE}${path}`, {
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+  } catch (err: unknown) {
+    const isAbort = err instanceof DOMException && err.name === "AbortError";
+    throw new Error(isAbort ? "request_timeout" : "network_error");
+  }
+
+  if (res.ok) return res.json() as Promise<T>;
+
+  // Map HTTP status codes to safe, generic error keys (no server internals exposed)
+  const statusMap: Record<number, string> = {
+    400: "bad_request",
+    401: "unauthorized",
+    403: "forbidden",
+    404: "not_found",
+    409: "conflict",
+    422: "validation_error",
+    429: "rate_limited",
+    500: "server_error",
+    502: "server_error",
+    503: "server_error",
+  };
+  throw new Error(statusMap[res.status] ?? "server_error");
 }
 
+// ── API surface ───────────────────────────────────────────────────────────────
 export const api = {
   // Appointments
-  getAppointments: () => req<Appointment[]>("/appointments"),
-  getAppointment: (id: number) => req<Appointment>(`/appointments/${id}`),
+  getAppointments: () =>
+    req<Appointment[]>("/appointments"),
+  getAppointment: (id: number) =>
+    req<Appointment>(`/appointments/${id}`),
   updateAppointment: (id: number, data: Partial<Appointment>) =>
     req<Appointment>(`/appointments/${id}`, { method: "PUT", body: JSON.stringify(data) }),
 
   // Patients
-  getPatients: () => req<Patient[]>("/patients"),
-  getPatient: (id: number) => req<Patient>(`/patients/${id}`),
+  getPatients: () =>
+    req<Patient[]>("/patients"),
+  getPatient: (id: number) =>
+    req<Patient>(`/patients/${id}`),
 
   // Specialists
-  getSpecialists: () => req<Specialist[]>("/specialists"),
+  getSpecialists: () =>
+    req<Specialist[]>("/specialists"),
   updateSpecialist: (id: number, data: Partial<Specialist>) =>
     req<Specialist>(`/specialists/${id}`, { method: "PUT", body: JSON.stringify(data) }),
 
   // Services
-  getServices: () => req<Service[]>("/services"),
+  getServices: () =>
+    req<Service[]>("/services"),
   updateService: (id: number, data: Partial<Service>) =>
     req<Service>(`/services/${id}`, { method: "PUT", body: JSON.stringify(data) }),
 
   // Payments
-  getPayments: () => req<Payment[]>("/payments"),
+  getPayments: () =>
+    req<Payment[]>("/payments"),
 
   // Clinical Records
-  getClinicalRecords: () => req<ClinicalRecord[]>("/clinical-records"),
+  getClinicalRecords: () =>
+    req<ClinicalRecord[]>("/clinical-records"),
   createClinicalRecord: (data: Partial<ClinicalRecord>) =>
     req<ClinicalRecord>("/clinical-records", { method: "POST", body: JSON.stringify(data) }),
 };
 
-// ── TYPES ──────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 export interface Appointment {
   id: number;
   patient_id: number;
