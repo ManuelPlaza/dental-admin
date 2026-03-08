@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-  display: "swap",
-});
+// Outfit is loaded via the @import in globals.css (browser-side).
+// Using next/font/google is avoided so the build doesn't require
+// network access to fonts.googleapis.com at build time.
 
 export const metadata: Metadata = {
   title: "Dental JC | Panel Admin",
@@ -21,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${outfit.variable} font-sans`}>
+      <body>
         <AuthProvider>
           {children}
         </AuthProvider>
