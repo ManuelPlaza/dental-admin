@@ -6,7 +6,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const BASE = `${API_URL}/api/v1`;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -26,22 +26,22 @@ interface AuthCtx {
 
 // ── Storage helpers ───────────────────────────────────────────────────────────
 
-const TOKEN_KEY = "dental_access_token";
+const TOKEN_KEY   = "dental_access_token";
 const REFRESH_KEY = "dental_refresh_token";
-const USER_KEY = "dental_user";
+const USER_KEY    = "dental_user";
 
 export const storage = {
-  getAccess: () => (typeof window !== "undefined" ? sessionStorage.getItem(TOKEN_KEY) : null),
+  getAccess:  () => (typeof window !== "undefined" ? sessionStorage.getItem(TOKEN_KEY)   : null),
   getRefresh: () => (typeof window !== "undefined" ? sessionStorage.getItem(REFRESH_KEY) : null),
-  getUser: () => {
+  getUser: (): AuthUser | null => {
     if (typeof window === "undefined") return null;
     try { return JSON.parse(sessionStorage.getItem(USER_KEY) || "null") as AuthUser | null; }
     catch { return null; }
   },
   set: (access: string, refresh: string, user: AuthUser) => {
-    sessionStorage.setItem(TOKEN_KEY, access);
+    sessionStorage.setItem(TOKEN_KEY,   access);
     sessionStorage.setItem(REFRESH_KEY, refresh);
-    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+    sessionStorage.setItem(USER_KEY,    JSON.stringify(user));
   },
   clear: () => {
     sessionStorage.removeItem(TOKEN_KEY);
@@ -49,6 +49,20 @@ export const storage = {
     sessionStorage.removeItem(USER_KEY);
   },
 };
+
+// ── Fetch with configurable timeout ──────────────────────────────────────────
+
+function fetchWithTimeout(
+  input: RequestInfo,
+  init: RequestInit = {},
+  timeoutMs = 15_000,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(input, { ...init, signal: controller.signal }).finally(() =>
+    clearTimeout(timer),
+  );
+}
 
 // ── Authenticated fetch with auto-refresh ─────────────────────────────────────
 
@@ -65,24 +79,23 @@ export async function authFetch(
   init: RequestInit = {},
   onSessionExpired?: () => void,
 ): Promise<Response> {
-  const access = storage.getAccess();
+  const access  = storage.getAccess();
   const headers = {
     "Content-Type": "application/json",
     ...(init.headers as Record<string, string>),
     ...(access ? { Authorization: `Bearer ${access}` } : {}),
   };
 
-  const res = await fetch(input, { ...init, headers });
+  const res = await fetchWithTimeout(input, { ...init, headers });
 
   if (res.status !== 401) return res;
 
   // ── 401 → attempt refresh ──
   if (isRefreshing) {
-    // Other request is already refreshing — queue this one
     const newToken = await new Promise<string>((resolve, reject) => {
       pendingQueue.push({ resolve, reject });
     });
-    return fetch(input, {
+    return fetchWithTimeout(input, {
       ...init,
       headers: { ...(init.headers as Record<string, string>), Authorization: `Bearer ${newToken}` },
     });
@@ -99,24 +112,24 @@ export async function authFetch(
   }
 
   try {
-    const refreshRes = await fetch(`${BASE}/auth/refresh`, {
-      method: "POST",
+    const refreshRes = await fetchWithTimeout(`${BASE}/auth/refresh`, {
+      method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+      body:    JSON.stringify({ refresh_token: refreshToken }),
     });
 
-    if (!refreshRes.ok) throw new Error("refresh failed");
+    if (!refreshRes.ok) throw new Error("refresh_failed");
 
-    const data = await refreshRes.json();
-    const newAccess = data.access_token;
-    const newRefresh = data.refresh_token;
-    const user = storage.getUser()!;
+    const data        = await refreshRes.json();
+    const newAccess   = data.access_token  as string;
+    const newRefresh  = data.refresh_token as string;
+    const user        = storage.getUser()!;
     storage.set(newAccess, newRefresh, user);
 
     flushQueue(newAccess);
     isRefreshing = false;
 
-    return fetch(input, {
+    return fetchWithTimeout(input, {
       ...init,
       headers: {
         "Content-Type": "application/json",
@@ -124,8 +137,8 @@ export async function authFetch(
         Authorization: `Bearer ${newAccess}`,
       },
     });
-  } catch (err) {
-    flushQueue(null, err);
+  } catch {
+    flushQueue(null, new Error("Session expired"));
     isRefreshing = false;
     storage.clear();
     onSessionExpired?.();
@@ -139,10 +152,9 @@ const Ctx = createContext<AuthCtx | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user,    setUser]    = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore session from localStorage on mount
   useEffect(() => {
     const saved = storage.getUser();
     const token = storage.getAccess();
@@ -156,82 +168,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [router]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await fetch(`${BASE}/auth/login`, {
-      method: "POST",
+    const res = await fetchWithTimeout(`${BASE}/auth/login`, {
+      method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body:    JSON.stringify({ email, password }),
     });
 
     if (res.status === 401) throw new Error("credentials");
     if (res.status === 403) throw new Error("inactive");
-    if (!res.ok) throw new Error("server");
+    if (res.status === 429) throw new Error("rate_limited");
+    if (!res.ok)            throw new Error("server");
 
     const data = await res.json();
 
-    // Backend returns { access_token, refresh_token, expires_in }
-    // Name comes from JWT claims — fetch /auth/me or use a fallback
     const authUser: AuthUser = {
-      id: data.admin_id || data.user?.id || 1,
-      name: data.user?.name || data.user?.first_name
-        ? `${data.user.first_name} ${data.user.last_name}`.trim()
-        : "Administrador",
-      email: data.user?.email || email,
+      id:    data.admin_id ?? data.user?.id ?? 0,
+      name:  data.user?.name
+        ? data.user.name
+        : data.user?.first_name
+          ? `${data.user.first_name} ${data.user.last_name ?? ""}`.trim()
+          : "Administrador",
+      email: data.user?.email ?? email,
     };
 
     storage.set(data.access_token, data.refresh_token, authUser);
     setUser(authUser);
 
-    // Fetch /auth/me to get real user data
+    // Refresh real user data from /auth/me without blocking navigation
     try {
       const meRes = await authFetch(`${BASE}/auth/me`, {}, handleSessionExpired);
       if (meRes.ok) {
-        const me = await meRes.json();
-        const realUser: AuthUser = {
-          id: me.admin_id,
-          name: me.name,
-          email: me.email,
-        };
+        const me         = await meRes.json();
+        const realUser: AuthUser = { id: me.admin_id, name: me.name, email: me.email };
         storage.set(data.access_token, data.refresh_token, realUser);
         setUser(realUser);
       }
-    } catch { }
+    } catch { /* non-critical: proceed with data from login response */ }
 
     router.push("/dashboard");
   }, [router, handleSessionExpired]);
 
-  const logout = useCallback(async (e?: React.MouseEvent) => {
-    // Si viene de un botón o link, evitamos que navegue por defecto
-    if (e) e.preventDefault(); 
-
-    console.log("1. Iniciando proceso de logout...");
+  const logout = useCallback(async () => {
     const refresh = storage.getRefresh();
     const access  = storage.getAccess();
-    
-    console.log("2. Tokens encontrados:", { access: !!access, refresh: !!refresh });
 
     try {
       if (refresh && access) {
-        console.log("3. Llamando al endpoint de logout en Go...");
-        await fetch(`${BASE}/auth/logout`, {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json", 
-            "Authorization": `Bearer ${access}` 
+        await fetchWithTimeout(`${BASE}/auth/logout`, {
+          method:  "POST",
+          headers: {
+            "Content-Type":  "application/json",
+            "Authorization": `Bearer ${access}`,
           },
           body: JSON.stringify({ refresh_token: refresh }),
-        });
-        console.log("4. Petición al backend finalizada.");
-      } else {
-        console.log("3. Saltando petición: No se encontraron tokens en sessionStorage.");
+        }, 5_000);
       }
-    } catch (error) {
-      console.error("Error al cerrar sesión en el servidor:", error);
-    } finally {
-      console.log("5. Limpiando almacenamiento y redirigiendo al Login...");
-      storage.clear();
-      setUser(null);
-      window.location.href = "/login";
-    }
+    } catch { /* Ignore network errors on logout — always clear local session */ }
+
+    storage.clear();
+    setUser(null);
+    window.location.href = "/login";
   }, []);
 
   return (
@@ -243,14 +239,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 // Safe fallback — returned during SSR or if accidentally used outside provider
 const fallbackCtx: AuthCtx = {
-  user: null,
+  user:    null,
   loading: true,
-  login: async () => { throw new Error("AuthProvider not mounted"); },
-  logout: async () => { },
+  login:   async () => { throw new Error("AuthProvider not mounted"); },
+  logout:  async () => { },
 };
 
 export function useAuth() {
   const ctx = useContext(Ctx);
-  // Return fallback during SSR instead of throwing (avoids 500 on hydration)
   return ctx ?? fallbackCtx;
 }
