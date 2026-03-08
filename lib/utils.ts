@@ -70,8 +70,9 @@ export function statusBadgeClass(status: string): string {
   return map[status] ?? "badge";
 }
 
-export function fullName(obj: { first_name: string; last_name: string }): string {
-  return `${obj.first_name} ${obj.last_name}`.trim();
+export function fullName(obj?: { first_name?: string; last_name?: string } | null): string {
+  if (!obj) return "";
+  return `${obj.first_name ?? ""} ${obj.last_name ?? ""}`.trim();
 }
 
 // Extrae "YYYY-MM-DD" del ISO string sin conversión de timezone
