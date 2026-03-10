@@ -126,7 +126,13 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
       }
 
       const raw = await res.json();
-      const saved: Service = { ...raw, show_on_web: raw.show_on_web ?? showOnWeb };
+      // En modo edit: partir del objeto original y sobrescribir con la respuesta del backend.
+      // Esto evita registros vacíos si el backend devuelve una respuesta parcial.
+      const saved: Service = {
+        ...(mode === "edit" ? initial! : {}),
+        ...raw,
+        show_on_web: raw.show_on_web ?? showOnWeb,
+      };
       showToast(mode === "create" ? "Servicio creado correctamente" : "Servicio actualizado correctamente", "success");
       onSaved(saved, mode);
       onClose();
