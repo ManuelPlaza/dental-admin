@@ -6,7 +6,7 @@ import { PageHeader, SearchBar, Table, TR, TD, EmptyState, Skeleton, Btn } from 
 import Portal from "@/components/ui/Portal";
 import { formatCOP } from "@/lib/utils";
 import { authFetch } from "@/lib/auth";
-import { Briefcase, Plus, Save, X, Edit2 } from "lucide-react";
+import { Briefcase, Plus, Save, X, Edit2, Globe, GlobeLock } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const BASE    = `${API_URL}/api/v1`;
@@ -21,6 +21,7 @@ interface Service {
   price: number;
   duration_minutes: number;
   is_active: boolean;
+  show_on_web: boolean;
 }
 
 interface ServiceCategory {
@@ -78,6 +79,7 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
         }
       : emptyForm
   );
+  const [showOnWeb, setShowOnWeb] = useState(initial ? initial.show_on_web : true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
@@ -98,6 +100,7 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
         name: form.name.trim(),
         price: Number(form.price),
         duration_minutes: Number(form.duration_minutes),
+        show_on_web: showOnWeb,
         ...(form.description.trim() && { description: form.description.trim() }),
         ...(form.category_id && { category_id: Number(form.category_id) }),
       };
@@ -189,6 +192,33 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
                 <input type="number" min="1" placeholder="60" className={`form-input text-sm ${errors.duration_minutes ? "border-red-500/50" : ""}`} {...field("duration_minutes")} />
                 {errors.duration_minutes && <p className="text-red-400 text-xs mt-1">{errors.duration_minutes}</p>}
               </div>
+            </div>
+
+            {/* Visible en web */}
+            <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-white/[0.03] border border-white/8">
+              <div className="flex items-center gap-3">
+                {showOnWeb
+                  ? <Globe size={15} className="text-cyan-400 shrink-0" />
+                  : <GlobeLock size={15} className="text-white/30 shrink-0" />}
+                <div>
+                  <p className="text-white/80 text-sm font-medium">Visible en landing público</p>
+                  <p className="text-white/35 text-xs">
+                    {showOnWeb ? "Aparece en la página pública de servicios" : "Oculto para el público"}
+                  </p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={showOnWeb}
+                  onChange={(e) => setShowOnWeb(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className={`w-9 h-5 rounded-full transition-all
+                  ${showOnWeb ? "bg-cyan-500" : "bg-white/10"}
+                  peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all relative`}
+                />
+              </label>
             </div>
 
             {/* Categoría */}
@@ -321,7 +351,7 @@ export default function ServiciosPage() {
       {loading ? (
         <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}</div>
       ) : (
-        <Table headers={["Nombre", "Categoría", "Descripción", "Precio", "Duración", "Estado", "Acción"]} empty={filtered.length === 0}>
+        <Table headers={["Nombre", "Categoría", "Descripción", "Precio", "Duración", "Estado", "Web", "Acción"]} empty={filtered.length === 0}>
           {paginated.map((s) => (
             <TR key={s.id} onClick={() => setEditTarget(s)}>
               <TD>
@@ -338,6 +368,17 @@ export default function ServiciosPage() {
                 <span className={`badge ${s.is_active ? "badge-completed" : "badge-cancelled"}`}>
                   {s.is_active ? "Activo" : "Inactivo"}
                 </span>
+              </TD>
+              <TD>
+                {s.show_on_web ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+                    <Globe size={11} /> Visible
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-white/30">
+                    <GlobeLock size={11} /> Oculto
+                  </span>
+                )}
               </TD>
               <TD>
                 <div onClick={(e) => e.stopPropagation()}><label className="relative inline-flex items-center cursor-pointer" title={s.is_active ? "Inactivar" : "Activar"}>
