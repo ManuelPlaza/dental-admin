@@ -98,10 +98,11 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
     try {
       const body: Record<string, unknown> = {
         name: form.name.trim(),
+        description: form.description.trim(),
         price: Number(form.price),
         duration_minutes: Number(form.duration_minutes),
+        is_active: initial?.is_active ?? true,
         show_on_web: showOnWeb,
-        ...(form.description.trim() && { description: form.description.trim() }),
         ...(form.category_id && { category_id: Number(form.category_id) }),
       };
 
