@@ -6,7 +6,7 @@ import { PageHeader, SearchBar, Table, TR, TD, EmptyState, Skeleton, Btn } from 
 import Portal from "@/components/ui/Portal";
 import { api, Specialist } from "@/lib/api";
 import { fullName } from "@/lib/utils";
-import { UserCog, Plus, Save } from "lucide-react";
+import { UserCog, Plus, Save, Star } from "lucide-react";
 import { authFetch } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -41,6 +41,7 @@ export default function EspecialistasPage() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [defaultLoading, setDefaultLoading] = useState<number | null>(null);
 
   const showToast = (msg: string, type: "success" | "error") => setToast({ msg, type });
 
@@ -79,6 +80,22 @@ export default function EspecialistasPage() {
     } catch {
       showToast("Error al activar el especialista", "error");
     } finally { setActionLoading(null); }
+  };
+
+  // ── Marcar como Principal ──
+  const handleSetDefault = async (s: Specialist) => {
+    setDefaultLoading(s.id);
+    try {
+      const res = await authFetch(`${BASE}/specialists/${s.id}/set-default`, { method: "PATCH" });
+      if (res.status === 404) { showToast("Especialista no encontrado", "error"); return; }
+      if (!res.ok) throw new Error();
+      setSpecialists((prev) =>
+        prev.map((sp) => ({ ...sp, is_default: sp.id === s.id }))
+      );
+      showToast(`${fullName(s)} es ahora el especialista principal`, "success");
+    } catch {
+      showToast("Error al marcar como principal", "error");
+    } finally { setDefaultLoading(null); }
   };
 
   // ── Crear especialista ──
@@ -133,7 +150,7 @@ export default function EspecialistasPage() {
         <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}</div>
       ) : (
         <Table
-          headers={["Nombre", "Especialidad", "Licencia", "Teléfono", "Estado", "Acciones"]}
+          headers={["Nombre", "Especialidad", "Licencia", "Teléfono", "Estado", "Principal", "Acciones"]}
           empty={filtered.length === 0}
         >
           {filtered.map((s) => (
@@ -159,6 +176,25 @@ export default function EspecialistasPage() {
                 <span className={`badge ${s.is_active ? "badge-completed" : "badge-cancelled"}`}>
                   {s.is_active ? "Activo" : "Inactivo"}
                 </span>
+              </TD>
+              <TD>
+                {s.is_default ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-500/15 border border-yellow-500/30 text-yellow-400">
+                    <Star size={11} className="fill-yellow-400" /> Principal
+                  </span>
+                ) : (
+                  s.is_active && (
+                    <Btn
+                      variant="secondary"
+                      size="sm"
+                      disabled={defaultLoading === s.id}
+                      onClick={() => handleSetDefault(s)}
+                    >
+                      <Star size={12} />
+                      {defaultLoading === s.id ? "..." : "Marcar principal"}
+                    </Btn>
+                  )
+                )}
               </TD>
               <TD>
                 {s.is_active ? (
