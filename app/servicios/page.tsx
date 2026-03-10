@@ -306,7 +306,9 @@ export default function ServiciosPage() {
 
       const res = await authFetch(endpoint, { method: "PATCH" });
       if (res.ok) {
-        setServices((prev) => prev.map((sv) => sv.id === s.id ? { ...sv, is_active: !sv.is_active } : sv));
+        const updated = { ...s, is_active: !s.is_active };
+        setServices((prev) => [updated, ...prev.filter((sv) => sv.id !== s.id)]);
+        setCurrentPage(1);
         showToast(s.is_active ? "Servicio inactivado" : "Servicio activado", "success");
       } else {
         const err = await res.json().catch(() => ({}));
@@ -317,11 +319,12 @@ export default function ServiciosPage() {
   };
 
   const handleSaved = (saved: Service, mode: "create" | "edit") => {
-    if (mode === "create") {
-      setServices((prev) => [saved, ...prev]);
-    } else {
-      setServices((prev) => prev.map((s) => s.id === saved.id ? saved : s));
-    }
+    setServices((prev) =>
+      mode === "create"
+        ? [saved, ...prev]
+        : [saved, ...prev.filter((s) => s.id !== saved.id)]
+    );
+    setCurrentPage(1);
   };
 
   const filtered = services.filter((s) => {
