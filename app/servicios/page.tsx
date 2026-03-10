@@ -79,7 +79,7 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
         }
       : emptyForm
   );
-  const [showOnWeb, setShowOnWeb] = useState(initial ? initial.show_on_web : true);
+  const [showOnWeb, setShowOnWeb] = useState<boolean>(initial?.show_on_web ?? true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
@@ -124,7 +124,8 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
         return;
       }
 
-      const saved: Service = await res.json();
+      const raw = await res.json();
+      const saved: Service = { ...raw, show_on_web: raw.show_on_web ?? showOnWeb };
       showToast(mode === "create" ? "Servicio creado correctamente" : "Servicio actualizado correctamente", "success");
       onSaved(saved, mode);
       onClose();
@@ -195,30 +196,33 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
             </div>
 
             {/* Visible en web */}
-            <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-white/[0.03] border border-white/8">
+            <div className={`flex items-center justify-between py-3.5 px-4 rounded-xl border transition-colors
+              ${showOnWeb
+                ? "bg-cyan-500/8 border-cyan-500/25"
+                : "bg-white/5 border-white/10"}`}>
               <div className="flex items-center gap-3">
                 {showOnWeb
-                  ? <Globe size={15} className="text-cyan-400 shrink-0" />
-                  : <GlobeLock size={15} className="text-white/30 shrink-0" />}
+                  ? <Globe size={16} className="text-cyan-400 shrink-0" />
+                  : <GlobeLock size={16} className="text-white/35 shrink-0" />}
                 <div>
-                  <p className="text-white/80 text-sm font-medium">Visible en landing público</p>
-                  <p className="text-white/35 text-xs">
-                    {showOnWeb ? "Aparece en la página pública de servicios" : "Oculto para el público"}
+                  <p className="text-white text-sm font-semibold">Mostrar en landing público</p>
+                  <p className={`text-xs mt-0.5 ${showOnWeb ? "text-cyan-400/70" : "text-white/35"}`}>
+                    {showOnWeb ? "Visible para el público en la web" : "Oculto — solo interno"}
                   </p>
                 </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                <input
-                  type="checkbox"
-                  checked={showOnWeb}
-                  onChange={(e) => setShowOnWeb(e.target.checked)}
-                  className="sr-only peer"
+              <button
+                type="button"
+                role="switch"
+                aria-checked={showOnWeb}
+                onClick={() => setShowOnWeb((v) => !v)}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 focus:outline-none
+                  ${showOnWeb ? "bg-cyan-500" : "bg-white/15"}`}
+              >
+                <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200
+                  ${showOnWeb ? "translate-x-5" : "translate-x-0"}`}
                 />
-                <div className={`w-9 h-5 rounded-full transition-all
-                  ${showOnWeb ? "bg-cyan-500" : "bg-white/10"}
-                  peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all relative`}
-                />
-              </label>
+              </button>
             </div>
 
             {/* Categoría */}
@@ -370,7 +374,7 @@ export default function ServiciosPage() {
                 </span>
               </TD>
               <TD>
-                {s.show_on_web ? (
+                {(s.show_on_web ?? false) ? (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
                     <Globe size={11} /> Visible
                   </span>
