@@ -148,14 +148,10 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
-  const [desktopLoaded, setDesktopLoaded] = useState(false);
-  const [mobileLoaded, setMobileLoaded]   = useState(false);
 
   const set = (key: keyof typeof form, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
-    if (key === "image_url_desktop") setDesktopLoaded(false);
-    if (key === "image_url_mobile")  setMobileLoaded(false);
   };
 
   const validate = () => {
@@ -283,21 +279,6 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
                 className={`form-input text-sm ${errors.image_url_desktop ? "border-red-500/50" : ""}`}
               />
               {errors.image_url_desktop && <p className="text-red-400 text-xs mt-1">{errors.image_url_desktop}</p>}
-              {isValidUrl(form.image_url_desktop) && (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={form.image_url_desktop} alt="" className="hidden"
-                    onLoad={() => setDesktopLoaded(true)}
-                    onError={() => setDesktopLoaded(false)}
-                  />
-                  {desktopLoaded && (
-                    <div className="mt-2 rounded-xl overflow-hidden border border-white/8 bg-white/3 h-24 flex items-center justify-center">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={form.image_url_desktop} alt="Preview desktop" className="max-h-full max-w-full object-contain" />
-                    </div>
-                  )}
-                </>
-              )}
             </div>
 
             {/* Imagen Mobile */}
@@ -309,21 +290,6 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
                 className={`form-input text-sm ${errors.image_url_mobile ? "border-red-500/50" : ""}`}
               />
               {errors.image_url_mobile && <p className="text-red-400 text-xs mt-1">{errors.image_url_mobile}</p>}
-              {isValidUrl(form.image_url_mobile) && (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={form.image_url_mobile} alt="" className="hidden"
-                    onLoad={() => setMobileLoaded(true)}
-                    onError={() => setMobileLoaded(false)}
-                  />
-                  {mobileLoaded && (
-                    <div className="mt-2 rounded-xl overflow-hidden border border-white/8 bg-white/3 h-20 flex items-center justify-center">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={form.image_url_mobile} alt="Preview mobile" className="max-h-full max-w-full object-contain" />
-                    </div>
-                  )}
-                </>
-              )}
             </div>
 
             {/* URL Redirección */}
