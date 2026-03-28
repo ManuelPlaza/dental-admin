@@ -274,7 +274,8 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
             <div>
               <Label text="URL Imagen Desktop" required />
               <input
-                type="url" placeholder="https://ejemplo.com/banner-1920x600.jpg"
+                type="text" autoComplete="off"
+                placeholder="https://ejemplo.com/banner-1920x600.jpg"
                 value={form.image_url_desktop} onChange={(e) => set("image_url_desktop", e.target.value)}
                 className={`form-input text-sm ${errors.image_url_desktop ? "border-red-500/50" : ""}`}
               />
@@ -285,7 +286,8 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
             <div>
               <Label text="URL Imagen Mobile" tooltip="Si no se especifica, se usará la imagen desktop" />
               <input
-                type="url" placeholder="https://ejemplo.com/banner-600x400.jpg (opcional)"
+                type="text" autoComplete="off"
+                placeholder="https://ejemplo.com/banner-600x400.jpg (opcional)"
                 value={form.image_url_mobile} onChange={(e) => set("image_url_mobile", e.target.value)}
                 className={`form-input text-sm ${errors.image_url_mobile ? "border-red-500/50" : ""}`}
               />
@@ -296,7 +298,8 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
             <div>
               <Label text="URL de Redirección" />
               <input
-                type="url" placeholder="https://ejemplo.com/promo (opcional)"
+                type="text" autoComplete="off"
+                placeholder="https://ejemplo.com/promo (opcional)"
                 value={form.redirect_url} onChange={(e) => set("redirect_url", e.target.value)}
                 className={`form-input text-sm ${errors.redirect_url ? "border-red-500/50" : ""}`}
               />
