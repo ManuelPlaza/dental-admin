@@ -139,6 +139,21 @@ export interface Payment {
   created_at: string;
 }
 
+export interface Banner {
+  id: number;
+  title: string;
+  description?: string;
+  image_url_desktop: string;
+  image_url_mobile?: string;
+  redirect_url?: string;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+  priority: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ClinicalRecord {
   id: number;
   patient_id: number;
