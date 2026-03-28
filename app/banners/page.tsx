@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/layout/AdminLayout";
-import { PageHeader, Table, TR, TD, EmptyState, Skeleton, Btn } from "@/components/ui";
+import { PageHeader, EmptyState, Skeleton, Btn } from "@/components/ui";
 import Portal from "@/components/ui/Portal";
 import { Banner } from "@/lib/api";
 import { authFetch } from "@/lib/auth";
@@ -452,68 +452,80 @@ export default function BannersPage() {
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
         </div>
       ) : (
-        <Table
-          headers={["Título", "Vigencia", "Prioridad", "Estado", "Acciones"]}
-          empty={banners.length === 0}
-        >
-          {banners.map((b) => {
-            const status = getBannerStatus(b);
-            const { label, cls } = STATUS_CONFIG[status];
-            return (
-              <TR key={b.id}>
-                {/* Título */}
-                <TD>
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-white font-medium text-sm truncate">{b.title}</span>
-                      {b.redirect_url && (
-                        <a href={b.redirect_url} target="_blank" rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-white/25 hover:text-white/60 transition-colors shrink-0" title="Abrir URL">
-                          <ExternalLink size={12} />
-                        </a>
-                      )}
-                    </div>
-                    {b.description && (
-                      <span className="text-white/35 text-xs truncate max-w-xs">{b.description}</span>
-                    )}
-                  </div>
-                </TD>
+        <div className="glass-card rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[320px]">
+              <thead>
+                <tr className="border-b border-white/5">
+                  <th className="text-left p-4 text-white/40 text-xs font-semibold uppercase tracking-wider">Título</th>
+                  <th className="hidden md:table-cell text-left p-4 text-white/40 text-xs font-semibold uppercase tracking-wider">Vigencia</th>
+                  <th className="hidden lg:table-cell text-left p-4 text-white/40 text-xs font-semibold uppercase tracking-wider">Prioridad</th>
+                  <th className="text-left p-4 text-white/40 text-xs font-semibold uppercase tracking-wider">Estado</th>
+                  <th className="text-left p-4 text-white/40 text-xs font-semibold uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {banners.length === 0 ? null : banners.map((b) => {
+                  const status = getBannerStatus(b);
+                  const { label, cls } = STATUS_CONFIG[status];
+                  return (
+                    <tr key={b.id} className="border-b border-white/5 last:border-0 hover:bg-white/3 transition-colors">
+                      {/* Título */}
+                      <td className="p-4">
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-medium text-sm truncate">{b.title}</span>
+                            {b.redirect_url && (
+                              <a href={b.redirect_url} target="_blank" rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-white/25 hover:text-white/60 transition-colors shrink-0" title="Abrir URL">
+                                <ExternalLink size={12} />
+                              </a>
+                            )}
+                          </div>
+                          {b.description && (
+                            <span className="text-white/35 text-xs truncate max-w-xs">{b.description}</span>
+                          )}
+                          {/* Vigencia visible solo en móvil bajo el título */}
+                          <span className="md:hidden text-white/40 text-xs mt-0.5">
+                            {formatDateRange(b.start_time, b.end_time)}
+                          </span>
+                        </div>
+                      </td>
 
-                {/* Vigencia */}
-                <TD>
-                  <span className="text-white/50 text-xs font-mono whitespace-nowrap">
-                    {formatDateRange(b.start_time, b.end_time)}
-                  </span>
-                </TD>
+                      {/* Vigencia — oculta en móvil */}
+                      <td className="hidden md:table-cell p-4 text-white/60 text-sm">
+                        {formatDateRange(b.start_time, b.end_time)}
+                      </td>
 
-                {/* Prioridad */}
-                <TD>
-                  <span className="text-white/60 text-sm font-mono">{b.priority}</span>
-                </TD>
+                      {/* Prioridad — oculta en tablet */}
+                      <td className="hidden lg:table-cell p-4 text-white/60 text-sm">{b.priority}</td>
 
-                {/* Estado */}
-                <TD>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cls}`}>
-                    {label}
-                  </span>
-                </TD>
+                      {/* Estado */}
+                      <td className="p-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cls}`}>
+                          {label}
+                        </span>
+                      </td>
 
-                {/* Acciones */}
-                <TD>
-                  <div className="flex items-center gap-2">
-                    <Btn variant="secondary" size="sm" onClick={() => setEditTarget(b)}>
-                      <Edit2 size={12} /> Editar
-                    </Btn>
-                    <Btn variant="danger" size="sm" onClick={() => setDeleteTarget(b)}>
-                      <Trash2 size={12} />
-                    </Btn>
-                  </div>
-                </TD>
-              </TR>
-            );
-          })}
-        </Table>
+                      {/* Acciones */}
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Btn variant="secondary" size="sm" onClick={() => setEditTarget(b)}>
+                            <Edit2 size={12} /> Editar
+                          </Btn>
+                          <Btn variant="danger" size="sm" onClick={() => setDeleteTarget(b)}>
+                            <Trash2 size={12} />
+                          </Btn>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
 
       {!loading && banners.length === 0 && (
