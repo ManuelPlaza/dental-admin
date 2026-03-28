@@ -151,8 +151,8 @@ export default function PagosPage() {
         appointment_id: detailRecord.appointment_id,
         amount: Number(payForm.amount),
         method: payForm.method,
-        reference_code: payForm.reference_code.trim() || undefined,
-        notes: payForm.notes.trim() || undefined,
+        reference_code: payForm.reference_code.trim(),
+        notes: payForm.notes.trim(),
       };
       const res = await authFetch(`${BASE}/payments`, {
         method: "POST",
@@ -318,10 +318,69 @@ export default function PagosPage() {
 
                     {showPayForm && (
                       <div className="bg-white/3 rounded-xl p-4 border border-white/8 space-y-3">
-                        <input type="number" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} placeholder="Monto" className="form-input text-sm" />
-                        <div className="flex gap-2">
-                          <Btn variant="secondary" onClick={() => setShowPayForm(false)}>Cancelar</Btn>
-                          <Btn variant="primary" onClick={handleRegisterPay} disabled={savingPay}>Guardar</Btn>
+                        {/* Monto */}
+                        <div>
+                          <p className="text-white/50 text-xs mb-1">Monto <span className="text-red-400">*</span></p>
+                          <input
+                            type="number" min="0"
+                            value={payForm.amount}
+                            onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })}
+                            placeholder="Ej: 90000"
+                            className="form-input text-sm"
+                          />
+                        </div>
+
+                        {/* Método de pago */}
+                        <div>
+                          <p className="text-white/50 text-xs mb-2">Método de pago <span className="text-red-400">*</span></p>
+                          <div className="flex flex-col gap-2">
+                            {[
+                              { value: "cash",           label: "💵 Efectivo" },
+                              { value: "nequi",          label: "📱 Nequi" },
+                              { value: "loyalty_points", label: "⭐ Puntos de fidelidad" },
+                            ].map(({ value, label }) => (
+                              <label key={value} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border cursor-pointer transition-all
+                                ${payForm.method === value
+                                  ? "bg-cyan-500/10 border-cyan-500/40 text-white"
+                                  : "bg-white/3 border-white/8 text-white/50 hover:border-white/20"}`}>
+                                <input
+                                  type="radio"
+                                  name="payment_method"
+                                  value={value}
+                                  checked={payForm.method === value}
+                                  onChange={() => setPayForm({ ...payForm, method: value, reference_code: "" })}
+                                  className="sr-only"
+                                />
+                                <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all
+                                  ${payForm.method === value ? "border-cyan-400" : "border-white/20"}`}>
+                                  {payForm.method === value && <span className="w-2 h-2 rounded-full bg-cyan-400" />}
+                                </span>
+                                <span className="text-sm">{label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Código de referencia (solo Nequi) */}
+                        {payForm.method === "nequi" && (
+                          <div>
+                            <p className="text-white/50 text-xs mb-1">Código de referencia <span className="text-red-400">*</span></p>
+                            <input
+                              type="text" autoComplete="off"
+                              value={payForm.reference_code}
+                              onChange={(e) => setPayForm({ ...payForm, reference_code: e.target.value })}
+                              placeholder="Ej: NEQ-123456"
+                              className="form-input text-sm"
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex gap-2 pt-1">
+                          <Btn variant="secondary" onClick={() => setShowPayForm(false)} disabled={savingPay}>Cancelar</Btn>
+                          <Btn variant="primary" onClick={handleRegisterPay} disabled={savingPay}>
+                            <Save size={13} />
+                            {savingPay ? "Registrando..." : "Registrar pago"}
+                          </Btn>
                         </div>
                       </div>
                     )}
