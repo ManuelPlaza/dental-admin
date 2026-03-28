@@ -401,6 +401,13 @@ export default function BannersPage() {
 
   useEffect(() => { loadBanners(); }, [loadBanners]);
 
+  // Re-render cada minuto para que getBannerStatus() recalcule con Date.now() actualizado
+  const [, forceRender] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => forceRender((n) => n + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   const handleSaved = useCallback(async (saved: Banner, mode: "create" | "edit") => {
     // Optimistic update inmediato para que la UI responda sin esperar el refetch
     setBanners((prev) =>
