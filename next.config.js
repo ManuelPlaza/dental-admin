@@ -2,6 +2,12 @@
 const nextConfig = {
   output: "standalone",
 
+  // Disable React Strict Mode to prevent double-invocation of effects in development.
+  // Strict Mode intentionally mounts/unmounts components twice in dev to surface
+  // side-effect bugs — this causes every API call to fire twice in localhost.
+  // Production (Railway) is unaffected: Strict Mode has no effect in production builds.
+  reactStrictMode: false,
+
   // ── HTTP Security Headers ────────────────────────────────────────────────
   async headers() {
     return [
