@@ -410,12 +410,18 @@ export default function BannersPage() {
 
   useEffect(() => { loadBanners(); }, [loadBanners]);
 
-  const handleSaved = useCallback((saved: Banner, mode: "create" | "edit") => {
+  const handleSaved = useCallback(async (saved: Banner, mode: "create" | "edit") => {
+    // Optimistic update inmediato para que la UI responda sin esperar el refetch
     setBanners((prev) =>
       mode === "create"
         ? [saved, ...prev]
         : [saved, ...prev.filter((b) => b.id !== saved.id)]
     );
+    // Refetch para garantizar que los datos reflejen exactamente lo que persiste el backend
+    try {
+      const res = await authFetch(`${BASE}/banners`);
+      if (res.ok) setBanners(await res.json());
+    } catch { /* mantener optimistic update si falla el refetch */ }
   }, []);
 
   const handleDelete = async () => {
