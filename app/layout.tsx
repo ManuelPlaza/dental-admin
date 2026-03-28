@@ -9,6 +9,10 @@ import { AuthProvider } from "@/lib/auth";
 export const metadata: Metadata = {
   title: "Dental JC | Panel Admin",
   description: "Panel de administración Técnica Dental JC",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
