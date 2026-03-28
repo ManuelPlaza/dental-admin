@@ -518,7 +518,7 @@ export default function BannersPage() {
                       {/* Acciones */}
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                          <Btn variant="secondary" size="sm" onClick={() => setEditTarget(b)}>
+                          <Btn variant="secondary" size="sm" onClick={() => setEditTarget(b)} disabled={status === "expirado"}>
                             <Edit2 size={12} /> Editar
                           </Btn>
                           <Btn variant="danger" size="sm" onClick={() => setDeleteTarget(b)}>
