@@ -46,7 +46,8 @@ export function formatDateShort(dateStr: string): string {
   }).format(d);
 }
 
-export function statusLabel(status: string): string {
+export function statusLabel(status: string, cancellationReason?: string): string {
+  if (status === "cancelled" && cancellationReason === "auto_expired") return "Expirada";
   const map: Record<string, string> = {
     pending:   "Pendiente",
     scheduled: "Aprobada",
@@ -58,7 +59,8 @@ export function statusLabel(status: string): string {
   return map[status] ?? status;
 }
 
-export function statusBadgeClass(status: string): string {
+export function statusBadgeClass(status: string, cancellationReason?: string): string {
+  if (status === "cancelled" && cancellationReason === "auto_expired") return "badge badge-expired";
   const map: Record<string, string> = {
     pending:   "badge badge-pending",
     scheduled: "badge badge-scheduled",

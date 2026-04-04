@@ -87,6 +87,8 @@ export interface Appointment {
   start_time: string;
   end_time: string;
   status: "pending" | "scheduled" | "completed" | "cancelled";
+  cancellation_reason?: string;
+  cancellation_notes?: string;
   historical_price: number;
   notes?: string;
   modification_count: number;

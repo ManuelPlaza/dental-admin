@@ -200,11 +200,13 @@ export default function CitasPage() {
 
       // Actualizar UI
       setAppointments((prev) => {
-        const updated = prev.map((a) => a.id === cancelTarget.id ? { ...a, status: "cancelled" as Appointment["status"] } : a);
+        const updated = prev.map((a) => a.id === cancelTarget.id
+          ? { ...a, status: "cancelled" as Appointment["status"], cancellation_reason: cancelForm.reason, cancellation_notes: cancelForm.notes.trim() || undefined }
+          : a);
         return filter !== "all" ? updated.filter((a) => a.status === filter) : updated;
       });
       if (selected?.id === cancelTarget.id) {
-        setSelected((prev) => prev ? { ...prev, status: "cancelled" as Appointment["status"] } : prev);
+        setSelected((prev) => prev ? { ...prev, status: "cancelled" as Appointment["status"], cancellation_reason: cancelForm.reason, cancellation_notes: cancelForm.notes.trim() || undefined } : prev);
       }
       await fetchSummary();
       showToast("Cita cancelada correctamente");
@@ -426,7 +428,7 @@ export default function CitasPage() {
                 <TD>{getServiceName(a)}</TD>
                 <TD>{getSpecialistName(a)}</TD>
                 <TD className="text-white/60 text-xs">{formatDate(a.start_time)}</TD>
-                <TD><span className={statusBadgeClass(a.status)}>{statusLabel(a.status)}</span></TD>
+                <TD><span className={statusBadgeClass(a.status, a.cancellation_reason)}>{statusLabel(a.status, a.cancellation_reason)}</span></TD>
                 <TD>
                   <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                     <select value={a.status} disabled={frozen}
@@ -484,27 +486,44 @@ export default function CitasPage() {
               {/* Banner estado terminal */}
               {frozen && (
                 <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium border
-                  ${selected.status === "completed" ? "bg-blue-500/10 border-blue-500/20 text-blue-300" : "bg-red-500/10 border-red-500/20 text-red-300"}`}>
-                  {selected.status === "completed" ? "✅" : "🚫"}
-                  Esta cita está <strong className="ml-1">{statusLabel(selected.status).toLowerCase()}</strong> y no puede modificarse.
+                  ${selected.status === "completed"
+                    ? "bg-blue-500/10 border-blue-500/20 text-blue-300"
+                    : selected.cancellation_reason === "auto_expired"
+                      ? "bg-slate-500/10 border-slate-500/20 text-slate-300"
+                      : "bg-red-500/10 border-red-500/20 text-red-300"}`}>
+                  {selected.status === "completed" ? "✅" : selected.cancellation_reason === "auto_expired" ? "⌛" : "🚫"}
+                  Esta cita está <strong className="ml-1">{statusLabel(selected.status, selected.cancellation_reason).toLowerCase()}</strong> y no puede modificarse.
                 </div>
               )}
 
               {/* Motivo de cancelación */}
-              {selected.status === "cancelled" && (cancelReason || cancelNotes) && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 space-y-1">
-                  <p className="text-red-300 text-xs font-semibold uppercase tracking-wider mb-2">Motivo de cancelación</p>
-                  {cancelReason && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-white/40 text-xs">Motivo:</span>
-                      <span className="text-white/80 text-sm font-medium">{CANCELLATION_LABELS[cancelReason] || cancelReason}</span>
-                    </div>
-                  )}
-                  {cancelNotes && (
-                    <div className="flex items-start gap-2">
-                      <span className="text-white/40 text-xs mt-0.5">Notas:</span>
-                      <span className="text-white/70 text-sm">{cancelNotes}</span>
-                    </div>
+              {selected.status === "cancelled" && cancelReason && (
+                <div className={`border rounded-xl p-4 space-y-1
+                  ${cancelReason === "auto_expired"
+                    ? "bg-slate-500/10 border-slate-500/20"
+                    : "bg-red-500/10 border-red-500/20"}`}>
+                  <p className={`text-xs font-semibold uppercase tracking-wider mb-2
+                    ${cancelReason === "auto_expired" ? "text-slate-400" : "text-red-300"}`}>
+                    Motivo de cancelación
+                  </p>
+                  {cancelReason === "auto_expired" ? (
+                    <p className="text-white/70 text-sm leading-relaxed">
+                      Esta cita fue cancelada automáticamente porque no se confirmó antes del límite establecido
+                      (1 hora antes del horario programado).
+                    </p>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <span className="text-white/40 text-xs">Motivo:</span>
+                        <span className="text-white/80 text-sm font-medium">{CANCELLATION_LABELS[cancelReason] || cancelReason}</span>
+                      </div>
+                      {cancelNotes && (
+                        <div className="flex items-start gap-2">
+                          <span className="text-white/40 text-xs mt-0.5">Notas:</span>
+                          <span className="text-white/70 text-sm">{cancelNotes}</span>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
