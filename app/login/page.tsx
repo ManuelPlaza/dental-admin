@@ -6,6 +6,61 @@ import Image from "next/image";
 import { Eye, EyeOff, ShieldAlert, Clock } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
+/* ─── Post-login loading overlay ─────────────────────────────────────────────── */
+function LoginSuccessOverlay() {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#07101f]"
+      style={{ animation: "fadeInOverlay 0.25s ease forwards" }}
+    >
+      <style>{`
+        @keyframes fadeInOverlay {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes logoPulse {
+          0%, 100% { opacity: 1;   transform: scale(1); }
+          50%       { opacity: 0.7; transform: scale(0.97); }
+        }
+        @keyframes spinnerRing {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+
+      {/* Background glows */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1a6fb5]/8 rounded-full blur-3xl" />
+      </div>
+
+      {/* Logo */}
+      <div className="relative z-10 flex flex-col items-center gap-10">
+        <div style={{ animation: "logoPulse 1.4s ease-in-out infinite" }}>
+          <Image
+            src="/logo-dentaljc.png"
+            alt="Dental JC"
+            width={220}
+            height={55}
+            priority
+            className="drop-shadow-[0_0_18px_rgba(26,111,181,0.4)]"
+            style={{ objectFit: "contain" }}
+          />
+        </div>
+
+        {/* Spinner */}
+        <div className="flex flex-col items-center gap-4">
+          <div
+            className="w-9 h-9 rounded-full border-2 border-white/10 border-t-[#1a6fb5]"
+            style={{ animation: "spinnerRing 0.8s linear infinite" }}
+          />
+          <p className="text-white/30 text-xs tracking-widest uppercase font-light">
+            Cargando panel…
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 const EMAIL_RE     = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MAX_ATTEMPTS = 5;
@@ -22,19 +77,20 @@ function LoginForm() {
   const params          = useSearchParams();
   const { user, login } = useAuth();
 
-  const [form, setForm]         = useState({ email: "", password: "" });
-  const [showPass, setShowPass] = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
-  const [expired, setExpired]   = useState(false);
+  const [form, setForm]           = useState({ email: "", password: "" });
+  const [showPass, setShowPass]   = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [error, setError]         = useState("");
+  const [expired, setExpired]     = useState(false);
 
   // Client-side brute-force throttle
   const [attempts, setAttempts]       = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [countdown, setCountdown]     = useState(0);
 
-  // Redirect if already authenticated
-  useEffect(() => { if (user) router.replace("/dashboard"); }, [user, router]);
+  // Redirect if already authenticated (direct nav, no overlay needed)
+  useEffect(() => { if (user && !loginSuccess) router.replace("/dashboard"); }, [user, router, loginSuccess]);
   useEffect(() => { if (params?.get("expired") === "1") setExpired(true); }, [params]);
 
   // Countdown timer when locked out
@@ -87,6 +143,10 @@ function LoginForm() {
     try {
       await login(sanitizeEmail(form.email), form.password);
       setAttempts(0);
+      setLoginSuccess(true);
+      // Small delay so the overlay is visible before navigation
+      setTimeout(() => router.replace("/dashboard"), 1800);
+      return;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
       const newAttempts = attempts + 1;
@@ -119,6 +179,8 @@ function LoginForm() {
   };
 
   const disabled = loading || isLocked;
+
+  if (loginSuccess) return <LoginSuccessOverlay />;
 
   return (
     <div className="w-full">
@@ -298,14 +360,14 @@ export default function LoginPage() {
     <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full">
 
       {/* ── Left: editorial image (desktop only) ── */}
-      <div className="hidden lg:block relative overflow-hidden">
+      <div className="hidden lg:flex relative items-center justify-center bg-[#07101f]">
         <Image
           src="/cover-login.png"
           alt=""
           fill
           priority
           quality={95}
-          className="object-cover object-center"
+          className="object-contain object-center"
           draggable={false}
         />
         {/* Fade derecho hacia el panel de login */}
