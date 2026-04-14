@@ -189,22 +189,22 @@ function LoginForm() {
         <Image
           src="/logo-dentaljc.png"
           alt="Dental JC"
-          width={148}
-          height={37}
+          width={172}
+          height={43}
           priority
           style={{ objectFit: "contain" }}
         />
         <div className="h-5 w-px bg-white/10 mx-1" />
-        <span className="text-white/25 text-[10px] tracking-widest uppercase font-medium">Admin</span>
+        <span className="text-white/25 text-xs tracking-widest uppercase font-medium">Admin</span>
       </div>
 
       {/* ── Headline ── */}
-      <div className="mt-8 mb-7">
-        <h1 className="text-white text-3xl font-semibold tracking-tight leading-[1.2]">
+      <div className="mt-9 mb-8">
+        <h1 className="text-white text-[2.1rem] font-semibold tracking-tight leading-[1.2]">
           Bienvenida<br />
           <span className="text-white/40 font-light">de vuelta</span>
         </h1>
-        <p className="text-white/28 text-xs mt-2 leading-relaxed">
+        <p className="text-white/35 text-sm mt-3 leading-relaxed">
           Accede a tu panel de gestión clínica
         </p>
       </div>
@@ -234,7 +234,7 @@ function LoginForm() {
         {/* Email */}
         <div className="group">
           <label htmlFor="login-email"
-            className="block text-white/35 text-[10px] tracking-widest uppercase font-medium mb-2">
+            className="block text-white/35 text-[11px] tracking-widest uppercase font-medium mb-2.5">
             Correo electrónico
           </label>
           <input
@@ -253,7 +253,7 @@ function LoginForm() {
             aria-describedby={error ? "login-error" : undefined}
             className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14]
               text-white text-sm placeholder-white/20 rounded-xl
-              px-4 py-3.5 focus:outline-none focus:bg-white/[0.06]
+              px-4 py-4 focus:outline-none focus:bg-white/[0.06]
               focus:border-[#1a6fb5]/50 focus:ring-1 focus:ring-[#1a6fb5]/25
               transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
           />
@@ -262,7 +262,7 @@ function LoginForm() {
         {/* Password */}
         <div className="group">
           <label htmlFor="login-password"
-            className="block text-white/35 text-[10px] tracking-widest uppercase font-medium mb-2">
+            className="block text-white/35 text-[11px] tracking-widest uppercase font-medium mb-2.5">
             Contraseña
           </label>
           <div className="relative">
@@ -325,7 +325,7 @@ function LoginForm() {
             disabled={disabled}
             className="w-full flex items-center justify-center gap-2.5
               bg-gradient-to-r from-[#1a6fb5] to-[#0d4a8a]
-              text-white font-semibold text-sm py-3.5 px-6 rounded-xl
+              text-white font-semibold text-sm py-4 px-6 rounded-xl
               transition-all duration-300
               hover:shadow-[0_8px_32px_rgba(26,111,181,0.35)] hover:brightness-110 hover:-translate-y-px
               disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0
@@ -389,7 +389,7 @@ export default function LoginPage() {
       </div>
 
       {/* ── Right: login panel — columna angosta a la derecha ── */}
-      <div className="flex flex-col min-h-screen w-full lg:w-[340px] xl:w-[360px] shrink-0 relative overflow-hidden">
+      <div className="flex flex-col min-h-screen w-full lg:w-[30%] shrink-0 relative overflow-hidden">
 
         {/* Glow sutil en la esquina superior derecha */}
         <div className="absolute top-0 right-0 w-72 h-72 bg-[#1a6fb5]/8 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3 pointer-events-none" />
