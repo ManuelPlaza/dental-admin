@@ -199,12 +199,12 @@ function LoginForm() {
       </div>
 
       {/* ── Headline ── */}
-      <div className="mt-12 mb-10">
-        <h1 className="text-white text-4xl font-semibold tracking-tight leading-[1.15]">
+      <div className="mt-8 mb-7">
+        <h1 className="text-white text-3xl font-semibold tracking-tight leading-[1.2]">
           Bienvenida<br />
-          <span className="text-white/45 font-light">de vuelta</span>
+          <span className="text-white/40 font-light">de vuelta</span>
         </h1>
-        <p className="text-white/30 text-sm mt-3 leading-relaxed">
+        <p className="text-white/28 text-xs mt-2 leading-relaxed">
           Accede a tu panel de gestión clínica
         </p>
       </div>
@@ -229,12 +229,12 @@ function LoginForm() {
       )}
 
       {/* ── Form ── */}
-      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
         {/* Email */}
         <div className="group">
           <label htmlFor="login-email"
-            className="block text-white/35 text-[10px] tracking-widest uppercase font-medium mb-2.5">
+            className="block text-white/35 text-[10px] tracking-widest uppercase font-medium mb-2">
             Correo electrónico
           </label>
           <input
@@ -252,8 +252,8 @@ function LoginForm() {
             aria-required="true"
             aria-describedby={error ? "login-error" : undefined}
             className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14]
-              text-white text-sm placeholder-white/20 rounded-2xl
-              px-5 py-4 focus:outline-none focus:bg-white/[0.06]
+              text-white text-sm placeholder-white/20 rounded-xl
+              px-4 py-3.5 focus:outline-none focus:bg-white/[0.06]
               focus:border-[#1a6fb5]/50 focus:ring-1 focus:ring-[#1a6fb5]/25
               transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
           />
@@ -262,7 +262,7 @@ function LoginForm() {
         {/* Password */}
         <div className="group">
           <label htmlFor="login-password"
-            className="block text-white/35 text-[10px] tracking-widest uppercase font-medium mb-2.5">
+            className="block text-white/35 text-[10px] tracking-widest uppercase font-medium mb-2">
             Contraseña
           </label>
           <div className="relative">
@@ -278,8 +278,8 @@ function LoginForm() {
               aria-required="true"
               aria-describedby={error ? "login-error" : undefined}
               className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14]
-                text-white text-sm placeholder-white/20 rounded-2xl
-                px-5 py-4 pr-14 focus:outline-none focus:bg-white/[0.06]
+                text-white text-sm placeholder-white/20 rounded-xl
+                px-4 py-3.5 pr-12 focus:outline-none focus:bg-white/[0.06]
                 focus:border-[#1a6fb5]/50 focus:ring-1 focus:ring-[#1a6fb5]/25
                 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
             />
@@ -319,13 +319,13 @@ function LoginForm() {
         )}
 
         {/* Submit */}
-        <div className="pt-3">
+        <div className="pt-2">
           <button
             type="submit"
             disabled={disabled}
             className="w-full flex items-center justify-center gap-2.5
               bg-gradient-to-r from-[#1a6fb5] to-[#0d4a8a]
-              text-white font-semibold text-sm py-4 px-6 rounded-2xl
+              text-white font-semibold text-sm py-3.5 px-6 rounded-xl
               transition-all duration-300
               hover:shadow-[0_8px_32px_rgba(26,111,181,0.35)] hover:brightness-110 hover:-translate-y-px
               disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0
@@ -359,34 +359,41 @@ function LoginForm() {
 /* ─── Page ───────────────────────────────────────────────────────────────────── */
 export default function LoginPage() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full">
+    <div className="flex min-h-screen w-full bg-[#07101f]">
 
-      {/* ── Left: editorial image (desktop only) ── */}
-      <div className="hidden lg:flex relative items-center justify-center bg-[#07101f]">
+      {/* ── Left: editorial image — fills most of the screen ── */}
+      <div className="hidden lg:block relative flex-1">
         <Image
           src="/cover-login.png"
           alt=""
           fill
           priority
           quality={95}
-          className="object-contain object-center"
+          className="object-cover object-center"
           draggable={false}
         />
-        {/* Fade derecho hacia el panel de login */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/5 to-[#07101f]" />
-        {/* Fade inferior sutil */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/25 to-transparent" />
+        {/* Overlay logo sobre la imagen */}
+        <div className="absolute bottom-10 left-10 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#07101f]/70 backdrop-blur-sm flex items-center justify-center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+              <path d="M12 2C9.5 2 7.5 3.5 6 5c-1 1-2 1.5-3 1.5C2.5 6.5 2 7 2 8c0 2 .5 4 1.5 6.5C4.5 17 5.5 22 7 22c1 0 1.5-1.5 2-3 .5-1.5 1-2.5 3-2.5s2.5 1 3 2.5c.5 1.5 1 3 2 3 1.5 0 2.5-5 3.5-7.5C21.5 12 22 10 22 8c0-1-.5-1.5-1-1.5-1 0-2-.5-3-1.5C16.5 3.5 14.5 2 12 2z"/>
+            </svg>
+          </div>
+          <div>
+            <p className="text-white text-sm font-semibold leading-none drop-shadow">Dental Admin</p>
+            <p className="text-white/50 text-[10px] tracking-widest uppercase mt-0.5 drop-shadow">Panel de Gestión Clínica</p>
+          </div>
+        </div>
+        {/* Fade derecho hacia el panel */}
+        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-r from-transparent to-[#07101f]" />
       </div>
 
-      {/* ── Right: login panel ── */}
-      <div className="flex flex-col min-h-screen bg-[#07101f] relative overflow-hidden">
+      {/* ── Right: login panel — columna angosta a la derecha ── */}
+      <div className="flex flex-col min-h-screen w-full lg:w-[340px] xl:w-[360px] shrink-0 relative overflow-hidden">
 
-        {/* Background glows */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[480px] h-[480px] bg-[#1a6fb5]/6 rounded-full blur-3xl -translate-y-1/3 translate-x-1/4" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#1a6fb5]/4 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
-          <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/5 to-transparent" />
-        </div>
+        {/* Glow sutil en la esquina superior derecha */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-[#1a6fb5]/8 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-56 h-56 bg-[#1a6fb5]/5 rounded-full blur-3xl translate-y-1/4 pointer-events-none" />
 
         {/* Mobile: imagen de fondo tenue */}
         <div className="lg:hidden absolute inset-0 -z-10">
@@ -400,23 +407,24 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-[#07101f]/65 via-[#07101f]/88 to-[#07101f]" />
         </div>
 
-        {/* Content: full-height column — logo top, form middle, footer bottom */}
-        <div className="relative z-10 flex flex-col flex-1 w-full max-w-[440px] px-10 lg:px-12 xl:px-14 mx-auto lg:mx-0 lg:ml-10 xl:ml-16 2xl:ml-20">
+        {/* Contenido: logo ↑ · form centro · footer ↓ */}
+        <div className="relative z-10 flex flex-col flex-1 px-8 xl:px-10">
 
-          {/* Zone 1 — top spacer */}
-          <div className="pt-12 pb-2" />
+          {/* Zona 1 — top spacer */}
+          <div className="pt-10" />
 
-          {/* Zone 2 — form (grows to fill, vertically centered) */}
-          <div className="flex-1 flex flex-col justify-center py-8">
+          {/* Zona 2 — form (crece y se centra verticalmente) */}
+          <div className="flex-1 flex flex-col justify-center">
             <Suspense fallback={null}>
               <LoginForm />
             </Suspense>
           </div>
 
-          {/* Zone 3 — footer anchored to bottom */}
-          <div className="pb-10 pt-4">
-            <p className="text-white/12 text-[11px] font-light">
-              &copy; {new Date().getFullYear()} Técnica Dental JC &middot; Todos los derechos reservados
+          {/* Zona 3 — footer al fondo */}
+          <div className="pb-8 pt-4">
+            <p className="text-white/12 text-[10px] font-light leading-relaxed">
+              &copy; {new Date().getFullYear()} Técnica Dental JC<br />
+              Todos los derechos reservados
             </p>
           </div>
 
