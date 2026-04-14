@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { PageHeader, SearchBar, Table, EmptyState, Skeleton, Btn } from "@/components/ui";
 import Portal from "@/components/ui/Portal";
 import { formatCOP, formatDateShort, formatDate, fullName } from "@/lib/utils";
 import { CreditCard, DollarSign, Save, ChevronRight, Copy, Check, Link2, X } from "lucide-react";
 import { authFetch } from "@/lib/auth";
+import { useRefreshOnFocus } from "@/lib/useRefreshOnFocus";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const BASE = `${API_URL}/api/v1`;
@@ -66,10 +67,20 @@ const METHOD_ICONS: Record<string, string> = {
   pending: "⏳", cash: "💵", nequi: "📱", loyalty: "⭐",
 };
 
-function paymentStatusInfo(balance?: Balance): { label: string; cls: string } {
-  if (!balance) return { label: "Pendiente", cls: "badge-cancelled" };
-  if (balance.status === "PAID") return { label: "Pagado", cls: "badge-completed" };
-  if (balance.status === "PARTIAL") return { label: "Parcial", cls: "badge-pending" };
+function paymentStatusInfo(balance?: Balance, paid = 0, total = 0): { label: string; cls: string } {
+  if (balance) {
+    if (balance.status === "PAID") return { label: "Pagado", cls: "badge-completed" };
+    if (balance.status === "PARTIAL") return { label: "Parcial", cls: "badge-pending" };
+    // Backend puede desfasarse — confiar en los números antes que en el label
+    if (balance.total_cost > 0 && balance.total_paid >= balance.total_cost)
+      return { label: "Pagado", cls: "badge-completed" };
+    if (balance.total_paid > 0)
+      return { label: "Parcial", cls: "badge-pending" };
+    return { label: "Pendiente", cls: "badge-cancelled" };
+  }
+  // Sin balance cargado: inferir desde los montos disponibles
+  if (total > 0 && paid >= total) return { label: "Pagado",   cls: "badge-completed" };
+  if (paid > 0 && total > 0)      return { label: "Parcial",  cls: "badge-pending" };
   return { label: "Pendiente", cls: "badge-cancelled" };
 }
 
@@ -345,10 +356,10 @@ export default function PagosPage() {
 
   const detailBal     = detailRecord ? balances[detailRecord.appointment_id] : undefined;
   const detailTotal   = detailBal?.total_cost ?? detailRecord?.appointment?.historical_price ?? 0;
-  const detailPaid    = detailBal?.total_paid ?? 0;
+  const detailPaid    = detailBal?.total_paid ?? detailRecord?.amount ?? 0;
   const detailPending = detailBal?.pending_balance ?? (detailTotal - detailPaid);
-  const detailSI      = paymentStatusInfo(detailBal);
-  const detailIsPaid  = detailBal?.status === "PAID" || detailPending <= 0;
+  const detailSI      = paymentStatusInfo(detailBal, detailPaid, detailTotal);
+  const detailIsPaid  = detailPending <= 0;
 
   const canGenerateLink = detailPending > 0 && !activeLink;
 
@@ -369,7 +380,7 @@ export default function PagosPage() {
             const total   = bal?.total_cost ?? p.appointment?.historical_price ?? 0;
             const paid    = bal?.total_paid ?? p.amount ?? 0;
             const pending = bal?.pending_balance ?? (total - paid);
-            const si      = paymentStatusInfo(bal);
+            const si      = paymentStatusInfo(bal, paid, total);
             return (
               <tr key={p.id} onClick={() => openDetail(p)} className="cursor-pointer group hover:bg-white/5 transition-colors border-b border-white/5">
                 <td className="p-4">
