@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Calendar, CalendarDays, Users, UserCog,
-  Briefcase, FileText, CreditCard, Menu, X, LogOut, ImagePlay,
+  Briefcase, FileText, CreditCard, Menu, X, LogOut, ImagePlay, Bot,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
@@ -19,6 +19,7 @@ const navItems = [
   { label: "Historias Clínicas", href: "/historias",     icon: FileText },
   { label: "Pagos",              href: "/pagos",         icon: CreditCard },
   { label: "Banners",            href: "/banners",       icon: ImagePlay },
+  { label: "Chatbot IA",         href: "/chatbot",       icon: Bot },
 ] as const;
 
 export default function Sidebar() {
