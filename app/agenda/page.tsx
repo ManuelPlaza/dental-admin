@@ -5,6 +5,7 @@ import AdminLayout from "@/components/layout/AdminLayout";
 import Portal from "@/components/ui/Portal";
 import { authFetch } from "@/lib/auth";
 import { formatCOP, fullName } from "@/lib/utils";
+import { useRefreshOnFocus } from "@/lib/useRefreshOnFocus";
 
 // Safe wrapper — evita error TypeScript cuando patient/specialist es undefined
 const safeName = (obj?: { first_name: string; last_name: string } | null): string =>
@@ -517,6 +518,7 @@ export default function AgendaPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  useRefreshOnFocus(() => load(true));
 
   // Filter appointments for current week view
   const weekEnd = addDays(weekStart, 6);

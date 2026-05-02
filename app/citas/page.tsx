@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { PageHeader, StatCard, SearchBar, Table, TR, TD, FilterTabs, Modal, Btn, Skeleton, EmptyState } from "@/components/ui";
 import Portal from "@/components/ui/Portal";
@@ -8,6 +8,7 @@ import { Appointment, Service, Specialist } from "@/lib/api";
 import { formatDate, formatCOP, fullName, statusBadgeClass, statusLabel } from "@/lib/utils";
 import { Calendar, Clock, CheckCircle, XCircle, ChevronLeft, ChevronRight, Save, Plus, Loader2, FileText, AlertTriangle } from "lucide-react";
 import { authFetch } from "@/lib/auth";
+import { useRefreshOnFocus } from "@/lib/useRefreshOnFocus";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const BASE = `${API_URL}/api/v1`;
@@ -160,6 +161,16 @@ export default function CitasPage() {
   }, []);
 
   useEffect(() => { fetchPage(1, limit, filter); }, [filter, limit]);
+
+  // Refrescar al volver a la pestaña
+  const filterRef = useRef(filter);
+  const limitRef  = useRef(limit);
+  useEffect(() => { filterRef.current = filter; }, [filter]);
+  useEffect(() => { limitRef.current  = limit;  }, [limit]);
+  useRefreshOnFocus(useCallback(() => {
+    fetchPage(1, limitRef.current, filterRef.current);
+    fetchSummary();
+  }, [fetchPage, fetchSummary]));
 
   // ── Abrir modal de cancelación ──
   const openCancelModal = (id: number, currentStatus: string) => {
