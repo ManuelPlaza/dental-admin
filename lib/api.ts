@@ -50,6 +50,10 @@ export const api = {
     req<Patient[]>("/patients"),
   getPatient: (id: number) =>
     req<Patient>(`/patients/${id}`),
+  getConsentStatus: (id: number) =>
+    req<ConsentStatus>(`/admin/patients/${id}/consent`),
+  revokeConsent: (id: number) =>
+    req<{ message: string }>(`/admin/patients/${id}/consent`, { method: "DELETE" }),
 
   // Specialists
   getSpecialists: () =>
@@ -104,7 +108,17 @@ export interface Patient {
   phone: string;
   email: string;
   emergency_contact_name?: string;
+  anonymized_at?: string;
   created_at: string;
+}
+
+export interface ConsentStatus {
+  has_consent: boolean;
+  consent_date?: string;
+  last_contact_date?: string;
+  expires_at?: string;
+  days_until_expiry?: number;
+  is_anonymized: boolean;
 }
 
 export interface Specialist {

@@ -140,7 +140,7 @@ export default function CitasPage() {
   }, []);
 
   const loadCatalogs = () => {
-    authFetch(`${BASE}/services`).then((r) => r.json()).then((d) => setServices(d.filter((s: Service) => s.is_active))).catch(() => { });
+    authFetch(`${BASE}/admin/services`).then((r) => r.json()).then((d) => setServices(d)).catch(() => { });
     authFetch(`${BASE}/specialists`).then((r) => r.json()).then((d) => setSpecialists(d.filter((s: Specialist) => s.is_active))).catch(() => { });
   };
 
@@ -550,14 +550,14 @@ export default function CitasPage() {
                   <label className="text-white/40 text-xs mb-1.5 block">Especialista</label>
                   <select value={editForm.specialist_id} onChange={(e) => setEditForm({ ...editForm, specialist_id: e.target.value })} className="form-input text-sm" disabled={frozen}>
                     <option value="" className="bg-slate-900">Seleccionar...</option>
-                    {specialists.map((s) => <option key={s.id} value={s.id} className="bg-slate-900">{fullName(s)} — {s.specialty}</option>)}
+                    {specialists.map((s) => <option key={s.id} value={String(s.id)} className="bg-slate-900">{fullName(s)} — {s.specialty}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="text-white/40 text-xs mb-1.5 block">Servicio</label>
                   <select value={editForm.service_id} onChange={(e) => setEditForm({ ...editForm, service_id: e.target.value })} className="form-input text-sm" disabled={frozen}>
                     <option value="" className="bg-slate-900">Seleccionar...</option>
-                    {services.map((s) => <option key={s.id} value={s.id} className="bg-slate-900">{s.name} — {formatCOP(s.price)}</option>)}
+                    {services.map((s) => <option key={s.id} value={String(s.id)} className="bg-slate-900">{s.name} — {formatCOP(s.price)}</option>)}
                   </select>
                 </div>
                 <div>

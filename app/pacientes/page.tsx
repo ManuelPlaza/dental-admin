@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { PageHeader, SearchBar, Table, TR, TD, EmptyState, Skeleton, Btn } from "@/components/ui";
 import Portal from "@/components/ui/Portal";
-import { api, Patient, Appointment, Service } from "@/lib/api";
+import { api, Patient, Appointment, Service, ConsentStatus } from "@/lib/api";
 import { fullName, formatDateShort, statusBadgeClass, statusLabel } from "@/lib/utils";
-import { Users, Edit2, X, Save } from "lucide-react";
+import { Users, Edit2, X, Save, ShieldCheck, ShieldOff, ShieldAlert, Clock } from "lucide-react";
 import { authFetch } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -60,6 +60,10 @@ export default function PacientesPage() {
     emergency_contact_name: "", emergency_contact_relationship: "", emergency_contact_phone: "",
   });
   const [originalForm, setOriginalForm] = useState({ ...editForm });
+  const [consentStatus, setConsentStatus] = useState<ConsentStatus | null>(null);
+  const [consentLoading, setConsentLoading] = useState(false);
+  const [revoking, setRevoking] = useState(false);
+  const [confirmRevoke, setConfirmRevoke] = useState(false);
 
   const showToast = (msg: string, type: "success" | "error") => setToast({ msg, type });
 
@@ -86,6 +90,8 @@ export default function PacientesPage() {
   const openModal = (p: Patient) => {
     setSelected(p);
     setEditMode(false);
+    setConsentStatus(null);
+    setConfirmRevoke(false);
     const form = {
       phone: p.phone || "",
       email: p.email || "",
@@ -94,7 +100,37 @@ export default function PacientesPage() {
       emergency_contact_phone: (p as any).emergency_contact_phone || "",
     };
     setEditForm(form);
-    setOriginalForm(form); // ← agrega esta línea
+    setOriginalForm(form);
+    // Cargar estado de consentimiento al abrir
+    setConsentLoading(true);
+    api.getConsentStatus(p.id)
+      .then(setConsentStatus)
+      .catch(() => setConsentStatus(null))
+      .finally(() => setConsentLoading(false));
+  };
+
+  const handleRevokeConsent = async () => {
+    if (!selected) return;
+    setRevoking(true);
+    try {
+      await api.revokeConsent(selected.id);
+      setConsentStatus((prev) => prev ? { ...prev, has_consent: false, consent_date: undefined } : null);
+      setConfirmRevoke(false);
+      showToast("Consentimiento revocado correctamente", "success");
+    } catch {
+      showToast("Error al revocar el consentimiento", "error");
+    } finally {
+      setRevoking(false);
+    }
+  };
+
+  const consentBadge = (cs: ConsentStatus) => {
+    if (cs.is_anonymized) return { icon: <ShieldOff size={13} />, label: "Datos anonimizados", cls: "bg-white/10 text-white/40 border-white/10" };
+    if (!cs.has_consent)  return { icon: <ShieldAlert size={13} />, label: "Sin consentimiento", cls: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20" };
+    const days = cs.days_until_expiry ?? 999;
+    if (days < 0)   return { icon: <ShieldOff size={13} />, label: "Período vencido", cls: "bg-red-500/15 text-red-400 border-red-500/20" };
+    if (days < 90)  return { icon: <Clock size={13} />, label: `Vence en ${days}d`, cls: "bg-orange-500/15 text-orange-400 border-orange-500/20" };
+    return { icon: <ShieldCheck size={13} />, label: "Consentimiento activo", cls: "bg-green-500/15 text-green-400 border-green-500/20" };
   };
 
   const handleCancel = () => {
@@ -293,6 +329,75 @@ export default function PacientesPage() {
                       <Save size={13} />
                       {saving ? "Guardando..." : "Guardar cambios"}
                     </Btn>
+                  </div>
+                )}
+
+                {/* Consentimiento Ley 1581 — solo en modo lectura */}
+                {!editMode && (
+                  <div>
+                    <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Tratamiento de datos · Ley 1581</p>
+                    {consentLoading ? (
+                      <div className="h-20 rounded-xl bg-white/[0.03] animate-pulse" />
+                    ) : consentStatus ? (
+                      <div className="glass-card rounded-xl p-4 space-y-3">
+                        {/* Badge de estado */}
+                        {(() => { const b = consentBadge(consentStatus); return (
+                          <div className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg border ${b.cls}`}>
+                            {b.icon} {b.label}
+                          </div>
+                        ); })()}
+
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          {consentStatus.consent_date && (
+                            <div>
+                              <p className="text-white/30 mb-0.5">Fecha aceptación</p>
+                              <p className="text-white/70">{new Date(consentStatus.consent_date).toLocaleDateString("es-CO")}</p>
+                            </div>
+                          )}
+                          {consentStatus.last_contact_date && (
+                            <div>
+                              <p className="text-white/30 mb-0.5">Último contacto</p>
+                              <p className="text-white/70">{new Date(consentStatus.last_contact_date).toLocaleDateString("es-CO")}</p>
+                            </div>
+                          )}
+                          {consentStatus.expires_at && (
+                            <div>
+                              <p className="text-white/30 mb-0.5">Datos se eliminan el</p>
+                              <p className={`font-medium ${(consentStatus.days_until_expiry ?? 999) < 90 ? "text-orange-400" : "text-white/70"}`}>
+                                {new Date(consentStatus.expires_at).toLocaleDateString("es-CO")}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Botón revocar — solo si tiene consentimiento activo y no está anonimizado */}
+                        {consentStatus.has_consent && !consentStatus.is_anonymized && (
+                          !confirmRevoke ? (
+                            <button onClick={() => setConfirmRevoke(true)}
+                              className="text-xs text-red-400 hover:text-red-300 underline underline-offset-2 transition-colors">
+                              Revocar consentimiento
+                            </button>
+                          ) : (
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 space-y-2">
+                              <p className="text-red-300 text-xs font-medium">¿Confirmar revocación?</p>
+                              <p className="text-white/40 text-xs">El paciente deberá aceptar nuevamente al próxima vez que agende una cita.</p>
+                              <div className="flex gap-2">
+                                <button onClick={() => setConfirmRevoke(false)}
+                                  className="text-xs text-white/40 hover:text-white/70 px-3 py-1.5 rounded-lg bg-white/5 transition-colors">
+                                  Cancelar
+                                </button>
+                                <button onClick={handleRevokeConsent} disabled={revoking}
+                                  className="text-xs text-red-300 hover:text-red-200 px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 transition-colors disabled:opacity-50">
+                                  {revoking ? "Revocando..." : "Sí, revocar"}
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-white/30 text-sm py-3 text-center">No se pudo cargar el estado de consentimiento</p>
+                    )}
                   </div>
                 )}
 
