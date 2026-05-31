@@ -100,8 +100,10 @@ function SupplyFormModal({
       onSaved(result, mode);
       showToast(mode === "create" ? "Insumo creado correctamente" : "Insumo actualizado correctamente", "success");
       onClose();
-    } catch {
-      showToast(mode === "create" ? "Error al crear el insumo" : "Error al actualizar el insumo", "error");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "unknown";
+      console.error("[inventario] error:", msg, err);
+      showToast(`${mode === "create" ? "Error al crear" : "Error al actualizar"}: ${msg}`, "error");
     } finally {
       setSaving(false);
     }
@@ -429,7 +431,7 @@ export default function InventarioPage() {
 
       {/* ── Stats ── */}
       {!loading && (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
           <StatCard
             label="Total insumos"
             value={supplies.length}
@@ -452,13 +454,11 @@ export default function InventarioPage() {
       )}
 
       {/* ── Buscador y filtros ── */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-5">
-        <div className="flex-1">
-          <SearchBar value={search} onChange={setSearch} placeholder="Buscar por nombre o categoría..." />
-        </div>
+      <div className="flex flex-col gap-3 mb-5">
+        <SearchBar value={search} onChange={setSearch} placeholder="Buscar por nombre o categoría..." />
         <div className="flex items-center gap-2 flex-wrap">
           {/* Tabs de filtro */}
-          <div className="flex bg-white/5 rounded-xl p-1 border border-white/8 gap-0.5">
+          <div className="flex bg-white/5 rounded-xl p-1 border border-white/8 gap-0.5 flex-wrap">
             {([ ["all", "Todos"], ["critical", "Críticos"], ["low", "Stock bajo"] ] as const).map(([val, label]) => (
               <button
                 key={val}
@@ -493,53 +493,92 @@ export default function InventarioPage() {
         </div>
       </div>
 
-      {/* ── Tabla ── */}
-      {loading ? (
+      {/* ── Skeleton ── */}
+      {loading && (
         <div className="space-y-2">
           {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
         </div>
-      ) : (
-        <Table
-          headers={["Nombre", "Categoría", "Stock", "Stock Mínimo", "Estado", "Acciones"]}
-          empty={displayed.length === 0}
-        >
-          {displayed.map((s) => (
-            <TR key={s.id} onClick={() => setSelected(s)}>
-              <TD>
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                    s.critical
-                      ? "bg-red-500/20 text-red-400"
-                      : "bg-cyan-500/20 text-cyan-400"
-                  }`}>
-                    <Package size={14} />
-                  </div>
-                  <span className="font-medium text-white">{s.name}</span>
-                </div>
-              </TD>
-              <TD className="text-white/60">{s.category || "—"}</TD>
-              <TD>
-                <span className={`font-bold font-mono ${s.critical ? "text-red-400" : "text-green-400"}`}>
-                  {s.stock}
-                </span>
-              </TD>
-              <TD className="text-white/60 font-mono">{s.minimumStock}</TD>
-              <TD><StatusBadge critical={s.critical} /></TD>
-              <TD>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setSelected(s); }}
-                  className="text-cyan-400 hover:text-cyan-300 text-xs font-medium"
-                >
-                  Ver detalle
-                </button>
-              </TD>
-            </TR>
-          ))}
-        </Table>
       )}
 
-      {displayed.length === 0 && !loading && (
-        <EmptyState icon={<Package size={40} />} message="No se encontraron insumos" />
+      {/* ── Mobile: cards ── */}
+      {!loading && (
+        <div className="sm:hidden space-y-2">
+          {displayed.length === 0 && (
+            <EmptyState icon={<Package size={40} />} message="No se encontraron insumos" />
+          )}
+          {displayed.map((s) => (
+            <div
+              key={s.id}
+              onClick={() => setSelected(s)}
+              className="glass-card rounded-2xl px-4 py-3.5 flex items-center gap-3 cursor-pointer hover:bg-white/[0.05] transition-colors active:scale-[0.99]"
+            >
+              {/* Icono */}
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                s.critical ? "bg-red-500/20" : "bg-cyan-500/20"
+              }`}>
+                <Package size={16} className={s.critical ? "text-red-400" : "text-cyan-400"} />
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="text-white font-semibold text-sm truncate">{s.name}</p>
+                  <StatusBadge critical={s.critical} />
+                </div>
+                <p className="text-white/40 text-xs truncate">{s.category || "Sin categoría"}</p>
+              </div>
+
+              {/* Stock */}
+              <div className="shrink-0 text-right">
+                <p className={`text-lg font-bold font-mono leading-tight ${s.critical ? "text-red-400" : "text-green-400"}`}>
+                  {s.stock}
+                </p>
+                <p className="text-white/30 text-[10px]">mín: {s.minimumStock}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Desktop: tabla ── */}
+      {!loading && (
+        <div className="hidden sm:block">
+          <Table
+            headers={["Nombre", "Categoría", "Stock", "Stock Mínimo", "Estado", "Acciones"]}
+            empty={displayed.length === 0}
+          >
+            {displayed.map((s) => (
+              <TR key={s.id} onClick={() => setSelected(s)}>
+                <TD>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                      s.critical ? "bg-red-500/20" : "bg-cyan-500/20"
+                    }`}>
+                      <Package size={14} className={s.critical ? "text-red-400" : "text-cyan-400"} />
+                    </div>
+                    <span className="font-medium text-white">{s.name}</span>
+                  </div>
+                </TD>
+                <TD className="text-white/60">{s.category || "—"}</TD>
+                <TD>
+                  <span className={`font-bold font-mono ${s.critical ? "text-red-400" : "text-green-400"}`}>
+                    {s.stock}
+                  </span>
+                </TD>
+                <TD className="text-white/60 font-mono">{s.minimumStock}</TD>
+                <TD><StatusBadge critical={s.critical} /></TD>
+                <TD>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelected(s); }}
+                    className="text-cyan-400 hover:text-cyan-300 text-xs font-medium"
+                  >
+                    Ver detalle
+                  </button>
+                </TD>
+              </TR>
+            ))}
+          </Table>
+        </div>
       )}
 
       {/* ── Modal detalle ── */}

@@ -42,7 +42,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob:",
-              `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}`,
+              `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"} ${process.env.NEXT_PUBLIC_INVENTORY_URL || "http://localhost:8081"}`,
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
