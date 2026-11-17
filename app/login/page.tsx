@@ -301,13 +301,11 @@ export default function LoginPage() {
         @media (prefers-reduced-motion: reduce) { .login-photo, .login-card { animation: none; } }
       `}</style>
 
-      {/* Foto: en escritorio ocupa la derecha; en celular, una franja arriba */}
+      {/* Foto: nunca se recorta. Su caja conserva la proporción de la imagen (896×1024)
+          y escala con la altura de la pantalla, así siempre se ve la persona completa.
+          Escritorio: anclada abajo a la derecha. Celular: franja centrada arriba. */}
       <div
-        className="login-photo pointer-events-none absolute right-0 top-0 h-[300px] w-full lg:h-full lg:w-[64%]"
-        style={{
-          WebkitMaskImage: "linear-gradient(to right, transparent 0%, #000 38%)",
-          maskImage: "linear-gradient(to right, transparent 0%, #000 38%)",
-        }}
+        className="login-photo login-photo-box pointer-events-none absolute"
         aria-hidden="true"
       >
         <Image
@@ -315,20 +313,17 @@ export default function LoginPage() {
           alt=""
           fill
           priority
-          sizes="(min-width: 1024px) 64vw, 100vw"
+          sizes="(min-width: 1024px) 50vw, 80vw"
           quality={90}
           className="object-cover"
-          style={{ objectPosition: "50% 22%" }}
           draggable={false}
         />
         {/* Tinte de marca para que la foto se integre al azul */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#08162A]/25 via-transparent to-[#08162A]/55" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#08162A]/20 via-transparent to-[#08162A]/50" />
       </div>
-      {/* En celular la franja se funde hacia abajo */}
-      <div className="lg:hidden pointer-events-none absolute inset-x-0 top-[120px] h-[180px] bg-gradient-to-b from-transparent to-[#0F2A47]" aria-hidden="true" />
 
       <main className="relative z-10 flex min-h-screen flex-col px-5 sm:px-10 lg:px-[6vw]">
-        <div className="flex-1 flex items-center justify-center lg:justify-start pt-40 pb-10 lg:pt-12">
+        <div className="flex-1 flex items-center justify-center lg:justify-start pt-[calc(clamp(220px,36vh,340px)-48px)] pb-10 lg:pt-12">
           <div className="login-card w-full max-w-[440px] rounded-2xl bg-surface text-ink p-7 sm:p-10 shadow-[0_30px_80px_-20px_rgba(2,10,25,0.6)]">
             <Image
               src="/logo-dentaljc.png"
