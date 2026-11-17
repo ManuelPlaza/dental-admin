@@ -280,45 +280,79 @@ function LoginForm() {
 }
 
 /* ─── Page ───────────────────────────────────────────────────────────────────── */
+// Composición a pantalla completa: fondo azul marino de marca, la foto anclada a la
+// derecha con un degradado que la funde al fondo, y la tarjeta de acceso flotando
+// a la izquierda. La foto se muestra con su altura natural como tope para no
+// ampliarla de más y que no se pixele en pantallas grandes.
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen w-full bg-surface">
-      {/* Foto de la marca (la imagen ya incluye el nombre del panel); solo en escritorio */}
-      <div className="hidden lg:block relative flex-1 bg-navy">
+    <div
+      className="login-stage relative min-h-screen w-full overflow-hidden text-white"
+      style={{
+        background:
+          "radial-gradient(70% 60% at 18% 20%, rgb(14 116 144 / 0.38), transparent 70%), radial-gradient(60% 50% at 90% 100%, rgb(14 116 144 / 0.22), transparent 70%), linear-gradient(135deg, #08162A 0%, #0F2A47 55%, #123456 100%)",
+      }}
+    >
+      <style>{`
+        @keyframes loginPhotoIn { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: scale(1); } }
+        @keyframes loginCardIn  { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        .login-photo { animation: loginPhotoIn 1.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .login-card  { animation: loginCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both; }
+        @media (prefers-reduced-motion: reduce) { .login-photo, .login-card { animation: none; } }
+      `}</style>
+
+      {/* Foto: en escritorio ocupa la derecha; en celular, una franja arriba */}
+      <div
+        className="login-photo pointer-events-none absolute right-0 top-0 h-[300px] w-full lg:h-full lg:w-[64%]"
+        style={{
+          WebkitMaskImage: "linear-gradient(to right, transparent 0%, #000 38%)",
+          maskImage: "linear-gradient(to right, transparent 0%, #000 38%)",
+        }}
+        aria-hidden="true"
+      >
         <Image
-          src="/cover-login.png"
+          src="/login-photo.jpg"
           alt=""
           fill
           priority
-          sizes="(min-width: 1024px) 66vw, 0px"
+          sizes="(min-width: 1024px) 64vw, 100vw"
           quality={90}
           className="object-cover"
-          style={{ objectPosition: "0% center" }}
+          style={{ objectPosition: "50% 22%" }}
           draggable={false}
         />
+        {/* Tinte de marca para que la foto se integre al azul */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#08162A]/25 via-transparent to-[#08162A]/55" />
       </div>
+      {/* En celular la franja se funde hacia abajo */}
+      <div className="lg:hidden pointer-events-none absolute inset-x-0 top-[120px] h-[180px] bg-gradient-to-b from-transparent to-[#0F2A47]" aria-hidden="true" />
 
-      <main className="flex flex-col min-h-screen w-full lg:w-[460px] xl:w-[500px] shrink-0 px-6 sm:px-12 lg:px-12">
-        <div className="pt-8 sm:pt-10">
-          <Image
-            src="/logo-dentaljc.png"
-            alt="Dental JC"
-            width={236}
-            height={51}
-            priority
-            style={{ height: "auto" }}
-          />
+      <main className="relative z-10 flex min-h-screen flex-col px-5 sm:px-10 lg:px-[6vw]">
+        <div className="flex-1 flex items-center justify-center lg:justify-start pt-40 pb-10 lg:pt-12">
+          <div className="login-card w-full max-w-[440px] rounded-2xl bg-surface text-ink p-7 sm:p-10 shadow-[0_30px_80px_-20px_rgba(2,10,25,0.6)]">
+            <Image
+              src="/logo-dentaljc.png"
+              alt="Dental JC"
+              width={210}
+              height={46}
+              priority
+              style={{ height: "auto" }}
+              className="-ml-4 mb-6"
+            />
+            <Suspense fallback={null}>
+              <LoginForm />
+            </Suspense>
+          </div>
         </div>
 
-        <div className="flex-1 flex flex-col justify-center py-10 max-w-[400px] w-full mx-auto lg:mx-0">
-          <Suspense fallback={null}>
-            <LoginForm />
-          </Suspense>
-        </div>
-
-        <p className="pb-8 text-ink/60 text-xs">
-          &copy; {new Date().getFullYear()} Técnica Dental JC
-        </p>
+        <footer className="pb-7 flex flex-col gap-3">
+          <p className="hidden lg:block text-white/85 text-lg font-light max-w-[26ch] leading-snug">
+            Tu agenda, tus pacientes y tus pagos, en un solo lugar.
+          </p>
+          <p className="text-white/70 text-xs text-center lg:text-left">
+            &copy; {new Date().getFullYear()} Técnica Dental JC
+          </p>
+        </footer>
       </main>
     </div>
   );
