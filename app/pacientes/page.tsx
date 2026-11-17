@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/layout/AdminLayout";
-import { PageHeader, SearchBar, Table, TR, TD, EmptyState, Skeleton, Btn } from "@/components/ui";
+import { PageHeader, SearchBar, Table, TR, TD, EmptyState, Skeleton, Btn, FilterTabs } from "@/components/ui";
 import Portal from "@/components/ui/Portal";
 import { api, Patient, Appointment, Service, ConsentStatus } from "@/lib/api";
 import { fullName, formatDateShort, statusBadgeClass, statusLabel } from "@/lib/utils";
-import { Users, Edit2, X, Save, ShieldCheck, ShieldOff, ShieldAlert, Clock } from "lucide-react";
+import { Users, Edit2, X, Save, ShieldCheck, ShieldOff, ShieldAlert, Clock, AlertTriangle } from "lucide-react";
 import { authFetch } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -28,18 +28,28 @@ function ToastNotif({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 
 const ROField = ({ label, value }: { label: string; value: string }) => (
   <div>
-    <p className="text-white/40 text-xs mb-1">{label}</p>
-    <div className="bg-white/[0.03] border border-white/5 rounded-xl px-3 py-2.5 opacity-60">
-      <p className="text-white/70 text-sm">{value || "—"}</p>
+    <p className="text-ink/60 text-xs mb-1">{label}</p>
+    <div className="bg-white/[0.03] border border-ink/[0.08] rounded-xl px-3 py-2.5 opacity-60">
+      <p className="text-ink/75 text-sm">{value || "—"}</p>
     </div>
   </div>
+);
+
+// Campos ausentes/undefined se tratan como "no fallecido"
+const isDeceased = (p: Patient) => p.is_deceased === true;
+
+const DeceasedBadge = () => (
+  <span className="badge badge-cancelled gap-1 shrink-0" title="Marcado como fallecido por verificación de identidad"
+    aria-label="Paciente marcado como fallecido por verificación de identidad">
+    <AlertTriangle size={11} aria-hidden="true" /> Fallecido
+  </span>
 );
 
 const EditField = ({ label, value, onChange, type = "text", placeholder = "" }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string;
 }) => (
   <div>
-    <p className="text-white/60 text-xs mb-1">{label}</p>
+    <p className="text-ink/70 text-xs mb-1">{label}</p>
     <input type={type} value={value} onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder} className="form-input text-sm" />
   </div>
@@ -51,6 +61,7 @@ export default function PacientesPage() {
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
   const [search, setSearch] = useState("");
+  const [identityFilter, setIdentityFilter] = useState<"all" | "deceased">("all");
   const [selected, setSelected] = useState<Patient | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -75,7 +86,9 @@ export default function PacientesPage() {
     ]).then(([p, a, s]) => { setPatients(p); setAppointments(a); setServices(s); setLoading(false); });
   }, []);
 
+  const deceasedCount = patients.filter(isDeceased).length;
   const filtered = patients.filter((p) => {
+    if (identityFilter === "deceased" && !isDeceased(p)) return false;
     const q = search.toLowerCase();
     return !q || fullName(p).toLowerCase().includes(q) ||
       p.document_number?.includes(q) || p.email?.toLowerCase().includes(q);
@@ -95,9 +108,9 @@ export default function PacientesPage() {
     const form = {
       phone: p.phone || "",
       email: p.email || "",
-      emergency_contact_name: (p as any).emergency_contact_name || "",
-      emergency_contact_relationship: (p as any).emergency_contact_relationship || "",
-      emergency_contact_phone: (p as any).emergency_contact_phone || "",
+      emergency_contact_name: p.emergency_contact_name || "",
+      emergency_contact_relationship: p.emergency_contact_relationship || "",
+      emergency_contact_phone: p.emergency_contact_phone || "",
     };
     setEditForm(form);
     setOriginalForm(form);
@@ -117,15 +130,17 @@ export default function PacientesPage() {
       setConsentStatus((prev) => prev ? { ...prev, has_consent: false, consent_date: undefined } : null);
       setConfirmRevoke(false);
       showToast("Consentimiento revocado correctamente", "success");
-    } catch {
-      showToast("Error al revocar el consentimiento", "error");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al revocar el consentimiento";
+      showToast(msg, "error");
+      setConfirmRevoke(false);
     } finally {
       setRevoking(false);
     }
   };
 
   const consentBadge = (cs: ConsentStatus) => {
-    if (cs.is_anonymized) return { icon: <ShieldOff size={13} />, label: "Datos anonimizados", cls: "bg-white/10 text-white/40 border-white/10" };
+    if (cs.is_anonymized) return { icon: <ShieldOff size={13} />, label: "Datos anonimizados", cls: "bg-ink/[0.06] text-ink/60 border-ink/[0.12]" };
     if (!cs.has_consent)  return { icon: <ShieldAlert size={13} />, label: "Sin consentimiento", cls: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20" };
     const days = cs.days_until_expiry ?? 999;
     if (days < 0)   return { icon: <ShieldOff size={13} />, label: "Período vencido", cls: "bg-red-500/15 text-red-400 border-red-500/20" };
@@ -138,9 +153,9 @@ export default function PacientesPage() {
     if (selected) setEditForm({
       phone: selected.phone || "",
       email: selected.email || "",
-      emergency_contact_name: (selected as any).emergency_contact_name || "",
-      emergency_contact_relationship: (selected as any).emergency_contact_relationship || "",
-      emergency_contact_phone: (selected as any).emergency_contact_phone || "",
+      emergency_contact_name: selected.emergency_contact_name || "",
+      emergency_contact_relationship: selected.emergency_contact_relationship || "",
+      emergency_contact_phone: selected.emergency_contact_phone || "",
     });
   };
 
@@ -178,8 +193,18 @@ export default function PacientesPage() {
 
       <PageHeader title="Pacientes" subtitle="Gestión de pacientes registrados" />
 
-      <div className="mb-5">
+      <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <SearchBar value={search} onChange={setSearch} placeholder="Buscar por nombre, documento o email..." />
+        {deceasedCount > 0 && (
+          <FilterTabs
+            options={[
+              { label: "Todos", value: "all" },
+              { label: `Fallecidos (${deceasedCount})`, value: "deceased" },
+            ]}
+            value={identityFilter}
+            onChange={(v) => setIdentityFilter(v === "deceased" ? "deceased" : "all")}
+          />
+        )}
       </div>
 
       {loading ? (
@@ -190,16 +215,17 @@ export default function PacientesPage() {
             <TR key={p.id} onClick={() => openModal(p)}>
               <TD>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/30 to-blue-600/30 flex items-center justify-center text-cyan-400 text-xs font-bold shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-cyan-400 text-xs font-bold shrink-0">
                     {p.first_name?.[0]?.toUpperCase()}
                   </div>
-                  <span className="font-medium text-white">{fullName(p)}</span>
+                  <span className="font-medium text-ink">{fullName(p)}</span>
+                  {isDeceased(p) && <DeceasedBadge />}
                 </div>
               </TD>
-              <TD className="text-white/60">{p.document_number}</TD>
-              <TD className="text-white/60">{p.phone}</TD>
-              <TD className="text-white/60">{p.email || "—"}</TD>
-              <TD className="text-white/60">{formatDateShort(p.created_at)}</TD>
+              <TD className="text-ink/70">{p.document_number}</TD>
+              <TD className="text-ink/70">{p.phone}</TD>
+              <TD className="text-ink/70">{p.email || "—"}</TD>
+              <TD className="text-ink/70">{formatDateShort(p.created_at)}</TD>
               <TD><span className="badge badge-scheduled">{patientAppts(p.id).length} citas</span></TD>
               <TD>
                 <button onClick={(e) => { e.stopPropagation(); openModal(p); }}
@@ -222,24 +248,27 @@ export default function PacientesPage() {
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div
-              className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+              className="absolute inset-0 bg-ink/50"
               onClick={() => { if (!editMode) { setSelected(null); } }}
             />
 
             {/* Panel */}
             <div
-              className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col"
+              className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col"
               style={{ maxHeight: "88vh" }}
             >
               {/* Header fijo */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 shrink-0">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 flex items-center justify-center text-cyan-400 font-bold text-lg shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-accent/20 flex items-center justify-center text-cyan-400 font-bold text-lg shrink-0">
                     {selected.first_name?.[0]?.toUpperCase()}
                   </div>
                   <div>
-                    <h2 className="text-white font-bold">{fullName(selected)}</h2>
-                    <p className="text-white/40 text-xs">CC: {selected.document_number} · Reg: {formatDateShort(selected.created_at)}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-ink font-bold">{fullName(selected)}</h2>
+                      {isDeceased(selected) && <DeceasedBadge />}
+                    </div>
+                    <p className="text-ink/60 text-xs">CC: {selected.document_number} · Reg: {formatDateShort(selected.created_at)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -254,7 +283,7 @@ export default function PacientesPage() {
                   )}
                   <button
                     onClick={() => { setSelected(null); setEditMode(false); }}
-                    className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center text-xl leading-none transition-all"
+                    className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all"
                   >
                     ×
                   </button>
@@ -266,16 +295,31 @@ export default function PacientesPage() {
 
                 {/* Datos personales — siempre solo lectura */}
                 <div>
-                  <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Datos personales</p>
+                  <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Datos personales</p>
                   <div className="grid grid-cols-2 gap-3">
                     <ROField label="Nombre completo" value={fullName(selected)} />
                     <ROField label="Cédula (CC)" value={selected.document_number} />
                   </div>
                 </div>
 
+                {/* Estado de identidad — solo si la verificación marcó fallecido */}
+                {isDeceased(selected) && (
+                  <div>
+                    <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Estado de identidad</p>
+                    <div className="glass-card rounded-xl p-4 space-y-1">
+                      <p className="text-ink/75 text-sm">
+                        {selected.identity_note || "Marcado como fallecido por la verificación automática de identidad"}
+                      </p>
+                      {selected.identity_checked_at && (
+                        <p className="text-ink/60 text-xs">Verificado el {formatDateShort(selected.identity_checked_at)}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Contacto */}
                 <div>
-                  <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Información de contacto</p>
+                  <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Información de contacto</p>
                   <div className="grid grid-cols-2 gap-3">
                     {editMode ? (
                       <>
@@ -297,7 +341,7 @@ export default function PacientesPage() {
 
                 {/* Contacto de emergencia */}
                 <div>
-                  <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Contacto de emergencia</p>
+                  <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Contacto de emergencia</p>
                   <div className="grid grid-cols-3 gap-3">
                     {editMode ? (
                       <>
@@ -313,9 +357,9 @@ export default function PacientesPage() {
                       </>
                     ) : (
                       <>
-                        <ROField label="Nombre" value={(selected as any).emergency_contact_name || ""} />
-                        <ROField label="Relación" value={(selected as any).emergency_contact_relationship || ""} />
-                        <ROField label="Teléfono" value={(selected as any).emergency_contact_phone || ""} />
+                        <ROField label="Nombre" value={selected.emergency_contact_name || ""} />
+                        <ROField label="Relación" value={selected.emergency_contact_relationship || ""} />
+                        <ROField label="Teléfono" value={selected.emergency_contact_phone || ""} />
                       </>
                     )}
                   </div>
@@ -323,7 +367,7 @@ export default function PacientesPage() {
 
                 {/* Guardar — solo en modo edición */}
                 {editMode && (
-                  <div className="flex gap-3 pt-1 border-t border-white/8">
+                  <div className="flex gap-3 pt-1 border-t border-ink/10">
                     <Btn variant="secondary" onClick={handleCancel}>Cancelar</Btn>
                     <Btn variant="primary" onClick={handleSave} disabled={saving || !hasChanges}>  {/* ← cambia esta línea */}
                       <Save size={13} />
@@ -335,7 +379,7 @@ export default function PacientesPage() {
                 {/* Consentimiento Ley 1581 — solo en modo lectura */}
                 {!editMode && (
                   <div>
-                    <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Tratamiento de datos · Ley 1581</p>
+                    <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Tratamiento de datos · Ley 1581</p>
                     {consentLoading ? (
                       <div className="h-20 rounded-xl bg-white/[0.03] animate-pulse" />
                     ) : consentStatus ? (
@@ -350,20 +394,20 @@ export default function PacientesPage() {
                         <div className="grid grid-cols-2 gap-3 text-xs">
                           {consentStatus.consent_date && (
                             <div>
-                              <p className="text-white/30 mb-0.5">Fecha aceptación</p>
-                              <p className="text-white/70">{new Date(consentStatus.consent_date).toLocaleDateString("es-CO")}</p>
+                              <p className="text-ink/60 mb-0.5">Fecha aceptación</p>
+                              <p className="text-ink/75">{new Date(consentStatus.consent_date).toLocaleDateString("es-CO")}</p>
                             </div>
                           )}
                           {consentStatus.last_contact_date && (
                             <div>
-                              <p className="text-white/30 mb-0.5">Último contacto</p>
-                              <p className="text-white/70">{new Date(consentStatus.last_contact_date).toLocaleDateString("es-CO")}</p>
+                              <p className="text-ink/60 mb-0.5">Último contacto</p>
+                              <p className="text-ink/75">{new Date(consentStatus.last_contact_date).toLocaleDateString("es-CO")}</p>
                             </div>
                           )}
                           {consentStatus.expires_at && (
                             <div>
-                              <p className="text-white/30 mb-0.5">Datos se eliminan el</p>
-                              <p className={`font-medium ${(consentStatus.days_until_expiry ?? 999) < 90 ? "text-orange-400" : "text-white/70"}`}>
+                              <p className="text-ink/60 mb-0.5">Datos se eliminan el</p>
+                              <p className={`font-medium ${(consentStatus.days_until_expiry ?? 999) < 90 ? "text-orange-400" : "text-ink/75"}`}>
                                 {new Date(consentStatus.expires_at).toLocaleDateString("es-CO")}
                               </p>
                             </div>
@@ -380,10 +424,10 @@ export default function PacientesPage() {
                           ) : (
                             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 space-y-2">
                               <p className="text-red-300 text-xs font-medium">¿Confirmar revocación?</p>
-                              <p className="text-white/40 text-xs">El paciente deberá aceptar nuevamente al próxima vez que agende una cita.</p>
+                              <p className="text-ink/60 text-xs">El paciente deberá aceptar nuevamente al próxima vez que agende una cita.</p>
                               <div className="flex gap-2">
                                 <button onClick={() => setConfirmRevoke(false)}
-                                  className="text-xs text-white/40 hover:text-white/70 px-3 py-1.5 rounded-lg bg-white/5 transition-colors">
+                                  className="text-xs text-ink/60 hover:text-ink/75 px-3 py-1.5 rounded-lg bg-ink/[0.04] transition-colors">
                                   Cancelar
                                 </button>
                                 <button onClick={handleRevokeConsent} disabled={revoking}
@@ -396,7 +440,7 @@ export default function PacientesPage() {
                         )}
                       </div>
                     ) : (
-                      <p className="text-white/30 text-sm py-3 text-center">No se pudo cargar el estado de consentimiento</p>
+                      <p className="text-ink/60 text-sm py-3 text-center">No se pudo cargar el estado de consentimiento</p>
                     )}
                   </div>
                 )}
@@ -404,18 +448,18 @@ export default function PacientesPage() {
                 {/* Historial — solo en modo lectura */}
                 {!editMode && (
                   <div>
-                    <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">
+                    <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">
                       Historial de citas ({patientAppts(selected.id).length})
                     </p>
                     {patientAppts(selected.id).length === 0 ? (
-                      <p className="text-white/30 text-sm py-4 text-center">Sin citas registradas</p>
+                      <p className="text-ink/60 text-sm py-4 text-center">Sin citas registradas</p>
                     ) : (
                       <div className="space-y-2">
                         {patientAppts(selected.id).map((a) => (
                           <div key={a.id} className="flex items-center justify-between glass-card rounded-xl px-4 py-3">
                             <div>
-                              <p className="text-white text-sm">{getServiceName(a)}</p>
-                              <p className="text-white/40 text-xs">{formatDateShort(a.start_time)}</p>
+                              <p className="text-ink text-sm">{getServiceName(a)}</p>
+                              <p className="text-ink/60 text-xs">{formatDateShort(a.start_time)}</p>
                             </div>
                             <span className={statusBadgeClass(a.status)}>{statusLabel(a.status)}</span>
                           </div>

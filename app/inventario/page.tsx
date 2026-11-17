@@ -46,7 +46,7 @@ function StatusBadge({ critical }: { critical: boolean }) {
 function FormField({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-white/50 text-xs mb-1.5">
+      <p className="text-ink/65 text-xs mb-1.5">
         {label}{required && <span className="text-red-400 ml-0.5">*</span>}
       </p>
       {children}
@@ -119,17 +119,17 @@ function SupplyFormModal({
   return (
     <Portal>
       <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-        <div className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="absolute inset-0 bg-ink/50" onClick={onClose} aria-hidden="true" />
+        <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-md">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/8">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
-                <Package size={16} className="text-white" />
+              <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                <Package size={16} className="text-ink" />
               </div>
-              <h2 className="text-white font-bold">{mode === "create" ? "Nuevo insumo" : "Editar insumo"}</h2>
+              <h2 className="text-ink font-bold">{mode === "create" ? "Nuevo insumo" : "Editar insumo"}</h2>
             </div>
-            <button onClick={onClose} className="text-white/40 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10">
+            <button onClick={onClose} className="text-ink/60 hover:text-ink transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-ink/[0.06]">
               <X size={16} />
             </button>
           </div>
@@ -181,13 +181,13 @@ function SupplyFormModal({
               </FormField>
             </div>
 
-            <p className="text-white/25 text-xs">
+            <p className="text-ink/60 text-xs">
               Un insumo se marca como <span className="text-red-400">Crítico</span> automáticamente cuando el stock actual es menor o igual al stock mínimo.
             </p>
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 px-6 py-4 border-t border-white/8">
+          <div className="flex gap-3 px-6 py-4 border-t border-ink/10">
             <Btn variant="secondary" onClick={onClose} disabled={saving}>Cancelar</Btn>
             <Btn variant="primary" onClick={handleSubmit} disabled={saving} loading={saving}>
               <Save size={14} />
@@ -241,16 +241,16 @@ function SupplyDetailModal({
   return (
     <Portal>
       <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-        <div className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="absolute inset-0 bg-ink/50" onClick={onClose} aria-hidden="true" />
+        <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-md">
           {/* Header */}
-          <div className={`h-1.5 w-full rounded-t-2xl ${supply.critical ? "bg-gradient-to-r from-red-500 to-orange-500" : "bg-gradient-to-r from-cyan-500 to-blue-600"}`} />
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/8">
+          <div className={`h-1.5 w-full rounded-t-2xl ${supply.critical ? "bg-red-600" : "bg-accent"}`} />
+          <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10">
             <div className="flex items-center gap-3">
-              <h2 className="text-white font-bold truncate">{supply.name}</h2>
+              <h2 className="text-ink font-bold truncate">{supply.name}</h2>
               <StatusBadge critical={supply.critical} />
             </div>
-            <button onClick={onClose} className="text-white/40 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 shrink-0">
+            <button onClick={onClose} className="text-ink/60 hover:text-ink transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-ink/[0.06] shrink-0">
               <X size={16} />
             </button>
           </div>
@@ -260,20 +260,20 @@ function SupplyDetailModal({
             {/* Stock visual */}
             <div className="glass-card rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-white/40 text-xs">Stock actual</span>
+                <span className="text-ink/60 text-xs">Stock actual</span>
                 <span className={`text-lg font-bold ${supply.critical ? "text-red-400" : "text-green-400"}`}>
                   {supply.stock}
                 </span>
               </div>
-              <div className="w-full bg-white/5 rounded-full h-2">
+              <div className="w-full bg-ink/[0.04] rounded-full h-2">
                 <div
                   className={`h-2 rounded-full transition-all ${supply.critical ? "bg-red-500" : "bg-green-500"}`}
                   style={{ width: `${pct}%` }}
                 />
               </div>
               <div className="flex justify-between mt-1.5">
-                <span className="text-white/25 text-xs">0</span>
-                <span className="text-white/25 text-xs">Mínimo: {supply.minimumStock}</span>
+                <span className="text-ink/60 text-xs">0</span>
+                <span className="text-ink/60 text-xs">Mínimo: {supply.minimumStock}</span>
               </div>
             </div>
 
@@ -285,8 +285,8 @@ function SupplyDetailModal({
                 { label: "ID de insumo",  value: `#${supply.id}` },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between">
-                  <span className="text-white/40 text-sm">{label}</span>
-                  <span className="text-white/80 text-sm font-medium">{value}</span>
+                  <span className="text-ink/60 text-sm">{label}</span>
+                  <span className="text-ink/85 text-sm font-medium">{value}</span>
                 </div>
               ))}
             </div>
@@ -298,8 +298,8 @@ function SupplyDetailModal({
                   <AlertTriangle size={15} />
                   ¿Confirmar eliminación?
                 </div>
-                <p className="text-white/50 text-xs">
-                  Se eliminará <strong className="text-white/70">{supply.name}</strong> de forma permanente. Esta acción no se puede deshacer.
+                <p className="text-ink/65 text-xs">
+                  Se eliminará <strong className="text-ink/75">{supply.name}</strong> de forma permanente. Esta acción no se puede deshacer.
                 </p>
                 <div className="flex gap-2">
                   <Btn size="sm" variant="secondary" onClick={() => setConfirmDelete(false)} disabled={deleting}>
@@ -316,7 +316,7 @@ function SupplyDetailModal({
 
           {/* Footer */}
           {!confirmDelete && (
-            <div className="flex gap-3 px-6 py-4 border-t border-white/8">
+            <div className="flex gap-3 px-6 py-4 border-t border-ink/10">
               <Btn variant="danger" size="sm" onClick={() => setConfirmDelete(true)}>
                 <Trash2 size={13} /> Eliminar
               </Btn>
@@ -421,7 +421,7 @@ export default function InventarioPage() {
             <p className="text-red-300 font-semibold text-sm">
               {criticalCount} insumo{criticalCount !== 1 ? "s" : ""} en estado crítico
             </p>
-            <p className="text-white/40 text-xs mt-0.5">
+            <p className="text-ink/60 text-xs mt-0.5">
               El stock actual es igual o menor al mínimo establecido. Haz clic para filtrar.
             </p>
           </div>
@@ -435,20 +435,20 @@ export default function InventarioPage() {
           <StatCard
             label="Total insumos"
             value={supplies.length}
-            icon={<Package size={18} className="text-white" />}
-            color="bg-gradient-to-br from-cyan-500 to-blue-600"
+            icon={<Package size={18} className="text-ink" />}
+            color="bg-accent"
           />
           <StatCard
             label="Estado crítico"
             value={criticalCount}
-            icon={<AlertTriangle size={18} className="text-white" />}
-            color={criticalCount > 0 ? "bg-gradient-to-br from-red-500 to-orange-500" : "bg-gradient-to-br from-slate-500 to-slate-600"}
+            icon={<AlertTriangle size={18} className="text-ink" />}
+            color={criticalCount > 0 ? "bg-red-600" : "bg-slate-600"}
           />
           <StatCard
             label="Estado normal"
             value={supplies.length - criticalCount}
-            icon={<CheckCircle size={18} className="text-white" />}
-            color="bg-gradient-to-br from-green-500 to-emerald-600"
+            icon={<CheckCircle size={18} className="text-ink" />}
+            color="bg-green-600"
           />
         </div>
       )}
@@ -458,13 +458,13 @@ export default function InventarioPage() {
         <SearchBar value={search} onChange={setSearch} placeholder="Buscar por nombre o categoría..." />
         <div className="flex items-center gap-2 flex-wrap">
           {/* Tabs de filtro */}
-          <div className="flex bg-white/5 rounded-xl p-1 border border-white/8 gap-0.5 flex-wrap">
+          <div className="flex bg-ink/[0.04] rounded-xl p-1 border border-ink/10 gap-0.5 flex-wrap">
             {([ ["all", "Todos"], ["critical", "Críticos"], ["low", "Stock bajo"] ] as const).map(([val, label]) => (
               <button
                 key={val}
                 onClick={() => setFilter(val)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  filter === val ? "bg-white/10 text-white" : "text-white/40 hover:text-white/70"
+                  filter === val ? "bg-ink/[0.06] text-ink" : "text-ink/60 hover:text-ink/75"
                 }`}
               >
                 {label}
@@ -480,7 +480,7 @@ export default function InventarioPage() {
           {/* Input de threshold para "stock bajo" */}
           {filter === "low" && (
             <div className="flex items-center gap-2">
-              <span className="text-white/40 text-xs whitespace-nowrap">Umbral:</span>
+              <span className="text-ink/60 text-xs whitespace-nowrap">Umbral:</span>
               <input
                 type="number"
                 min={1}
@@ -522,10 +522,10 @@ export default function InventarioPage() {
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <p className="text-white font-semibold text-sm truncate">{s.name}</p>
+                  <p className="text-ink font-semibold text-sm truncate">{s.name}</p>
                   <StatusBadge critical={s.critical} />
                 </div>
-                <p className="text-white/40 text-xs truncate">{s.category || "Sin categoría"}</p>
+                <p className="text-ink/60 text-xs truncate">{s.category || "Sin categoría"}</p>
               </div>
 
               {/* Stock */}
@@ -533,7 +533,7 @@ export default function InventarioPage() {
                 <p className={`text-lg font-bold font-mono leading-tight ${s.critical ? "text-red-400" : "text-green-400"}`}>
                   {s.stock}
                 </p>
-                <p className="text-white/30 text-[10px]">mín: {s.minimumStock}</p>
+                <p className="text-ink/60 text-[10px]">mín: {s.minimumStock}</p>
               </div>
             </div>
           ))}
@@ -556,16 +556,16 @@ export default function InventarioPage() {
                     }`}>
                       <Package size={14} className={s.critical ? "text-red-400" : "text-cyan-400"} />
                     </div>
-                    <span className="font-medium text-white">{s.name}</span>
+                    <span className="font-medium text-ink">{s.name}</span>
                   </div>
                 </TD>
-                <TD className="text-white/60">{s.category || "—"}</TD>
+                <TD className="text-ink/70">{s.category || "—"}</TD>
                 <TD>
                   <span className={`font-bold font-mono ${s.critical ? "text-red-400" : "text-green-400"}`}>
                     {s.stock}
                   </span>
                 </TD>
-                <TD className="text-white/60 font-mono">{s.minimumStock}</TD>
+                <TD className="text-ink/70 font-mono">{s.minimumStock}</TD>
                 <TD><StatusBadge critical={s.critical} /></TD>
                 <TD>
                   <button

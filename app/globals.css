@@ -1,128 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
-
+/* ── Tokens ──────────────────────────────────────────────────────────────────
+   Mismo azul marino y turquesa de la landing, sobre fondo claro.
+   Los canales van sin comas para poder usar opacidad desde Tailwind.        */
 :root {
-  --font-outfit: 'Outfit', sans-serif;
-  --color-bg:      #0a0f1e;
-  --color-surface: #0d1526;
-  --color-border:  rgba(255,255,255,0.07);
-  --color-primary: #06b6d4;
+  --font-outfit: 'Outfit', system-ui, sans-serif;
+
+  --page:          246 248 250;  /* fondo de la app */
+  --surface:       255 255 255;  /* tarjetas, menú, modales */
+  --ink:           15 23 42;     /* texto principal (azul noche) */
+  --line:          226 232 240;  /* bordes y divisores */
+  --navy:          30 58 95;     /* azul marino de marca */
+  --accent:        14 116 144;   /* turquesa oscuro: 5.4:1 sobre blanco */
+  --accent-strong: 21 94 117;
+  --accent-soft:   236 254 255;
+  --gold:          184 150 12;
 }
 
-/* ── Base reset ──────────────────────────────────────────────────────────── */
+/* ── Base ────────────────────────────────────────────────────────────────── */
 * { box-sizing: border-box; padding: 0; margin: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scrollbar-color: #94A3B8 transparent; scrollbar-width: thin; }
 
 body {
-  background-color: var(--color-bg);
-  color: white;
+  background-color: rgb(var(--page));
+  color: rgb(var(--ink));
   font-family: var(--font-outfit);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: lining-nums;
 }
 
-/* ── Focus visible (accessibility) ──────────────────────────────────────── */
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+
+::selection { background: rgb(var(--accent)); color: #fff; }
+input, textarea { caret-color: rgb(var(--accent)); }
+
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid rgb(var(--accent));
   outline-offset: 2px;
 }
 
-/* ── Scrollbar ───────────────────────────────────────────────────────────── */
-::-webkit-scrollbar       { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #0f172a; }
-::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #2a5080; }
+/* Cifras alineadas en tablas, importes y horas */
+table, .tabular { font-variant-numeric: tabular-nums; }
 
-/* ── Glass card ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+@layer components {
+/* ── Tarjeta ─────────────────────────────────────────────────────────────── */
 .glass-card {
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--color-border);
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--line));
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.05);
 }
 
-/* ── Sidebar items ───────────────────────────────────────────────────────── */
-.sidebar-item { transition: all 0.15s ease; position: relative; }
-.sidebar-item:hover { background: rgba(255,255,255,0.06); }
-.sidebar-item.active {
-  background: rgba(6,182,212,0.12);
-  color: #22d3ee;
-}
-
-/* ── Form inputs ─────────────────────────────────────────────────────────── */
+/* ── Campos de formulario ────────────────────────────────────────────────── */
 .form-input {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: white;
-  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  background: rgb(var(--surface));
+  border: 1px solid #CBD5E1;
+  color: rgb(var(--ink));
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   width: 100%;
   padding: 10px 14px;
   border-radius: 10px;
   font-size: 14px;
+  min-height: 44px;
 }
+.form-input:hover { border-color: #94A3B8; }
 .form-input:focus {
   outline: none;
-  border-color: rgba(6,182,212,0.7);
-  background: rgba(6,182,212,0.05);
-  box-shadow: 0 0 0 3px rgba(6,182,212,0.12);
+  border-color: rgb(var(--accent));
+  box-shadow: 0 0 0 3px rgb(var(--accent) / 0.18);
 }
-.form-input::placeholder { color: rgba(255,255,255,0.3); }
-.form-input:disabled     { opacity: 0.5; cursor: not-allowed; }
+.form-input::placeholder { color: #64748B; }
+.form-input:disabled { opacity: 0.55; cursor: not-allowed; background: #F1F5F9; }
+select.form-input { appearance: auto; }
 
-/* ── Status badges ───────────────────────────────────────────────────────── */
+/* ── Estados (badges) ────────────────────────────────────────────────────── */
 .badge {
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.35;
   white-space: nowrap;
+  border: 1px solid transparent;
 }
-.badge-pending   { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
-.badge-scheduled { background: rgba(59,130,246,0.15);  color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
-.badge-completed { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-.badge-cancelled { background: rgba(239,68,68,0.15);   color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-.badge-expired   { background: rgba(148,163,184,0.12); color: #94a3b8; border: 1px solid rgba(148,163,184,0.25); }
-.badge-paid      { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-.badge-refunded  { background: rgba(139,92,246,0.15);  color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+.badge-pending   { background: #FEF3C7; color: #92400E; border-color: #FCD34D; }
+.badge-scheduled { background: #DBEAFE; color: #1E40AF; border-color: #93C5FD; }
+.badge-completed { background: #DCFCE7; color: #166534; border-color: #86EFAC; }
+.badge-cancelled { background: #FEE2E2; color: #991B1B; border-color: #FCA5A5; }
+.badge-expired   { background: #F1F5F9; color: #475569; border-color: #CBD5E1; }
+.badge-paid      { background: #DCFCE7; color: #166534; border-color: #86EFAC; }
+.badge-refunded  { background: #E2E8F0; color: #334155; border-color: #CBD5E1; }
 
-/* ── Gradient text ───────────────────────────────────────────────────────── */
-.text-gradient {
-  background: linear-gradient(135deg, #22d3ee, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-/* ── Page enter animation ────────────────────────────────────────────────── */
+/* ── Entrada de página: un solo desplazamiento corto ─────────────────────── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.fade-in { animation: fadeIn 0.3s ease forwards; }
+.fade-in { animation: fadeIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-/* ── Skeleton shimmer ────────────────────────────────────────────────────── */
+/* ── Skeleton ────────────────────────────────────────────────────────────── */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position:  200% 0; }
 }
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.04) 25%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(255,255,255,0.04) 75%
-  );
+  background: linear-gradient(90deg, #EEF2F6 25%, #E2E8F0 50%, #EEF2F6 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
 }
 
-/* ── Toast notification ──────────────────────────────────────────────────── */
+/* ── Aviso (toast) ───────────────────────────────────────────────────────── */
 .toast {
   position: fixed;
   bottom: 1.5rem;
@@ -130,14 +133,24 @@ body {
   z-index: 9999;
   max-width: 22rem;
   padding: 0.875rem 1.125rem;
-  border-radius: 0.875rem;
+  border-radius: 0.75rem;
   font-size: 0.875rem;
   font-weight: 500;
-  backdrop-filter: blur(12px);
-  animation: toastIn 0.3s ease forwards;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  background: rgb(var(--surface));
+  color: rgb(var(--ink));
+  border: 1px solid rgb(var(--line));
+  box-shadow: 0 12px 32px rgb(15 23 42 / 0.14);
+  animation: toastIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 @keyframes toastIn {
-  from { opacity: 0; transform: translateY(12px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 640px) {
+  .toast { left: 1rem; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
 }

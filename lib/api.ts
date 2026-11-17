@@ -52,8 +52,13 @@ export const api = {
     req<Patient>(`/patients/${id}`),
   getConsentStatus: (id: number) =>
     req<ConsentStatus>(`/admin/patients/${id}/consent`),
-  revokeConsent: (id: number) =>
-    req<{ message: string }>(`/admin/patients/${id}/consent`, { method: "DELETE" }),
+  revokeConsent: async (id: number): Promise<void> => {
+    const res = await authFetch(`${BASE}/admin/patients/${id}/consent`, { method: "DELETE" });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error ?? "Error al revocar el consentimiento");
+    }
+  },
 
   // Specialists
   getSpecialists: () =>
@@ -108,8 +113,20 @@ export interface Patient {
   phone: string;
   email: string;
   emergency_contact_name?: string;
+  emergency_contact_relationship?: string;
+  emergency_contact_phone?: string;
   anonymized_at?: string;
   created_at: string;
+  // Novedad de identidad (verificación Verifik) — solo endpoint admin autenticado
+  is_deceased?: boolean;
+  identity_note?: string;
+  identity_checked_at?: string;
+}
+
+export interface TopReferrer {
+  document_number: string;
+  name: string;
+  referral_count: number;
 }
 
 export interface ConsentStatus {

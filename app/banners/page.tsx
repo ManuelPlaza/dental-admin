@@ -30,7 +30,7 @@ function getBannerStatus(b: Banner): BannerStatus {
 const STATUS_CONFIG: Record<BannerStatus, { label: string; cls: string }> = {
   vigente:    { label: "Vigente",    cls: "bg-green-500/15 border border-green-500/25 text-green-400" },
   programado: { label: "Programado", cls: "bg-blue-500/15 border border-blue-500/25 text-blue-400" },
-  expirado:   { label: "Expirado",   cls: "bg-white/5 border border-white/10 text-white/35" },
+  expirado:   { label: "Expirado",   cls: "bg-ink/[0.04] border border-ink/[0.12] text-ink/60" },
   inactivo:   { label: "Inactivo",   cls: "bg-red-500/15 border border-red-500/25 text-red-400" },
 };
 
@@ -73,20 +73,20 @@ function DeleteConfirmModal({
   return (
     <Portal>
       <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onCancel} />
-        <div className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-5">
+        <div className="absolute inset-0 bg-ink/50" onClick={onCancel} />
+        <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/25 flex items-center justify-center shrink-0">
               <AlertTriangle size={18} className="text-red-400" />
             </div>
             <div>
-              <h3 className="text-white font-bold text-sm">Eliminar banner</h3>
-              <p className="text-white/40 text-xs mt-0.5">Esta acción no se puede deshacer</p>
+              <h3 className="text-ink font-bold text-sm">Eliminar banner</h3>
+              <p className="text-ink/60 text-xs mt-0.5">Esta acción no se puede deshacer</p>
             </div>
           </div>
-          <p className="text-white/65 text-sm leading-relaxed">
+          <p className="text-ink/75 text-sm leading-relaxed">
             ¿Estás seguro de que deseas eliminar el banner{" "}
-            <span className="text-white font-semibold">"{banner.title}"</span>?
+            <span className="text-ink font-semibold">"{banner.title}"</span>?
           </p>
           <div className="flex gap-3">
             <Btn variant="secondary" onClick={onCancel} disabled={deleting}>Cancelar</Btn>
@@ -214,11 +214,11 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
   };
 
   const Label = ({ text, required, tooltip }: { text: string; required?: boolean; tooltip?: string }) => (
-    <p className="text-white/50 text-xs mb-1 flex items-center gap-1.5">
+    <p className="text-ink/65 text-xs mb-1 flex items-center gap-1.5">
       {text}
       {required && <span className="text-red-400">*</span>}
       {tooltip && (
-        <span className="text-white/25 cursor-help" title={tooltip}>(?)</span>
+        <span className="text-ink/60 cursor-help" title={tooltip}>(?)</span>
       )}
     </p>
   );
@@ -226,22 +226,22 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
   return (
     <Portal>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
-        <div className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: "92vh" }}>
+        <div className="absolute inset-0 bg-ink/50" onClick={onClose} />
+        <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: "92vh" }}>
 
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 shrink-0">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mode === "create" ? "bg-gradient-to-br from-cyan-500 to-blue-600" : "bg-gradient-to-br from-violet-500 to-purple-600"}`}>
-                {mode === "create" ? <Plus size={16} className="text-white" /> : <Edit2 size={15} className="text-white" />}
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mode === "create" ? "bg-accent" : "bg-navy"}`}>
+                {mode === "create" ? <Plus size={16} className="text-ink" /> : <Edit2 size={15} className="text-ink" />}
               </div>
               <div>
-                <h2 className="text-white font-bold">{mode === "create" ? "Nuevo Banner" : "Editar Banner"}</h2>
-                <p className="text-white/40 text-xs">{mode === "create" ? "Completa los datos del banner" : initial?.title}</p>
+                <h2 className="text-ink font-bold">{mode === "create" ? "Nuevo Banner" : "Editar Banner"}</h2>
+                <p className="text-ink/60 text-xs">{mode === "create" ? "Completa los datos del banner" : initial?.title}</p>
               </div>
             </div>
             <button onClick={onClose}
-              className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center text-xl leading-none transition-all">
+              className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">
               ×
             </button>
           </div>
@@ -342,9 +342,9 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
 
               {/* Toggle Activo */}
               <div>
-                <p className="text-white/50 text-xs mb-1">Estado</p>
-                <div className="flex items-center justify-between py-2.5 px-4 rounded-xl bg-white/[0.03] border border-white/8 h-[38px]">
-                  <span className={`text-sm font-medium ${form.is_active ? "text-white/80" : "text-white/35"}`}>
+                <p className="text-ink/65 text-xs mb-1">Estado</p>
+                <div className="flex items-center justify-between py-2.5 px-4 rounded-xl bg-white/[0.03] border border-ink/10 h-[38px]">
+                  <span className={`text-sm font-medium ${form.is_active ? "text-ink/85" : "text-ink/60"}`}>
                     {form.is_active ? "Activo" : "Inactivo"}
                   </span>
                   <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -354,7 +354,7 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
                       className="sr-only peer"
                     />
                     <div className={`w-9 h-5 rounded-full transition-all relative
-                      ${form.is_active ? "bg-cyan-500" : "bg-white/10"}
+                      ${form.is_active ? "bg-cyan-500" : "bg-ink/[0.06]"}
                       peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all`}
                     />
                   </label>
@@ -365,7 +365,7 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 px-6 py-4 border-t border-white/8 shrink-0">
+          <div className="flex gap-3 px-6 py-4 border-t border-ink/10 shrink-0">
             <Btn variant="secondary" onClick={onClose} disabled={saving}>Cancelar</Btn>
             <Btn variant="primary" onClick={handleSave} disabled={saving}>
               <Save size={14} />
@@ -463,12 +463,12 @@ export default function BannersPage() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[320px]">
               <thead>
-                <tr className="border-b border-white/5">
-                  <th className="text-left p-4 text-white/40 text-xs font-semibold uppercase tracking-wider">Título</th>
-                  <th className="hidden md:table-cell text-left p-4 text-white/40 text-xs font-semibold uppercase tracking-wider">Vigencia</th>
-                  <th className="hidden lg:table-cell text-left p-4 text-white/40 text-xs font-semibold uppercase tracking-wider">Prioridad</th>
-                  <th className="text-left p-4 text-white/40 text-xs font-semibold uppercase tracking-wider">Estado</th>
-                  <th className="text-left p-4 text-white/40 text-xs font-semibold uppercase tracking-wider">Acciones</th>
+                <tr className="border-b border-ink/[0.08]">
+                  <th className="text-left p-4 text-ink/60 text-xs font-semibold uppercase tracking-wider">Título</th>
+                  <th className="hidden md:table-cell text-left p-4 text-ink/60 text-xs font-semibold uppercase tracking-wider">Vigencia</th>
+                  <th className="hidden lg:table-cell text-left p-4 text-ink/60 text-xs font-semibold uppercase tracking-wider">Prioridad</th>
+                  <th className="text-left p-4 text-ink/60 text-xs font-semibold uppercase tracking-wider">Estado</th>
+                  <th className="text-left p-4 text-ink/60 text-xs font-semibold uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -476,37 +476,37 @@ export default function BannersPage() {
                   const status = getBannerStatus(b);
                   const { label, cls } = STATUS_CONFIG[status];
                   return (
-                    <tr key={b.id} className="border-b border-white/5 last:border-0 hover:bg-white/3 transition-colors">
+                    <tr key={b.id} className="border-b border-ink/[0.08] last:border-0 hover:bg-ink/[0.025] transition-colors">
                       {/* Título */}
                       <td className="p-4">
                         <div className="flex flex-col gap-0.5 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-white font-medium text-sm truncate">{b.title}</span>
+                            <span className="text-ink font-medium text-sm truncate">{b.title}</span>
                             {b.redirect_url && (
                               <a href={b.redirect_url} target="_blank" rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="text-white/25 hover:text-white/60 transition-colors shrink-0" title="Abrir URL">
+                                className="text-ink/60 hover:text-ink/70 transition-colors shrink-0" title="Abrir URL">
                                 <ExternalLink size={12} />
                               </a>
                             )}
                           </div>
                           {b.description && (
-                            <span className="text-white/35 text-xs truncate max-w-xs">{b.description}</span>
+                            <span className="text-ink/60 text-xs truncate max-w-xs">{b.description}</span>
                           )}
                           {/* Vigencia visible solo en móvil bajo el título */}
-                          <span className="md:hidden text-white/40 text-xs mt-0.5">
+                          <span className="md:hidden text-ink/60 text-xs mt-0.5">
                             {formatDateRange(b.start_time, b.end_time)}
                           </span>
                         </div>
                       </td>
 
                       {/* Vigencia — oculta en móvil */}
-                      <td className="hidden md:table-cell p-4 text-white/60 text-sm">
+                      <td className="hidden md:table-cell p-4 text-ink/70 text-sm">
                         {formatDateRange(b.start_time, b.end_time)}
                       </td>
 
                       {/* Prioridad — oculta en tablet */}
-                      <td className="hidden lg:table-cell p-4 text-white/60 text-sm">{b.priority}</td>
+                      <td className="hidden lg:table-cell p-4 text-ink/70 text-sm">{b.priority}</td>
 
                       {/* Estado */}
                       <td className="p-4">

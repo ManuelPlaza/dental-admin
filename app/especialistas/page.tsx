@@ -29,7 +29,7 @@ function ToastNotif({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 const emptyForm = { first_name: "", last_name: "", specialty: "", license_number: "", phone: "" };
 
 const reqLabel = (label: string) => (
-  <p className="text-white/50 text-xs mb-1">{label} <span className="text-red-400">*</span></p>
+  <p className="text-ink/65 text-xs mb-1">{label} <span className="text-red-400">*</span></p>
 );
 
 export default function EspecialistasPage() {
@@ -159,19 +159,19 @@ export default function EspecialistasPage() {
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0
                     ${s.is_active
-                      ? "bg-gradient-to-br from-purple-500/30 to-pink-600/30 text-purple-400"
-                      : "bg-white/5 text-white/30"
+                      ? "bg-navy/20 text-purple-400"
+                      : "bg-ink/[0.04] text-ink/60"
                     }`}>
                     {s.first_name?.[0]?.toUpperCase()}
                   </div>
-                  <span className={`font-medium ${s.is_active ? "text-white" : "text-white/40"}`}>
+                  <span className={`font-medium ${s.is_active ? "text-ink" : "text-ink/60"}`}>
                     {fullName(s)}
                   </span>
                 </div>
               </TD>
-              <TD className={s.is_active ? "text-white/60" : "text-white/30"}>{s.specialty}</TD>
-              <TD className={`font-mono text-xs ${s.is_active ? "text-white/60" : "text-white/30"}`}>{s.license_number}</TD>
-              <TD className={s.is_active ? "text-white/60" : "text-white/30"}>{s.phone || "—"}</TD>
+              <TD className={s.is_active ? "text-ink/70" : "text-ink/60"}>{s.specialty}</TD>
+              <TD className={`font-mono text-xs ${s.is_active ? "text-ink/70" : "text-ink/60"}`}>{s.license_number}</TD>
+              <TD className={s.is_active ? "text-ink/70" : "text-ink/60"}>{s.phone || "—"}</TD>
               <TD>
                 <span className={`badge ${s.is_active ? "badge-completed" : "badge-cancelled"}`}>
                   {s.is_active ? "Activo" : "Inactivo"}
@@ -230,22 +230,22 @@ export default function EspecialistasPage() {
       {showModal && (
         <Portal>
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-            <div className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col">
+            <div className="absolute inset-0 bg-ink/50" onClick={() => setShowModal(false)} />
+            <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-lg flex flex-col">
 
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/8">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-                    <Plus size={16} className="text-white" />
+                  <div className="w-9 h-9 rounded-xl bg-navy flex items-center justify-center">
+                    <Plus size={16} className="text-ink" />
                   </div>
                   <div>
-                    <h2 className="text-white font-bold">Nuevo Especialista</h2>
-                    <p className="text-white/40 text-xs">Completa los datos del especialista</p>
+                    <h2 className="text-ink font-bold">Nuevo Especialista</h2>
+                    <p className="text-ink/60 text-xs">Completa los datos del especialista</p>
                   </div>
                 </div>
                 <button onClick={() => setShowModal(false)}
-                  className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center text-xl leading-none transition-all">
+                  className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">
                   ×
                 </button>
               </div>
@@ -282,7 +282,7 @@ export default function EspecialistasPage() {
                 </div>
 
                 <div>
-                  <p className="text-white/50 text-xs mb-1">Teléfono <span className="text-white/30">(opcional)</span></p>
+                  <p className="text-ink/65 text-xs mb-1">Teléfono <span className="text-ink/60">(opcional)</span></p>
                   <input type="tel" value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     placeholder="3001234567" className="form-input text-sm" />
@@ -290,7 +290,7 @@ export default function EspecialistasPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex gap-3 px-6 py-4 border-t border-white/8">
+              <div className="flex gap-3 px-6 py-4 border-t border-ink/10">
                 <Btn variant="secondary" onClick={() => setShowModal(false)}>Cancelar</Btn>
                 <Btn variant="primary" onClick={handleCreate} disabled={saving}>
                   <Save size={14} />

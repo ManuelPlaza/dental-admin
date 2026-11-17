@@ -1,0 +1,30 @@
+# Dependencias y artefactos de build (se regeneran dentro de la imagen)
+node_modules
+.next
+out
+build
+tsconfig.tsbuildinfo
+
+# Git y metadatos
+.git
+.gitignore
+.github
+
+# Secretos: nunca entran al contexto de build.
+# Las NEXT_PUBLIC_* se pasan con --build-arg.
+.env
+.env.local
+.env.*.local
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Herramientas y editores
+.claude
+.vscode
+.idea
+*.log
+npm-debug.log*
+.DS_Store

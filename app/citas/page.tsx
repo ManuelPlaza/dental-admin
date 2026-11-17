@@ -76,7 +76,7 @@ function ToastNotif({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 }
 
 const reqLabel = (label: string) => (
-  <p className="text-white/50 text-xs mb-1">{label} <span className="text-red-400">*</span></p>
+  <p className="text-ink/65 text-xs mb-1">{label} <span className="text-red-400">*</span></p>
 );
 
 export default function CitasPage() {
@@ -413,11 +413,11 @@ export default function CitasPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-        <StatCard label="Total" value={summary.total} icon={<Calendar size={18} className="text-white" />} color="bg-gradient-to-br from-cyan-500 to-blue-600" />
-        <StatCard label="Pendientes" value={summary.pending} icon={<Clock size={18} className="text-white" />} color="bg-gradient-to-br from-amber-500 to-orange-500" />
-        <StatCard label="Aprobadas" value={summary.scheduled} icon={<CheckCircle size={18} className="text-white" />} color="bg-gradient-to-br from-green-500 to-emerald-600" />
-        <StatCard label="Completadas" value={summary.completed} icon={<CheckCircle size={18} className="text-white" />} color="bg-gradient-to-br from-blue-500 to-indigo-600" />
-        <StatCard label="Canceladas" value={summary.cancelled} icon={<XCircle size={18} className="text-white" />} color="bg-gradient-to-br from-slate-500 to-slate-600" />
+        <StatCard label="Total" value={summary.total} icon={<Calendar size={18} className="text-white" />} color="bg-accent" />
+        <StatCard label="Pendientes" value={summary.pending} icon={<Clock size={18} className="text-white" />} color="bg-amber-600" />
+        <StatCard label="Aprobadas" value={summary.scheduled} icon={<CheckCircle size={18} className="text-white" />} color="bg-green-600" />
+        <StatCard label="Completadas" value={summary.completed} icon={<CheckCircle size={18} className="text-white" />} color="bg-accent" />
+        <StatCard label="Canceladas" value={summary.cancelled} icon={<XCircle size={18} className="text-white" />} color="bg-slate-600" />
       </div>
 
       {/* Filters */}
@@ -435,25 +435,25 @@ export default function CitasPage() {
             const frozen = isFrozen(a.status);
             return (
               <TR key={a.id} onClick={() => openEditModal(a)}>
-                <TD><p className="font-medium text-white">{fullName(a.patient)}</p><p className="text-white/40 text-xs">{a.patient?.document_number}</p></TD>
+                <TD><p className="font-medium text-ink">{fullName(a.patient)}</p><p className="text-ink/60 text-xs">{a.patient?.document_number}</p></TD>
                 <TD>{getServiceName(a)}</TD>
                 <TD>{getSpecialistName(a)}</TD>
-                <TD className="text-white/60 text-xs">{formatDate(a.start_time)}</TD>
+                <TD className="text-ink/70 text-xs">{formatDate(a.start_time)}</TD>
                 <TD><span className={statusBadgeClass(a.status, a.cancellation_reason)}>{statusLabel(a.status, a.cancellation_reason)}</span></TD>
                 <TD>
                   <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                     <select value={a.status} disabled={frozen}
                       onChange={(e) => handleStatusChange(a.id, e.target.value, a.status)}
-                      className={`border border-white/10 text-white/70 text-xs rounded-lg px-2 py-1 ${frozen ? "bg-white/5 opacity-40 cursor-not-allowed" : "bg-white/5 cursor-pointer"}`}>
+                      className={`border border-ink/[0.12] text-ink/75 text-xs rounded-lg px-2 py-1 ${frozen ? "bg-ink/[0.04] opacity-40 cursor-not-allowed" : "bg-ink/[0.04] cursor-pointer"}`}>
                       {STATUS_OPTIONS.map((s) => (
-                        <option key={s} value={s} disabled={s !== a.status && !canTransition(a.status, s)} className="bg-slate-900">{statusLabel(s)}</option>
+                        <option key={s} value={s} disabled={s !== a.status && !canTransition(a.status, s)} className="bg-surface">{statusLabel(s)}</option>
                       ))}
                     </select>
                     {a.status === "completed" && (
                       <button disabled={historiasDone.has(a.id)}
                         onClick={() => { if (!historiasDone.has(a.id)) { setHistoriaAppt(a); setHistoriaForm(emptyHistoriaForm); } }}
                         className={`flex items-center gap-1 text-xs font-medium border rounded-lg px-2 py-1 transition-all whitespace-nowrap
-                          ${historiasDone.has(a.id) ? "text-white/20 border-white/5 cursor-not-allowed" : "text-emerald-400 hover:text-emerald-300 border-emerald-500/30 hover:border-emerald-400/50 cursor-pointer"}`}
+                          ${historiasDone.has(a.id) ? "text-ink/60 border-ink/[0.08] cursor-not-allowed" : "text-emerald-400 hover:text-emerald-300 border-emerald-500/30 hover:border-emerald-400/50 cursor-pointer"}`}
                         title={historiasDone.has(a.id) ? "Historia ya registrada" : "Crear Historia Clínica"}>
                         <FileText size={12} />{historiasDone.has(a.id) ? "Registrada" : "Historia"}
                       </button>
@@ -471,16 +471,16 @@ export default function CitasPage() {
       {/* Paginador */}
       {!loading && total > 0 && (
         <div className="flex items-center justify-between mt-5 glass-card rounded-2xl px-5 py-3">
-          <div className="flex items-center gap-2 text-white/50 text-sm">
+          <div className="flex items-center gap-2 text-ink/65 text-sm">
             <span>Mostrar</span>
-            <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }} className="bg-white/5 border border-white/10 text-white text-sm rounded-lg px-2 py-1 cursor-pointer">
-              {[10, 25, 50].map((n) => <option key={n} value={n} className="bg-slate-900">{n}</option>)}
+            <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }} className="bg-ink/[0.04] border border-ink/[0.12] text-ink text-sm rounded-lg px-2 py-1 cursor-pointer">
+              {[10, 25, 50].map((n) => <option key={n} value={n} className="bg-surface">{n}</option>)}
             </select>
-            <span>por página — <span className="text-white">{total}</span> total</span>
+            <span>por página — <span className="text-ink">{total}</span> total</span>
           </div>
           <div className="flex items-center gap-3">
             <Btn size="sm" variant="secondary" disabled={page <= 1} onClick={() => { const p = page - 1; setPage(p); fetchPage(p, limit, filter); }}><ChevronLeft size={14} /> Anterior</Btn>
-            <span className="text-white/60 text-sm">Página <span className="text-white font-semibold">{page}</span> de <span className="text-white font-semibold">{totalPages}</span></span>
+            <span className="text-ink/70 text-sm">Página <span className="text-ink font-semibold">{page}</span> de <span className="text-ink font-semibold">{totalPages}</span></span>
             <Btn size="sm" variant="secondary" disabled={page >= totalPages} onClick={() => { const p = page + 1; setPage(p); fetchPage(p, limit, filter); }}>Siguiente <ChevronRight size={14} /></Btn>
           </div>
         </div>
@@ -518,20 +518,20 @@ export default function CitasPage() {
                     Motivo de cancelación
                   </p>
                   {cancelReason === "auto_expired" ? (
-                    <p className="text-white/70 text-sm leading-relaxed">
+                    <p className="text-ink/75 text-sm leading-relaxed">
                       Esta cita fue cancelada automáticamente porque no se confirmó antes del límite establecido
                       (1 hora antes del horario programado).
                     </p>
                   ) : (
                     <>
                       <div className="flex items-center gap-2">
-                        <span className="text-white/40 text-xs">Motivo:</span>
-                        <span className="text-white/80 text-sm font-medium">{CANCELLATION_LABELS[cancelReason] || cancelReason}</span>
+                        <span className="text-ink/60 text-xs">Motivo:</span>
+                        <span className="text-ink/85 text-sm font-medium">{CANCELLATION_LABELS[cancelReason] || cancelReason}</span>
                       </div>
                       {cancelNotes && (
                         <div className="flex items-start gap-2">
-                          <span className="text-white/40 text-xs mt-0.5">Notas:</span>
-                          <span className="text-white/70 text-sm">{cancelNotes}</span>
+                          <span className="text-ink/60 text-xs mt-0.5">Notas:</span>
+                          <span className="text-ink/75 text-sm">{cancelNotes}</span>
                         </div>
                       )}
                     </>
@@ -540,41 +540,41 @@ export default function CitasPage() {
               )}
 
               <div className="glass-card rounded-xl p-4">
-                <p className="text-white/40 text-xs mb-1">Paciente</p>
-                <p className="text-white font-semibold">{fullName(selected.patient)}</p>
-                <p className="text-white/50 text-xs">{selected.patient?.document_number} · {selected.patient?.phone}</p>
+                <p className="text-ink/60 text-xs mb-1">Paciente</p>
+                <p className="text-ink font-semibold">{fullName(selected.patient)}</p>
+                <p className="text-ink/65 text-xs">{selected.patient?.document_number} · {selected.patient?.phone}</p>
               </div>
 
               <div className={`grid grid-cols-2 gap-4 ${frozen ? "opacity-50 pointer-events-none" : ""}`}>
                 <div>
-                  <label className="text-white/40 text-xs mb-1.5 block">Especialista</label>
+                  <label className="text-ink/60 text-xs mb-1.5 block">Especialista</label>
                   <select value={editForm.specialist_id} onChange={(e) => setEditForm({ ...editForm, specialist_id: e.target.value })} className="form-input text-sm" disabled={frozen}>
-                    <option value="" className="bg-slate-900">Seleccionar...</option>
-                    {specialists.map((s) => <option key={s.id} value={String(s.id)} className="bg-slate-900">{fullName(s)} — {s.specialty}</option>)}
+                    <option value="" className="bg-surface">Seleccionar...</option>
+                    {specialists.map((s) => <option key={s.id} value={String(s.id)} className="bg-surface">{fullName(s)} — {s.specialty}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-white/40 text-xs mb-1.5 block">Servicio</label>
+                  <label className="text-ink/60 text-xs mb-1.5 block">Servicio</label>
                   <select value={editForm.service_id} onChange={(e) => setEditForm({ ...editForm, service_id: e.target.value })} className="form-input text-sm" disabled={frozen}>
-                    <option value="" className="bg-slate-900">Seleccionar...</option>
-                    {services.map((s) => <option key={s.id} value={String(s.id)} className="bg-slate-900">{s.name} — {formatCOP(s.price)}</option>)}
+                    <option value="" className="bg-surface">Seleccionar...</option>
+                    {services.map((s) => <option key={s.id} value={String(s.id)} className="bg-surface">{s.name} — {formatCOP(s.price)}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-white/40 text-xs mb-1.5 block">Fecha y hora inicio</label>
+                  <label className="text-ink/60 text-xs mb-1.5 block">Fecha y hora inicio</label>
                   <input type="datetime-local" value={editForm.start_time} onChange={(e) => setEditForm({ ...editForm, start_time: e.target.value })} className="form-input text-sm" disabled={frozen} />
                 </div>
                 <div>
-                  <label className="text-white/40 text-xs mb-1.5 block">Fecha y hora fin</label>
+                  <label className="text-ink/60 text-xs mb-1.5 block">Fecha y hora fin</label>
                   <input type="datetime-local" value={editForm.end_time} onChange={(e) => setEditForm({ ...editForm, end_time: e.target.value })} className="form-input text-sm" disabled={frozen} />
                 </div>
               </div>
 
-              {selected.notes && <div className="glass-card rounded-xl p-4"><p className="text-white/40 text-xs mb-1">Notas</p><p className="text-white/80 text-sm">{selected.notes}</p></div>}
+              {selected.notes && <div className="glass-card rounded-xl p-4"><p className="text-ink/60 text-xs mb-1">Notas</p><p className="text-ink/85 text-sm">{selected.notes}</p></div>}
 
               {!frozen && (
                 <div>
-                  <p className="text-white/40 text-xs mb-2">Cambiar estado</p>
+                  <p className="text-ink/60 text-xs mb-2">Cambiar estado</p>
                   <div className="flex gap-2 flex-wrap">
                     {STATUS_OPTIONS.map((s) => {
                       const isCurrent = selected.status === s;
@@ -588,14 +588,14 @@ export default function CitasPage() {
                       );
                     })}
                   </div>
-                  <p className="text-white/25 text-xs mt-2">
+                  <p className="text-ink/60 text-xs mt-2">
                     {selected.status === "pending" && "Pendiente → solo puede pasar a Aprobada o Cancelada"}
                     {selected.status === "scheduled" && "Aprobada → solo puede pasar a Completada o Cancelada"}
                   </p>
                 </div>
               )}
 
-              <div className="flex gap-3 pt-2 border-t border-white/8">
+              <div className="flex gap-3 pt-2 border-t border-ink/10">
                 <Btn variant="secondary" onClick={() => setSelected(null)}>Cerrar</Btn>
                 {!frozen && <Btn variant="primary" onClick={handleSave} disabled={saving}><Save size={14} />{saving ? "Guardando..." : "Guardar cambios"}</Btn>}
               </div>
@@ -608,17 +608,17 @@ export default function CitasPage() {
       {cancelTarget && (
         <Portal>
           <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <div className="relative z-10 bg-[#0d1526] border border-red-500/20 rounded-2xl shadow-2xl w-full max-w-md flex flex-col">
+            <div className="absolute inset-0 bg-ink/50" />
+            <div className="relative z-10 bg-surface border border-red-500/20 rounded-2xl shadow-2xl w-full max-w-md flex flex-col">
 
               {/* Header */}
-              <div className="flex items-center gap-3 px-6 py-4 border-b border-white/8">
+              <div className="flex items-center gap-3 px-6 py-4 border-b border-ink/10">
                 <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center shrink-0">
                   <AlertTriangle size={18} className="text-red-400" />
                 </div>
                 <div>
-                  <h2 className="text-white font-bold">Cancelar Cita</h2>
-                  <p className="text-white/40 text-xs">Esta acción no se puede deshacer</p>
+                  <h2 className="text-ink font-bold">Cancelar Cita</h2>
+                  <p className="text-ink/60 text-xs">Esta acción no se puede deshacer</p>
                 </div>
               </div>
 
@@ -631,21 +631,21 @@ export default function CitasPage() {
                     onChange={(e) => { setCancelForm({ ...cancelForm, reason: e.target.value }); setCancelError(""); }}
                     className={`form-input text-sm ${cancelError ? "border-red-500/50" : ""}`}
                   >
-                    <option value="" className="bg-slate-900">Seleccionar motivo...</option>
+                    <option value="" className="bg-surface">Seleccionar motivo...</option>
                     {cancelReasons.map((r) => (
-                      <option key={r.code} value={r.code} className="bg-slate-900">{r.label}</option>
+                      <option key={r.code} value={r.code} className="bg-surface">{r.label}</option>
                     ))}
                   </select>
                   {cancelError && <p className="text-red-400 text-xs mt-1">{cancelError}</p>}
                   {cancelForm.reason && (
-                    <p className="text-white/30 text-xs mt-1 italic">
+                    <p className="text-ink/60 text-xs mt-1 italic">
                       {cancelReasons.find((r) => r.code === cancelForm.reason)?.description}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <p className="text-white/50 text-xs mb-1">Notas adicionales <span className="text-white/30">(opcional)</span></p>
+                  <p className="text-ink/65 text-xs mb-1">Notas adicionales <span className="text-ink/60">(opcional)</span></p>
                   <textarea rows={3} value={cancelForm.notes}
                     onChange={(e) => setCancelForm({ ...cancelForm, notes: e.target.value })}
                     placeholder="Detalles adicionales sobre la cancelación..."
@@ -654,7 +654,7 @@ export default function CitasPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex gap-3 px-6 py-4 border-t border-white/8">
+              <div className="flex gap-3 px-6 py-4 border-t border-ink/10">
                 <Btn variant="secondary" onClick={() => setCancelTarget(null)} disabled={savingCancel}>
                   Volver
                 </Btn>
@@ -672,23 +672,23 @@ export default function CitasPage() {
       {historiaAppt && (
         <Portal>
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setHistoriaAppt(null)} />
-            <div className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: "90vh" }}>
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 shrink-0">
+            <div className="absolute inset-0 bg-ink/50" onClick={() => setHistoriaAppt(null)} />
+            <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: "90vh" }}>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center"><FileText size={16} className="text-white" /></div>
-                  <div><h2 className="text-white font-bold">Nueva Historia Clínica</h2><p className="text-white/40 text-xs">{fullName(historiaAppt.patient)} · {formatDate(historiaAppt.start_time)}</p></div>
+                  <div className="w-9 h-9 rounded-xl bg-green-600 flex items-center justify-center"><FileText size={16} className="text-white" /></div>
+                  <div><h2 className="text-ink font-bold">Nueva Historia Clínica</h2><p className="text-ink/60 text-xs">{fullName(historiaAppt.patient)} · {formatDate(historiaAppt.start_time)}</p></div>
                 </div>
-                <button onClick={() => setHistoriaAppt(null)} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center text-xl leading-none transition-all">×</button>
+                <button onClick={() => setHistoriaAppt(null)} className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">×</button>
               </div>
               <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
                 <div>{reqLabel("Diagnóstico")}<textarea rows={3} value={historiaForm.diagnosis} onChange={(e) => setHistoriaForm({ ...historiaForm, diagnosis: e.target.value })} placeholder="Describe el diagnóstico..." className="form-input text-sm resize-none" /></div>
                 <div>{reqLabel("Tratamiento realizado")}<textarea rows={3} value={historiaForm.treatment} onChange={(e) => setHistoriaForm({ ...historiaForm, treatment: e.target.value })} placeholder="Describe el tratamiento aplicado..." className="form-input text-sm resize-none" /></div>
-                <div><p className="text-white/50 text-xs mb-1">Notas del doctor <span className="text-white/30">(opcional)</span></p><textarea rows={2} value={historiaForm.doctor_notes} onChange={(e) => setHistoriaForm({ ...historiaForm, doctor_notes: e.target.value })} className="form-input text-sm resize-none" /></div>
-                <div><p className="text-white/50 text-xs mb-1">Adjuntos <span className="text-white/30">(opcional)</span></p><input type="text" value={historiaForm.attachments} onChange={(e) => setHistoriaForm({ ...historiaForm, attachments: e.target.value })} className="form-input text-sm" /></div>
-                <div><p className="text-white/50 text-xs mb-1">Próxima cita <span className="text-white/30">(opcional)</span></p><input type="datetime-local" value={historiaForm.next_appointment_date} onChange={(e) => setHistoriaForm({ ...historiaForm, next_appointment_date: e.target.value })} className="form-input text-sm" /></div>
+                <div><p className="text-ink/65 text-xs mb-1">Notas del doctor <span className="text-ink/60">(opcional)</span></p><textarea rows={2} value={historiaForm.doctor_notes} onChange={(e) => setHistoriaForm({ ...historiaForm, doctor_notes: e.target.value })} className="form-input text-sm resize-none" /></div>
+                <div><p className="text-ink/65 text-xs mb-1">Adjuntos <span className="text-ink/60">(opcional)</span></p><input type="text" value={historiaForm.attachments} onChange={(e) => setHistoriaForm({ ...historiaForm, attachments: e.target.value })} className="form-input text-sm" /></div>
+                <div><p className="text-ink/65 text-xs mb-1">Próxima cita <span className="text-ink/60">(opcional)</span></p><input type="datetime-local" value={historiaForm.next_appointment_date} onChange={(e) => setHistoriaForm({ ...historiaForm, next_appointment_date: e.target.value })} className="form-input text-sm" /></div>
               </div>
-              <div className="flex gap-3 px-6 py-4 border-t border-white/8 shrink-0">
+              <div className="flex gap-3 px-6 py-4 border-t border-ink/10 shrink-0">
                 <Btn variant="secondary" onClick={() => setHistoriaAppt(null)}>Cancelar</Btn>
                 <Btn variant="primary" onClick={handleCreateHistoria} disabled={savingHistoria}><FileText size={14} />{savingHistoria ? "Guardando..." : "Crear Historia Clínica"}</Btn>
               </div>
@@ -701,24 +701,24 @@ export default function CitasPage() {
       {showNewModal && (
         <Portal>
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setShowNewModal(false)} />
-            <div className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: "90vh" }}>
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 shrink-0">
+            <div className="absolute inset-0 bg-ink/50" onClick={() => setShowNewModal(false)} />
+            <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: "90vh" }}>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"><Plus size={16} className="text-white" /></div>
-                  <div><h2 className="text-white font-bold">Nueva Cita</h2><p className="text-white/40 text-xs">Completa los datos para agendar</p></div>
+                  <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center"><Plus size={16} className="text-white" /></div>
+                  <div><h2 className="text-ink font-bold">Nueva Cita</h2><p className="text-ink/60 text-xs">Completa los datos para agendar</p></div>
                 </div>
-                <button onClick={() => setShowNewModal(false)} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center text-xl leading-none transition-all">×</button>
+                <button onClick={() => setShowNewModal(false)} className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">×</button>
               </div>
               <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
                 <div>
-                  <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Datos del paciente</p>
+                  <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Datos del paciente</p>
                   <div className="mb-3">
                     {reqLabel("Número de Cédula")}
                     <div className="relative">
                       <input type="text" value={newForm.document_number} onChange={(e) => { setNewForm({ ...newForm, document_number: e.target.value }); setPatientStatus("idle"); setPatientLocked(false); }} onBlur={handleCedulaBlur} placeholder="Ej: 1234567890" className="form-input text-sm pr-32" />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        {lookingUp && <Loader2 size={14} className="text-white/40 animate-spin" />}
+                        {lookingUp && <Loader2 size={14} className="text-ink/60 animate-spin" />}
                         {!lookingUp && patientStatus === "found" && <span className="text-green-400 text-xs font-medium">✅ Encontrado</span>}
                         {!lookingUp && patientStatus === "new" && <span className="text-amber-400 text-xs font-medium">⚠️ Nuevo</span>}
                       </div>
@@ -730,25 +730,25 @@ export default function CitasPage() {
                     <div>{reqLabel("Nombre")}<input type="text" value={newForm.first_name} onChange={(e) => setNewForm({ ...newForm, first_name: e.target.value })} disabled={patientLocked} placeholder="Juan" className={inputClass(patientLocked)} /></div>
                     <div>{reqLabel("Apellido")}<input type="text" value={newForm.last_name} onChange={(e) => setNewForm({ ...newForm, last_name: e.target.value })} disabled={patientLocked} placeholder="Pérez" className={inputClass(patientLocked)} /></div>
                     <div>{reqLabel("Teléfono")}<input type="tel" value={newForm.phone} onChange={(e) => setNewForm({ ...newForm, phone: e.target.value })} disabled={patientLocked} placeholder="3001234567" className={inputClass(patientLocked)} /></div>
-                    <div><p className="text-white/50 text-xs mb-1">Email <span className="text-white/30">(opcional)</span></p><input type="email" value={newForm.email} onChange={(e) => setNewForm({ ...newForm, email: e.target.value })} disabled={patientLocked} placeholder="correo@ejemplo.com" className={inputClass(patientLocked)} /></div>
+                    <div><p className="text-ink/65 text-xs mb-1">Email <span className="text-ink/60">(opcional)</span></p><input type="email" value={newForm.email} onChange={(e) => setNewForm({ ...newForm, email: e.target.value })} disabled={patientLocked} placeholder="correo@ejemplo.com" className={inputClass(patientLocked)} /></div>
                   </div>
                 </div>
                 <div>
-                  <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Detalles de la cita</p>
+                  <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Detalles de la cita</p>
                   <div className="grid grid-cols-2 gap-3">
-                    <div>{reqLabel("Especialista")}<select value={newForm.specialist_id} onChange={(e) => setNewForm({ ...newForm, specialist_id: e.target.value })} className="form-input text-sm"><option value="" className="bg-slate-900">Seleccionar...</option>{specialists.map((s) => <option key={s.id} value={s.id} className="bg-slate-900">{fullName(s)} — {s.specialty}</option>)}</select></div>
-                    <div>{reqLabel("Servicio")}<select value={newForm.service_id} onChange={(e) => handleServiceChange(e.target.value)} className="form-input text-sm"><option value="" className="bg-slate-900">Seleccionar...</option>{services.map((s) => <option key={s.id} value={s.id} className="bg-slate-900">{s.name} — {formatCOP(s.price)}</option>)}</select></div>
+                    <div>{reqLabel("Especialista")}<select value={newForm.specialist_id} onChange={(e) => setNewForm({ ...newForm, specialist_id: e.target.value })} className="form-input text-sm"><option value="" className="bg-surface">Seleccionar...</option>{specialists.map((s) => <option key={s.id} value={String(s.id)} className="bg-surface">{fullName(s)} — {s.specialty}</option>)}</select></div>
+                    <div>{reqLabel("Servicio")}<select value={newForm.service_id} onChange={(e) => handleServiceChange(e.target.value)} className="form-input text-sm"><option value="" className="bg-surface">Seleccionar...</option>{services.map((s) => <option key={s.id} value={String(s.id)} className="bg-surface">{s.name} — {formatCOP(s.price)}</option>)}</select></div>
                     <div>{reqLabel("Fecha y hora inicio")}<input type="datetime-local" value={newForm.start_time} onChange={(e) => handleStartTimeChange(e.target.value)} className="form-input text-sm" /></div>
                     <div>
                       {reqLabel("Fecha y hora fin")}
                       <input type="datetime-local" value={newForm.end_time} onChange={(e) => setNewForm({ ...newForm, end_time: e.target.value })} className="form-input text-sm" />
-                      {newForm.service_id && newForm.start_time && <p className="text-white/30 text-xs mt-1">Auto-calculado según duración del servicio</p>}
+                      {newForm.service_id && newForm.start_time && <p className="text-ink/60 text-xs mt-1">Auto-calculado según duración del servicio</p>}
                     </div>
                   </div>
                 </div>
-                <div><p className="text-white/50 text-xs mb-1">Notas <span className="text-white/30">(opcional)</span></p><textarea rows={3} value={newForm.notes} onChange={(e) => setNewForm({ ...newForm, notes: e.target.value })} placeholder="Información adicional..." className="form-input text-sm resize-none" /></div>
+                <div><p className="text-ink/65 text-xs mb-1">Notas <span className="text-ink/60">(opcional)</span></p><textarea rows={3} value={newForm.notes} onChange={(e) => setNewForm({ ...newForm, notes: e.target.value })} placeholder="Información adicional..." className="form-input text-sm resize-none" /></div>
               </div>
-              <div className="flex gap-3 px-6 py-4 border-t border-white/8 shrink-0">
+              <div className="flex gap-3 px-6 py-4 border-t border-ink/10 shrink-0">
                 <Btn variant="secondary" onClick={() => setShowNewModal(false)}>Cancelar</Btn>
                 <Btn variant="primary" onClick={handleCreateAppointment} disabled={creatingAppt}><Plus size={14} />{creatingAppt ? "Creando cita..." : "Crear Cita"}</Btn>
               </div>

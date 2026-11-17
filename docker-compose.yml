@@ -1,0 +1,14 @@
+services:
+  admin:
+    build:
+      context: .
+      args:
+        # URLs del backend Go y del microservicio de inventario.
+        # Se resuelven en build time (ver comentario en el Dockerfile).
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+        NEXT_PUBLIC_INVENTORY_URL: ${NEXT_PUBLIC_INVENTORY_URL:-http://localhost:8081}
+    image: dental-admin:latest
+    container_name: dental-admin
+    ports:
+      - "3001:3001"
+    restart: unless-stopped

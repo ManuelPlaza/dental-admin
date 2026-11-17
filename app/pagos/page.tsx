@@ -88,9 +88,9 @@ function linkStatusBadge(status: PaymentLink["status"]): { label: string; cls: s
   switch (status) {
     case "pending":   return { label: "Pendiente", cls: "bg-amber-500/15 border border-amber-500/30 text-amber-400" };
     case "paid":      return { label: "Pagado",    cls: "bg-green-500/15 border border-green-500/30 text-green-400" };
-    case "expired":   return { label: "Expirado",  cls: "bg-white/5 border border-white/10 text-white/35" };
+    case "expired":   return { label: "Expirado",  cls: "bg-ink/[0.04] border border-ink/[0.12] text-ink/60" };
     case "rejected":  return { label: "Rechazado", cls: "bg-red-500/15 border border-red-500/30 text-red-400" };
-    case "cancelled": return { label: "Cancelado", cls: "bg-white/5 border border-white/10 text-white/35" };
+    case "cancelled": return { label: "Cancelado", cls: "bg-ink/[0.04] border border-ink/[0.12] text-ink/60" };
   }
 }
 
@@ -382,19 +382,19 @@ export default function PagosPage() {
             const pending = bal?.pending_balance ?? (total - paid);
             const si      = paymentStatusInfo(bal, paid, total);
             return (
-              <tr key={p.id} onClick={() => openDetail(p)} className="cursor-pointer group hover:bg-white/5 transition-colors border-b border-white/5">
+              <tr key={p.id} onClick={() => openDetail(p)} className="cursor-pointer group hover:bg-ink/[0.04] transition-colors border-b border-ink/[0.08]">
                 <td className="p-4">
-                  <p className="font-medium text-white group-hover:text-cyan-300 transition-colors">{fullName(p.appointment?.patient)}</p>
-                  <p className="text-white/40 text-xs">{p.appointment?.patient?.document_number}</p>
+                  <p className="font-medium text-ink group-hover:text-cyan-300 transition-colors">{fullName(p.appointment?.patient)}</p>
+                  <p className="text-ink/60 text-xs">{p.appointment?.patient?.document_number}</p>
                 </td>
-                <td className="p-4 text-white/70 font-mono text-sm">{formatCOP(total)}</td>
+                <td className="p-4 text-ink/75 font-mono text-sm">{formatCOP(total)}</td>
                 <td className="p-4 text-cyan-400 font-mono text-sm">{formatCOP(paid)}</td>
                 <td className={`p-4 font-mono text-sm font-semibold ${pending > 0 ? "text-amber-400" : "text-green-400"}`}>
                   {pending > 0 ? formatCOP(pending) : "—"}
                 </td>
-                <td className="p-4 text-white/50 text-xs">{METHOD_LABELS[p.method] || p.method}</td>
+                <td className="p-4 text-ink/65 text-xs">{METHOD_LABELS[p.method] || p.method}</td>
                 <td className="p-4"><span className={`badge ${si.cls}`}>{si.label}</span></td>
-                <td className="p-4 text-white/40 text-xs">{formatDateShort(p.payment_date)}</td>
+                <td className="p-4 text-ink/60 text-xs">{formatDateShort(p.payment_date)}</td>
                 <td className="p-4" onClick={(e) => e.stopPropagation()}>
                   <Btn size="sm" variant="ghost" onClick={() => openDetail(p)}>
                     <ChevronRight size={12} /> Ver
@@ -414,33 +414,33 @@ export default function PagosPage() {
       {detailRecord && (
         <Portal>
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={closeDetail} />
-            <div className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-3xl flex flex-col" style={{ maxHeight: "90vh" }}>
+            <div className="absolute inset-0 bg-ink/50" onClick={closeDetail} />
+            <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-3xl flex flex-col" style={{ maxHeight: "90vh" }}>
 
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 shrink-0">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                    <CreditCard size={16} className="text-white" />
+                  <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                    <CreditCard size={16} className="text-ink" />
                   </div>
                   <div>
-                    <h2 className="text-white font-bold">Detalle de Pago</h2>
-                    <p className="text-white/40 text-xs">{fullName(detailRecord.appointment?.patient)} · Cita #{detailRecord.appointment_id}</p>
+                    <h2 className="text-ink font-bold">Detalle de Pago</h2>
+                    <p className="text-ink/60 text-xs">{fullName(detailRecord.appointment?.patient)} · Cita #{detailRecord.appointment_id}</p>
                   </div>
                 </div>
-                <button onClick={closeDetail} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center text-xl leading-none transition-all">×</button>
+                <button onClick={closeDetail} className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">×</button>
               </div>
 
               <div className="overflow-y-auto flex-1">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-white/8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-ink/10">
 
                   {/* ── Left: payment info ── */}
                   <div className="px-6 py-5 space-y-4">
-                    <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest">Información del pago</p>
-                    <div className="bg-white/3 rounded-xl p-4 border border-white/5">
-                      <p className="text-white/40 text-xs mb-1">Paciente</p>
-                      <p className="text-white font-semibold">{fullName(detailRecord.appointment?.patient)}</p>
-                      <p className="text-white/40 text-xs mt-0.5">{detailRecord.appointment?.patient?.document_number}</p>
+                    <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest">Información del pago</p>
+                    <div className="bg-ink/[0.025] rounded-xl p-4 border border-ink/[0.08]">
+                      <p className="text-ink/60 text-xs mb-1">Paciente</p>
+                      <p className="text-ink font-semibold">{fullName(detailRecord.appointment?.patient)}</p>
+                      <p className="text-ink/60 text-xs mt-0.5">{detailRecord.appointment?.patient?.document_number}</p>
                     </div>
                     <div className="space-y-2.5">
                       {[
@@ -450,29 +450,29 @@ export default function PagosPage() {
                         { label: "Último pago", val: formatDate(detailRecord.payment_date) },
                       ].map(({ label, val }) => (
                         <div key={label} className="flex items-start justify-between gap-3">
-                          <span className="text-white/40 text-xs shrink-0">{label}</span>
-                          <span className="text-white/80 text-xs text-right">{val}</span>
+                          <span className="text-ink/60 text-xs shrink-0">{label}</span>
+                          <span className="text-ink/85 text-xs text-right">{val}</span>
                         </div>
                       ))}
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-white/40 text-xs">Estado</span>
+                        <span className="text-ink/60 text-xs">Estado</span>
                         <span className={`badge ${detailSI.cls}`}>{detailSI.label}</span>
                       </div>
                     </div>
 
                     {/* Balance */}
-                    <div className="bg-white/3 rounded-xl p-4 border border-white/5">
+                    <div className="bg-ink/[0.025] rounded-xl p-4 border border-ink/[0.08]">
                       <div className="grid grid-cols-3 gap-2 text-center">
                         <div>
-                          <p className="text-white/40 text-[10px] mb-0.5">Valor total</p>
-                          <p className="text-white font-semibold text-sm font-mono">{formatCOP(detailTotal)}</p>
+                          <p className="text-ink/60 text-[10px] mb-0.5">Valor total</p>
+                          <p className="text-ink font-semibold text-sm font-mono">{formatCOP(detailTotal)}</p>
                         </div>
                         <div>
-                          <p className="text-white/40 text-[10px] mb-0.5">Pagado</p>
+                          <p className="text-ink/60 text-[10px] mb-0.5">Pagado</p>
                           <p className="text-cyan-400 font-semibold text-sm font-mono">{formatCOP(detailPaid)}</p>
                         </div>
                         <div>
-                          <p className="text-white/40 text-[10px] mb-0.5">Saldo</p>
+                          <p className="text-ink/60 text-[10px] mb-0.5">Saldo</p>
                           <p className={`font-semibold text-sm font-mono ${detailPending > 0 ? "text-amber-400" : "text-green-400"}`}>
                             {detailPending > 0 ? formatCOP(detailPending) : "—"}
                           </p>
@@ -491,15 +491,15 @@ export default function PagosPage() {
 
                     {/* Register payment form */}
                     {showPayForm && (
-                      <div className="bg-white/3 rounded-xl p-4 border border-white/8 space-y-3">
+                      <div className="bg-ink/[0.025] rounded-xl p-4 border border-ink/10 space-y-3">
                         <div>
-                          <p className="text-white/50 text-xs mb-1">Monto <span className="text-red-400">*</span></p>
+                          <p className="text-ink/65 text-xs mb-1">Monto <span className="text-red-400">*</span></p>
                           <input type="number" min="0" value={payForm.amount}
                             onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })}
                             placeholder="Ej: 90000" className="form-input text-sm" />
                         </div>
                         <div>
-                          <p className="text-white/50 text-xs mb-2">Método de pago <span className="text-red-400">*</span></p>
+                          <p className="text-ink/65 text-xs mb-2">Método de pago <span className="text-red-400">*</span></p>
                           <div className="flex flex-col gap-2">
                             {[
                               { value: "cash", label: "💵 Efectivo" },
@@ -507,10 +507,10 @@ export default function PagosPage() {
                               { value: "loyalty_points", label: "⭐ Puntos de fidelidad" },
                             ].map(({ value, label }) => (
                               <label key={value} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border cursor-pointer transition-all
-                                ${payForm.method === value ? "bg-cyan-500/10 border-cyan-500/40 text-white" : "bg-white/3 border-white/8 text-white/50 hover:border-white/20"}`}>
+                                ${payForm.method === value ? "bg-cyan-500/10 border-cyan-500/40 text-ink" : "bg-ink/[0.025] border-ink/10 text-ink/65 hover:border-ink/20"}`}>
                                 <input type="radio" name="payment_method" value={value} checked={payForm.method === value}
                                   onChange={() => setPayForm({ ...payForm, method: value, reference_code: "" })} className="sr-only" />
-                                <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${payForm.method === value ? "border-cyan-400" : "border-white/20"}`}>
+                                <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${payForm.method === value ? "border-cyan-400" : "border-ink/20"}`}>
                                   {payForm.method === value && <span className="w-2 h-2 rounded-full bg-cyan-400" />}
                                 </span>
                                 <span className="text-sm">{label}</span>
@@ -520,7 +520,7 @@ export default function PagosPage() {
                         </div>
                         {payForm.method === "nequi" && (
                           <div>
-                            <p className="text-white/50 text-xs mb-1">Código de referencia <span className="text-red-400">*</span></p>
+                            <p className="text-ink/65 text-xs mb-1">Código de referencia <span className="text-red-400">*</span></p>
                             <input type="text" autoComplete="off" value={payForm.reference_code}
                               onChange={(e) => setPayForm({ ...payForm, reference_code: e.target.value })}
                               placeholder="Ej: NEQ-123456" className="form-input text-sm" />
@@ -541,17 +541,17 @@ export default function PagosPage() {
 
                     {/* Historial de pagos */}
                     <div>
-                      <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest mb-4">Historial de pagos</p>
+                      <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-4">Historial de pagos</p>
                       {historyLoading ? <Skeleton className="h-20 w-full" /> : (
                         <div className="space-y-2">
-                          {history.length === 0 && <p className="text-white/25 text-xs">Sin pagos registrados</p>}
+                          {history.length === 0 && <p className="text-ink/60 text-xs">Sin pagos registrados</p>}
                           {history.map((entry) => (
-                            <div key={entry.id} className="bg-white/3 border border-white/5 rounded-xl p-3">
+                            <div key={entry.id} className="bg-ink/[0.025] border border-ink/[0.08] rounded-xl p-3">
                               <div className="flex justify-between items-center">
-                                <span className="text-white font-mono text-sm">{formatCOP(entry.amount)}</span>
-                                <span className="text-white/30 text-[10px]">{formatDateShort(entry.payment_date)}</span>
+                                <span className="text-ink font-mono text-sm">{formatCOP(entry.amount)}</span>
+                                <span className="text-ink/60 text-[10px]">{formatDateShort(entry.payment_date)}</span>
                               </div>
-                              <p className="text-white/35 text-xs mt-0.5">{METHOD_LABELS[entry.method] || entry.method}</p>
+                              <p className="text-ink/60 text-xs mt-0.5">{METHOD_LABELS[entry.method] || entry.method}</p>
                             </div>
                           ))}
                         </div>
@@ -561,7 +561,7 @@ export default function PagosPage() {
                     {/* ── Link de Pago Nequi ── */}
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <p className="text-white/30 text-[11px] font-semibold uppercase tracking-widest">Link de Pago Nequi</p>
+                        <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest">Link de Pago Nequi</p>
                         {canGenerateLink && !showNequiForm && (
                           <Btn variant="secondary" size="sm" onClick={() => {
                             setNequiForm({
@@ -577,18 +577,18 @@ export default function PagosPage() {
 
                       {/* Nequi form */}
                       {showNequiForm && (
-                        <div className="bg-white/3 rounded-xl p-4 border border-white/8 space-y-3 mb-3">
+                        <div className="bg-ink/[0.025] rounded-xl p-4 border border-ink/10 space-y-3 mb-3">
                           <div>
-                            <p className="text-white/50 text-xs mb-1">Monto <span className="text-red-400">*</span></p>
+                            <p className="text-ink/65 text-xs mb-1">Monto <span className="text-red-400">*</span></p>
                             <input type="number" min="0" value={nequiForm.amount}
                               onChange={(e) => setNequiForm({ ...nequiForm, amount: e.target.value })}
                               placeholder="Ej: 90000" className="form-input text-sm" />
                             {detailPending > 0 && (
-                              <p className="text-white/25 text-[10px] mt-1">Saldo pendiente: {formatCOP(detailPending)}</p>
+                              <p className="text-ink/60 text-[10px] mt-1">Saldo pendiente: {formatCOP(detailPending)}</p>
                             )}
                           </div>
                           <div>
-                            <p className="text-white/50 text-xs mb-1">Número de celular <span className="text-red-400">*</span></p>
+                            <p className="text-ink/65 text-xs mb-1">Número de celular <span className="text-red-400">*</span></p>
                             <input type="text" autoComplete="off" value={nequiForm.phone}
                               onChange={(e) => setNequiForm({ ...nequiForm, phone: e.target.value })}
                               placeholder="Ej: 3001234567" className="form-input text-sm" />
@@ -612,17 +612,17 @@ export default function PagosPage() {
                             </span>
                           </div>
                           <div>
-                            <p className="text-white/40 text-[10px] mb-1">URL de pago</p>
+                            <p className="text-ink/60 text-[10px] mb-1">URL de pago</p>
                             <div className="flex items-center gap-2">
-                              <code className="text-white/60 text-xs bg-white/5 rounded-lg px-2 py-1.5 flex-1 truncate">{activeLink.payment_url}</code>
+                              <code className="text-ink/70 text-xs bg-ink/[0.04] rounded-lg px-2 py-1.5 flex-1 truncate">{activeLink.payment_url}</code>
                               <button onClick={handleCopy}
-                                className="shrink-0 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all">
+                                className="shrink-0 p-1.5 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink transition-all">
                                 {copied ? <Check size={13} className="text-green-400" /> : <Copy size={13} />}
                               </button>
                             </div>
                           </div>
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-white/40">{formatCOP(activeLink.amount)} · {activeLink.phone_number}</span>
+                            <span className="text-ink/60">{formatCOP(activeLink.amount)} · {activeLink.phone_number}</span>
                             <Btn variant="danger" size="sm" onClick={handleCancelLink} disabled={cancellingLink}>
                               <X size={11} />{cancellingLink ? "Cancelando..." : "Cancelar link"}
                             </Btn>
@@ -638,7 +638,7 @@ export default function PagosPage() {
                           </div>
                           <div>
                             <p className="text-green-400 font-semibold text-sm">¡Pago recibido!</p>
-                            <p className="text-white/40 text-xs">{formatCOP(activeLink.amount)} via Nequi</p>
+                            <p className="text-ink/60 text-xs">{formatCOP(activeLink.amount)} via Nequi</p>
                           </div>
                         </div>
                       )}
@@ -649,8 +649,8 @@ export default function PagosPage() {
                           {nequiLinks.filter((l) => l.token !== activeLink?.token || activeLink.status !== "pending").map((l) => {
                             const { label, cls } = linkStatusBadge(l.status);
                             return (
-                              <div key={l.id} className="flex items-center justify-between px-3 py-2 bg-white/3 border border-white/5 rounded-xl">
-                                <span className="text-white/60 font-mono text-xs">{formatCOP(l.amount)}</span>
+                              <div key={l.id} className="flex items-center justify-between px-3 py-2 bg-ink/[0.025] border border-ink/[0.08] rounded-xl">
+                                <span className="text-ink/70 font-mono text-xs">{formatCOP(l.amount)}</span>
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${cls}`}>{label}</span>
                               </div>
                             );
@@ -659,14 +659,14 @@ export default function PagosPage() {
                       )}
 
                       {!nequiLinksLoading && nequiLinks.length === 0 && !showNequiForm && (
-                        <p className="text-white/25 text-xs">Sin links generados</p>
+                        <p className="text-ink/60 text-xs">Sin links generados</p>
                       )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end px-6 py-4 border-t border-white/8 shrink-0">
+              <div className="flex justify-end px-6 py-4 border-t border-ink/10 shrink-0">
                 <Btn variant="secondary" onClick={closeDetail}>Cerrar</Btn>
               </div>
             </div>

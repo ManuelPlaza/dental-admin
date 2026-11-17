@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Search, X } from "lucide-react";
 
 // ── PAGE HEADER ──────────────────────────────────────────────────────────────
@@ -9,12 +10,12 @@ export function PageHeader({ title, subtitle, action }: {
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-white">{title}</h1>
-        {subtitle && <p className="text-white/50 text-sm mt-1">{subtitle}</p>}
+    <div className="flex flex-wrap items-end justify-between gap-4 mb-6 lg:mb-8">
+      <div className="min-w-0">
+        <h1 className="text-2xl lg:text-[1.75rem] font-semibold tracking-tight text-ink leading-tight">{title}</h1>
+        {subtitle && <p className="text-ink/65 text-sm mt-1">{subtitle}</p>}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
+      {action && <div className="shrink-0 max-sm:w-full [&>*]:max-sm:w-full">{action}</div>}
     </div>
   );
 }
@@ -28,13 +29,13 @@ export function StatCard({ label, value, sub, icon, color }: {
   color: string;
 }) {
   return (
-    <div className="glass-card rounded-2xl p-5 flex items-center justify-between gap-4">
+    <div className="glass-card rounded-xl p-4 sm:p-5 flex items-center justify-between gap-4">
       <div className="min-w-0">
-        <p className="text-white/50 text-xs font-medium uppercase tracking-wider truncate">{label}</p>
-        <p className="text-white text-2xl font-bold mt-1 leading-tight">{value}</p>
-        {sub && <p className="text-white/40 text-xs mt-0.5">{sub}</p>}
+        <p className="text-ink/65 text-xs font-medium truncate">{label}</p>
+        <p className="text-ink text-2xl font-semibold mt-1 leading-tight tabular">{value}</p>
+        {sub && <p className="text-ink/60 text-xs mt-0.5">{sub}</p>}
       </div>
-      <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center shadow-lg shrink-0`}
+      <div className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center shrink-0`}
         aria-hidden="true">
         {icon}
       </div>
@@ -50,7 +51,7 @@ export function SearchBar({ value, onChange, placeholder }: {
 }) {
   return (
     <div className="relative">
-      <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" aria-hidden="true" />
+      <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/60 pointer-events-none" aria-hidden="true" />
       <input
         type="search"
         value={value}
@@ -58,14 +59,14 @@ export function SearchBar({ value, onChange, placeholder }: {
         placeholder={placeholder || "Buscar..."}
         aria-label={placeholder || "Buscar"}
         maxLength={100}
-        className="form-input pl-9 pr-9 text-sm"
+        className="form-input pl-10 pr-10 text-sm"
       />
       {value && (
         <button
           type="button"
           onClick={() => onChange("")}
           aria-label="Limpiar búsqueda"
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-ink/60 hover:text-ink hover:bg-ink/[0.06] transition-colors"
         >
           <X size={14} aria-hidden="true" />
         </button>
@@ -81,13 +82,13 @@ export function Table({ headers, children, empty }: {
   empty?: boolean;
 }) {
   return (
-    <div className="glass-card rounded-2xl overflow-hidden">
+    <div className="glass-card rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[600px]">
           <thead>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-line bg-ink/[0.025]">
               {headers.map((h) => (
-                <th key={h} scope="col" className="text-left px-5 py-3.5 text-white/40 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
+                <th key={h} scope="col" className="text-left px-5 py-3 text-ink/65 text-xs font-semibold whitespace-nowrap">
                   {h}
                 </th>
               ))}
@@ -97,7 +98,7 @@ export function Table({ headers, children, empty }: {
         </table>
       </div>
       {empty && (
-        <div className="py-16 text-center text-white/30 text-sm">
+        <div className="py-16 text-center text-ink/60 text-sm">
           No se encontraron registros
         </div>
       )}
@@ -113,8 +114,8 @@ export function TR({ children, onClick }: { children: React.ReactNode; onClick?:
       onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(); } : undefined}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={`border-b border-white/5 last:border-0 transition-colors
-        ${onClick ? "cursor-pointer hover:bg-white/[0.03] focus-visible:bg-white/[0.05] focus-visible:outline-none" : ""}`}
+      className={`border-b border-line last:border-0 transition-colors
+        ${onClick ? "cursor-pointer hover:bg-accent/[0.05] focus-visible:bg-accent/[0.08] focus-visible:outline-none" : ""}`}
     >
       {children}
     </tr>
@@ -124,7 +125,7 @@ export function TR({ children, onClick }: { children: React.ReactNode; onClick?:
 // ── TABLE CELL ───────────────────────────────────────────────────────────────
 export function TD({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <td className={`px-5 py-4 text-white/80 text-sm ${className ?? ""}`}>
+    <td className={`px-5 py-3.5 text-ink/85 text-sm ${className ?? ""}`}>
       {children}
     </td>
   );
@@ -137,22 +138,24 @@ export function FilterTabs({ options, value, onChange }: {
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-1 bg-white/5 rounded-xl p-1" role="tablist">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          role="tab"
-          aria-selected={value === opt.value}
-          onClick={() => onChange(opt.value)}
-          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-500 ${
-            value === opt.value
-              ? "bg-cyan-500/20 text-cyan-400 shadow-sm"
-              : "text-white/50 hover:text-white hover:bg-white/5"
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
+    <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
+      <div className="inline-flex gap-1 bg-ink/[0.05] rounded-xl p-1" role="tablist">
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            role="tab"
+            aria-selected={value === opt.value}
+            onClick={() => onChange(opt.value)}
+            className={`px-4 min-h-[36px] rounded-lg text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${
+              value === opt.value
+                ? "bg-surface text-accent-strong shadow-card"
+                : "text-ink/70 hover:text-ink hover:bg-ink/[0.04]"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -165,33 +168,39 @@ export function Modal({ isOpen, onClose, title, children, wide }: {
   children: React.ReactNode;
   wide?: boolean;
 }) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-ink/50"
         onClick={onClose}
         aria-hidden="true"
       />
-      {/* Panel */}
-      <div className={`relative bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto ${wide ? "max-w-3xl" : "max-w-lg"}`}>
-        <div className="flex items-center justify-between p-6 border-b border-white/8">
-          <h2 id="modal-title" className="text-white font-bold text-lg leading-tight">{title}</h2>
+      {/* En celular sube desde abajo como una hoja; en escritorio va centrado */}
+      <div className={`relative bg-surface sm:border border-line rounded-t-2xl sm:rounded-2xl shadow-pop w-full max-h-[92vh] sm:max-h-[90vh] overflow-y-auto ${wide ? "sm:max-w-3xl" : "sm:max-w-lg"}`}>
+        <div className="sticky top-0 z-10 bg-surface flex items-center justify-between gap-4 px-5 sm:px-6 py-4 border-b border-line">
+          <h2 id="modal-title" className="text-ink font-semibold text-lg leading-tight">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="text-white/40 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-xl leading-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-500"
+            className="text-ink/60 hover:text-ink transition-colors w-10 h-10 -mr-2 flex items-center justify-center rounded-lg hover:bg-ink/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
           >
-            &times;
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
-        <div className="p-6">{children}</div>
+        <div className="p-5 sm:p-6">{children}</div>
       </div>
     </div>
   );
@@ -211,8 +220,8 @@ export function Skeleton({ className }: { className?: string }) {
 // ── EMPTY STATE ──────────────────────────────────────────────────────────────
 export function EmptyState({ icon, message }: { icon: React.ReactNode; message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 gap-4 text-white/30">
-      <div className="text-white/20" aria-hidden="true">{icon}</div>
+    <div className="flex flex-col items-center justify-center py-20 gap-4 text-ink/60">
+      <div className="text-ink/40" aria-hidden="true">{icon}</div>
       <p className="text-sm">{message}</p>
     </div>
   );
@@ -231,13 +240,13 @@ export function Btn({
   type?: "button" | "submit";
   loading?: boolean;
 }) {
-  const base = "inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
-  const sizes = { sm: "px-3 py-1.5 text-xs", md: "px-5 py-2.5 text-sm" };
+  const base = "inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-colors active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
+  const sizes = { sm: "px-3 min-h-[36px] text-xs", md: "px-5 min-h-[44px] text-sm" };
   const variants = {
-    primary:   "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/20 focus-visible:outline-cyan-500",
-    secondary: "bg-white/[0.08] hover:bg-white/[0.12] text-white border border-white/10 focus-visible:outline-white",
-    danger:    "bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/20 focus-visible:outline-red-500",
-    ghost:     "text-white/60 hover:text-white hover:bg-white/5 focus-visible:outline-white",
+    primary:   "bg-accent hover:bg-accent-strong text-white shadow-card focus-visible:outline-accent",
+    secondary: "bg-surface hover:bg-ink/[0.04] text-ink border border-line focus-visible:outline-accent",
+    danger:    "bg-red-600/10 hover:bg-red-600/15 text-red-700 border border-red-600/20 focus-visible:outline-red-600",
+    ghost:     "text-ink/70 hover:text-ink hover:bg-ink/[0.05] focus-visible:outline-accent",
   };
   return (
     <button

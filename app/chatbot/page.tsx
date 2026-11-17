@@ -59,12 +59,12 @@ function Field({ icon, label, hint, children }: {
 }) {
   return (
     <div>
-      <label className="flex items-center gap-2 text-white/50 text-xs mb-1.5">
-        <span className="text-white/25">{icon}</span>
+      <label className="flex items-center gap-2 text-ink/65 text-xs mb-1.5">
+        <span className="text-ink/60">{icon}</span>
         {label}
       </label>
       {children}
-      {hint && <p className="text-white/25 text-xs mt-1">{hint}</p>}
+      {hint && <p className="text-ink/60 text-xs mt-1">{hint}</p>}
     </div>
   );
 }
@@ -123,7 +123,7 @@ export default function ChatbotPage() {
       {/* ── Info banner ── */}
       <div className="flex items-start gap-3 bg-cyan-500/8 border border-cyan-500/20 rounded-2xl px-5 py-4 mb-8">
         <Info size={16} className="text-cyan-400 shrink-0 mt-0.5" />
-        <p className="text-white/60 text-sm leading-relaxed">
+        <p className="text-ink/70 text-sm leading-relaxed">
           Los cambios se aplican <span className="text-cyan-400 font-medium">de inmediato</span> — el próximo
           mensaje al chatbot ya usará la nueva información sin necesidad de redesplegar nada.
         </p>
@@ -136,8 +136,8 @@ export default function ChatbotPage() {
           <div className="space-y-5">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="space-y-2">
-                <div className="h-3 w-32 bg-white/5 rounded-full animate-pulse" />
-                <div className="h-10 bg-white/5 rounded-xl animate-pulse" />
+                <div className="h-3 w-32 bg-ink/[0.04] rounded-full animate-pulse" />
+                <div className="h-10 bg-ink/[0.04] rounded-xl animate-pulse" />
               </div>
             ))}
           </div>
@@ -145,7 +145,7 @@ export default function ChatbotPage() {
           <>
             {/* ── Datos de contacto ── */}
             <div className="glass-card rounded-2xl p-6 space-y-5">
-              <h2 className="text-white/70 text-sm font-semibold uppercase tracking-wider flex items-center gap-2">
+              <h2 className="text-ink/75 text-sm font-semibold uppercase tracking-wider flex items-center gap-2">
                 <Phone size={14} className="text-cyan-400" /> Datos de contacto
               </h2>
 
@@ -208,10 +208,10 @@ export default function ChatbotPage() {
             {/* ── Información adicional ── */}
             <div className="glass-card rounded-2xl p-6 space-y-4">
               <div>
-                <h2 className="text-white/70 text-sm font-semibold uppercase tracking-wider flex items-center gap-2 mb-1">
+                <h2 className="text-ink/75 text-sm font-semibold uppercase tracking-wider flex items-center gap-2 mb-1">
                   <FileText size={14} className="text-cyan-400" /> Información adicional / FAQs
                 </h2>
-                <p className="text-white/35 text-xs">
+                <p className="text-ink/60 text-xs">
                   Escribe aquí todo lo que quieras que el bot sepa: formas de pago, restricciones, preguntas frecuentes,
                   políticas del laboratorio, etc. El chatbot lo leerá textualmente como parte de su contexto.
                 </p>

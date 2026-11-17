@@ -88,20 +88,20 @@ export default function HistoriasPage() {
             return (
               <TR key={r.id}>
                 <TD>
-                  <p className="font-medium text-white">{fullName(patient)}</p>
-                  <p className="text-white/40 text-xs">{patient?.document_number}</p>
+                  <p className="font-medium text-ink">{fullName(patient)}</p>
+                  <p className="text-ink/60 text-xs">{patient?.document_number}</p>
                 </TD>
-                <TD className="text-white/70">{fullName(specialist) || "—"}</TD>
+                <TD className="text-ink/75">{fullName(specialist) || "—"}</TD>
                 <TD>
-                  <p className="text-white/80 text-sm max-w-[180px] truncate" title={r.diagnosis}>{r.diagnosis}</p>
-                </TD>
-                <TD>
-                  <p className="text-white/60 text-sm max-w-[180px] truncate" title={r.treatment}>{r.treatment}</p>
+                  <p className="text-ink/85 text-sm max-w-[180px] truncate" title={r.diagnosis}>{r.diagnosis}</p>
                 </TD>
                 <TD>
-                  <p className="text-white/50 text-xs max-w-[140px] truncate" title={r.doctor_notes}>{r.doctor_notes || "—"}</p>
+                  <p className="text-ink/70 text-sm max-w-[180px] truncate" title={r.treatment}>{r.treatment}</p>
                 </TD>
-                <TD className="text-white/50 text-xs whitespace-nowrap">{formatDateShort(r.created_at)}</TD>
+                <TD>
+                  <p className="text-ink/65 text-xs max-w-[140px] truncate" title={r.doctor_notes}>{r.doctor_notes || "—"}</p>
+                </TD>
+                <TD className="text-ink/65 text-xs whitespace-nowrap">{formatDateShort(r.created_at)}</TD>
                 <TD>
                   <Btn
                     variant="secondary"

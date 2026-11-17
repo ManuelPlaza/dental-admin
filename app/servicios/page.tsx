@@ -152,21 +152,21 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
   return (
     <Portal>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
-        <div className="relative z-10 bg-[#0d1526] border border-white/10 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col" style={{ maxHeight: "90vh" }}>
+        <div className="absolute inset-0 bg-ink/50" onClick={onClose} />
+        <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-lg flex flex-col" style={{ maxHeight: "90vh" }}>
 
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 shrink-0">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mode === "create" ? "bg-gradient-to-br from-cyan-500 to-blue-600" : "bg-gradient-to-br from-violet-500 to-purple-600"}`}>
-                {mode === "create" ? <Plus size={16} className="text-white" /> : <Edit2 size={15} className="text-white" />}
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mode === "create" ? "bg-accent" : "bg-navy"}`}>
+                {mode === "create" ? <Plus size={16} className="text-ink" /> : <Edit2 size={15} className="text-ink" />}
               </div>
               <div>
-                <h2 className="text-white font-bold">{mode === "create" ? "Nuevo Servicio" : "Editar Servicio"}</h2>
-                <p className="text-white/40 text-xs">{mode === "create" ? "Completa los datos del servicio" : initial?.name}</p>
+                <h2 className="text-ink font-bold">{mode === "create" ? "Nuevo Servicio" : "Editar Servicio"}</h2>
+                <p className="text-ink/60 text-xs">{mode === "create" ? "Completa los datos del servicio" : initial?.name}</p>
               </div>
             </div>
-            <button onClick={onClose} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center text-xl leading-none transition-all">×</button>
+            <button onClick={onClose} className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">×</button>
           </div>
 
           {/* Body */}
@@ -174,29 +174,29 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
 
             {/* Nombre */}
             <div>
-              <p className="text-white/50 text-xs mb-1">Nombre <span className="text-red-400">*</span></p>
+              <p className="text-ink/65 text-xs mb-1">Nombre <span className="text-red-400">*</span></p>
               <input type="text" placeholder="Ej: Limpieza dental" className={`form-input text-sm ${errors.name ? "border-red-500/50" : ""}`} {...field("name")} />
               {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
             </div>
 
             {/* Descripción */}
             <div>
-              <p className="text-white/50 text-xs mb-1">Descripción <span className="text-white/25">(opcional)</span></p>
+              <p className="text-ink/65 text-xs mb-1">Descripción <span className="text-ink/60">(opcional)</span></p>
               <textarea rows={3} placeholder="Describe el servicio..." className="form-input text-sm resize-none" {...field("description")} />
             </div>
 
             {/* Precio + Duración */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-white/50 text-xs mb-1">Precio COP <span className="text-red-400">*</span></p>
+                <p className="text-ink/65 text-xs mb-1">Precio COP <span className="text-red-400">*</span></p>
                 <input type="number" min="0" placeholder="Ej: 120000" className={`form-input text-sm font-mono ${errors.price ? "border-red-500/50" : ""}`} {...field("price")} />
                 {errors.price && <p className="text-red-400 text-xs mt-1">{errors.price}</p>}
                 {form.price && Number(form.price) > 0 && (
-                  <p className="text-white/25 text-xs mt-1">{formatCOP(Number(form.price))}</p>
+                  <p className="text-ink/60 text-xs mt-1">{formatCOP(Number(form.price))}</p>
                 )}
               </div>
               <div>
-                <p className="text-white/50 text-xs mb-1">Duración (min) <span className="text-red-400">*</span></p>
+                <p className="text-ink/65 text-xs mb-1">Duración (min) <span className="text-red-400">*</span></p>
                 <input type="number" min="1" placeholder="60" className={`form-input text-sm ${errors.duration_minutes ? "border-red-500/50" : ""}`} {...field("duration_minutes")} />
                 {errors.duration_minutes && <p className="text-red-400 text-xs mt-1">{errors.duration_minutes}</p>}
               </div>
@@ -206,14 +206,14 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
             <div className={`flex items-center justify-between py-3.5 px-4 rounded-xl border transition-colors
               ${showOnWeb
                 ? "bg-cyan-500/8 border-cyan-500/25"
-                : "bg-white/5 border-white/10"}`}>
+                : "bg-ink/[0.04] border-ink/[0.12]"}`}>
               <div className="flex items-center gap-3">
                 {showOnWeb
                   ? <Globe size={16} className="text-cyan-400 shrink-0" />
-                  : <GlobeLock size={16} className="text-white/35 shrink-0" />}
+                  : <GlobeLock size={16} className="text-ink/60 shrink-0" />}
                 <div>
-                  <p className="text-white text-sm font-semibold">Mostrar en landing público</p>
-                  <p className={`text-xs mt-0.5 ${showOnWeb ? "text-cyan-400/70" : "text-white/35"}`}>
+                  <p className="text-ink text-sm font-semibold">Mostrar en landing público</p>
+                  <p className={`text-xs mt-0.5 ${showOnWeb ? "text-cyan-400/70" : "text-ink/60"}`}>
                     {showOnWeb ? "Visible para el público en la web" : "Oculto — solo interno"}
                   </p>
                 </div>
@@ -224,7 +224,7 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
                 aria-checked={showOnWeb}
                 onClick={() => setShowOnWeb((v) => !v)}
                 className={`relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 focus:outline-none
-                  ${showOnWeb ? "bg-cyan-500" : "bg-white/15"}`}
+                  ${showOnWeb ? "bg-cyan-500" : "bg-ink/[0.08]"}`}
               >
                 <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200
                   ${showOnWeb ? "translate-x-5" : "translate-x-0"}`}
@@ -234,7 +234,7 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
 
             {/* Categoría */}
             <div>
-              <p className="text-white/50 text-xs mb-1">Categoría <span className="text-white/25">(opcional)</span></p>
+              <p className="text-ink/65 text-xs mb-1">Categoría <span className="text-ink/60">(opcional)</span></p>
               <select
                 value={form.category_id}
                 onChange={(e) => {
@@ -243,16 +243,16 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
                 }}
                 className="form-input text-sm w-full"
               >
-                <option value="" className="bg-slate-900">Sin categoría</option>
+                <option value="" className="bg-surface">Sin categoría</option>
                 {categories.map((cat) => (
-                  <option key={cat.id} value={String(cat.id)} className="bg-slate-900">{cat.name}</option>
+                  <option key={cat.id} value={String(cat.id)} className="bg-surface">{cat.name}</option>
                 ))}
               </select>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 px-6 py-4 border-t border-white/8 shrink-0">
+          <div className="flex gap-3 px-6 py-4 border-t border-ink/10 shrink-0">
             <Btn variant="secondary" onClick={onClose} disabled={saving}>Cancelar</Btn>
             <Btn variant="primary" onClick={handleSave} disabled={saving}>
               <Save size={14} />{saving ? "Guardando..." : mode === "create" ? "Crear Servicio" : "Guardar cambios"}
@@ -370,14 +370,14 @@ export default function ServiciosPage() {
             <TR key={s.id} onClick={() => setEditTarget(s)}>
               <TD>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${s.is_active ? "bg-green-400" : "bg-white/20"}`} />
-                  <span className="font-medium text-white">{s.name}</span>
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${s.is_active ? "bg-green-400" : "bg-ink/[0.1]"}`} />
+                  <span className="font-medium text-ink">{s.name}</span>
                 </div>
               </TD>
-              <TD className="text-white/60 text-sm">{getCategoryName(s.category_id)}</TD>
-              <TD className="text-white/50 text-xs max-w-[220px] truncate">{s.description || "—"}</TD>
+              <TD className="text-ink/70 text-sm">{getCategoryName(s.category_id)}</TD>
+              <TD className="text-ink/65 text-xs max-w-[220px] truncate">{s.description || "—"}</TD>
               <TD className="text-cyan-400 font-semibold font-mono text-sm">{formatCOP(s.price)}</TD>
-              <TD className="text-white/60 text-sm">{s.duration_minutes} min</TD>
+              <TD className="text-ink/70 text-sm">{s.duration_minutes} min</TD>
               <TD>
                 <span className={`badge ${s.is_active ? "badge-completed" : "badge-cancelled"}`}>
                   {s.is_active ? "Activo" : "Inactivo"}
@@ -389,7 +389,7 @@ export default function ServiciosPage() {
                     <Globe size={11} /> Visible
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-white/30">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-ink/[0.04] border border-ink/[0.12] text-ink/60">
                     <GlobeLock size={11} /> Oculto
                   </span>
                 )}
@@ -405,7 +405,7 @@ export default function ServiciosPage() {
                   />
                   <div className={`w-9 h-5 rounded-full transition-all relative
                     ${togglingId === s.id ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                    ${s.is_active ? "bg-cyan-500" : "bg-white/10"}
+                    ${s.is_active ? "bg-cyan-500" : "bg-ink/[0.06]"}
                     peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all`}
                   />
                 </label></div>
@@ -422,32 +422,32 @@ export default function ServiciosPage() {
       {/* Paginador */}
       {!loading && filtered.length > 0 && (
         <div className="flex items-center justify-between mt-4 px-2 flex-wrap gap-3">
-          <div className="flex items-center gap-2 text-white/50 text-sm">
+          <div className="flex items-center gap-2 text-ink/65 text-sm">
             <span>Mostrar</span>
             <select
               value={rowsPerPage}
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
-              className="bg-[#1a2235] border border-white/10 rounded-lg px-2 py-1 text-white text-sm"
+              className="bg-[#1a2235] border border-ink/[0.12] rounded-lg px-2 py-1 text-ink text-sm"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
             </select>
-            <span>por página — <span className="text-white/70">{filtered.length}</span> total</span>
+            <span>por página — <span className="text-ink/75">{filtered.length}</span> total</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-white/50">
+          <div className="flex items-center gap-2 text-sm text-ink/65">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition"
+              className="px-3 py-1 rounded-lg border border-ink/[0.12] hover:bg-ink/[0.04] disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
               ← Anterior
             </button>
-            <span className="text-white/70">Página {currentPage} de {totalPages || 1}</span>
+            <span className="text-ink/75">Página {currentPage} de {totalPages || 1}</span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages || totalPages === 0}
-              className="px-3 py-1 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition"
+              className="px-3 py-1 rounded-lg border border-ink/[0.12] hover:bg-ink/[0.04] disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
               Siguiente →
             </button>

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Sidebar from "./Sidebar";
 import { useAuth } from "@/lib/auth";
 
@@ -17,16 +18,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-[#0a0f1e] items-center justify-center" aria-busy="true">
-        <div className="flex flex-col items-center gap-4">
-          {/* Animated logo */}
-          <div className="relative">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white text-base shadow-xl shadow-cyan-500/25 animate-pulse">
-              JC
-            </div>
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-blue-600/30 blur-md animate-pulse" />
-          </div>
-          <p className="text-white/50 text-sm">Verificando sesión...</p>
+      <div className="flex min-h-screen bg-page items-center justify-center" aria-busy="true">
+        <div className="flex flex-col items-center gap-5">
+          <Image src="/logo-dentaljc.png" alt="Dental JC" width={180} height={39} priority style={{ height: "auto" }} className="animate-pulse" />
+          <p className="text-ink/65 text-sm">Verificando sesión…</p>
         </div>
       </div>
     );
@@ -35,14 +30,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!user) return null;
 
   return (
-    <div className="flex min-h-screen bg-[#0a0f1e]">
+    <div className="flex min-h-screen bg-page">
       <Sidebar />
       <main
         id="main-content"
-        className="flex-1 lg:ml-64 min-h-screen"
+        className="flex-1 min-w-0 lg:ml-64 min-h-screen pt-[calc(3.5rem+env(safe-area-inset-top,0px))] lg:pt-0"
         tabIndex={-1}
       >
-        <div className="p-5 sm:p-6 lg:p-8 fade-in max-w-[1600px] mx-auto">
+        <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 fade-in max-w-[1400px] mx-auto">
           {children}
         </div>
       </main>

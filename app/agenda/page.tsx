@@ -127,20 +127,20 @@ function AppointmentTooltip({ appt, onClose }: { appt: Appointment; onClose: () 
   return (
     <Portal>
       <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" onClick={onClose}>
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-ink/50" />
         <div
-          className="relative z-10 bg-[#0d1526] border border-white/12 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+          className="relative z-10 bg-surface border border-ink/15 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Colored top bar */}
-          <div className={`h-1.5 w-full ${appt.status === "scheduled" ? "bg-gradient-to-r from-cyan-400 to-blue-500" : "bg-gradient-to-r from-amber-400 to-orange-500"}`} />
+          <div className={`h-1.5 w-full ${appt.status === "scheduled" ? "bg-accent" : "bg-amber-600"}`} />
 
           <div className="p-5 space-y-4">
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <p className="text-white font-bold text-base truncate">{safeName(appt.patient)}</p>
-                <p className="text-white/40 text-xs mt-0.5">{appt.patient?.document_number}</p>
+                <p className="text-ink font-bold text-base truncate">{safeName(appt.patient)}</p>
+                <p className="text-ink/60 text-xs mt-0.5">{appt.patient?.document_number}</p>
               </div>
               <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${st.badge}`}>
                 {st.label}
@@ -150,15 +150,15 @@ function AppointmentTooltip({ appt, onClose }: { appt: Appointment; onClose: () 
             {/* Details grid */}
             <div className="space-y-2.5">
               <div className="flex items-center gap-3">
-                <Clock size={14} className="text-white/30 shrink-0" />
-                <span className="text-white/70 text-sm">
+                <Clock size={14} className="text-ink/60 shrink-0" />
+                <span className="text-ink/75 text-sm">
                   {formatTime(appt.start_time)} — {formatTime(appt.end_time)}
                 </span>
               </div>
               {appt.service && (
                 <div className="flex items-center gap-3">
-                  <Stethoscope size={14} className="text-white/30 shrink-0" />
-                  <span className="text-white/70 text-sm">
+                  <Stethoscope size={14} className="text-ink/60 shrink-0" />
+                  <span className="text-ink/75 text-sm">
                     {appt.service.name}
                     {appt.service.price > 0 && (
                       <span className="text-cyan-400 ml-2 font-mono text-xs">{formatCOP(appt.service.price)}</span>
@@ -168,33 +168,33 @@ function AppointmentTooltip({ appt, onClose }: { appt: Appointment; onClose: () 
               )}
               {appt.specialist && (
                 <div className="flex items-center gap-3">
-                  <User size={14} className="text-white/30 shrink-0" />
-                  <span className="text-white/70 text-sm">
+                  <User size={14} className="text-ink/60 shrink-0" />
+                  <span className="text-ink/75 text-sm">
                     {safeName(appt.specialist)}
                     {appt.specialist.specialty && (
-                      <span className="text-white/30 ml-1">· {appt.specialist.specialty}</span>
+                      <span className="text-ink/60 ml-1">· {appt.specialist.specialty}</span>
                     )}
                   </span>
                 </div>
               )}
               {appt.patient?.phone && (
                 <div className="flex items-center gap-3">
-                  <span className="text-white/30 text-xs w-3.5 text-center shrink-0">📞</span>
-                  <span className="text-white/50 text-sm">{appt.patient.phone}</span>
+                  <span className="text-ink/60 text-xs w-3.5 text-center shrink-0">📞</span>
+                  <span className="text-ink/65 text-sm">{appt.patient.phone}</span>
                 </div>
               )}
             </div>
 
             {appt.notes && (
-              <div className="bg-white/5 rounded-xl p-3 border border-white/8">
-                <p className="text-white/40 text-xs mb-1">Notas</p>
-                <p className="text-white/60 text-sm">{appt.notes}</p>
+              <div className="bg-ink/[0.04] rounded-xl p-3 border border-ink/10">
+                <p className="text-ink/60 text-xs mb-1">Notas</p>
+                <p className="text-ink/70 text-sm">{appt.notes}</p>
               </div>
             )}
 
             <button
               onClick={onClose}
-              className="w-full py-2 text-white/40 hover:text-white/70 text-sm transition-colors border border-white/8 rounded-xl hover:border-white/15"
+              className="w-full py-2 text-ink/60 hover:text-ink/75 text-sm transition-colors border border-ink/10 rounded-xl hover:border-ink/15"
             >
               Cerrar
             </button>
@@ -290,15 +290,15 @@ function WeekView({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Day headers */}
-      <div className="grid grid-cols-[56px_repeat(7,1fr)] border-b border-white/8 shrink-0">
+      <div className="grid grid-cols-[56px_repeat(7,1fr)] border-b border-ink/10 shrink-0">
         <div />
         {days.map((day, i) => {
           const isToday = sameDay(day, today);
           return (
-            <div key={i} className="text-center py-3 border-l border-white/5 first:border-l-0">
-              <p className="text-white/40 text-xs uppercase tracking-wider">{DAYS_ES[day.getDay()]}</p>
+            <div key={i} className="text-center py-3 border-l border-ink/[0.08] first:border-l-0">
+              <p className="text-ink/60 text-xs uppercase tracking-wider">{DAYS_ES[day.getDay()]}</p>
               <div className={`mx-auto mt-1 w-8 h-8 rounded-full flex items-center justify-center
-                ${isToday ? "bg-cyan-500 text-white font-bold" : "text-white/70"} text-sm`}>
+                ${isToday ? "bg-accent text-white font-bold" : "text-ink/70"} text-sm`}>
                 {day.getDate()}
               </div>
             </div>
@@ -314,7 +314,7 @@ function WeekView({
           <div className="col-start-1">
             {HOURS.map((h) => (
               <div key={h} className="h-16 flex items-start justify-end pr-3 pt-0.5">
-                <span className="text-white/25 text-[11px]">{h < 12 ? `${h} am` : h === 12 ? "12 pm" : `${h - 12} pm`}</span>
+                <span className="text-ink/60 text-[11px]">{h < 12 ? `${h} am` : h === 12 ? "12 pm" : `${h - 12} pm`}</span>
               </div>
             ))}
           </div>
@@ -325,10 +325,10 @@ function WeekView({
             const totalCols = columns.length || 1;
 
             return (
-              <div key={di} className={`border-l border-white/5 relative ${isToday ? "bg-cyan-500/[0.03]" : ""}`}>
+              <div key={di} className={`border-l border-ink/[0.08] relative ${isToday ? "bg-cyan-500/[0.03]" : ""}`}>
                 {/* Hour lines */}
                 {HOURS.map((h, hi) => (
-                  <div key={h} className="h-16 border-t border-white/5 relative">
+                  <div key={h} className="h-16 border-t border-ink/[0.08] relative">
                     {/* Half-hour dashed line */}
                     <div className="absolute top-1/2 left-0 right-0 border-t border-white/[0.03] border-dashed" />
                   </div>
@@ -408,8 +408,8 @@ function ListView({
     return (
       <div className="flex-1 flex items-center justify-center py-20">
         <div className="text-center">
-          <Calendar size={48} className="text-white/10 mx-auto mb-4" />
-          <p className="text-white/30 text-sm">No hay citas pendientes ni confirmadas</p>
+          <Calendar size={48} className="text-ink/60 mx-auto mb-4" />
+          <p className="text-ink/60 text-sm">No hay citas pendientes ni confirmadas</p>
         </div>
       </div>
     );
@@ -429,21 +429,21 @@ function ListView({
             {/* Date header */}
             <div className="flex items-center gap-3 mb-3">
               <div className={`flex flex-col items-center w-12 h-12 rounded-xl justify-center shrink-0
-                ${isToday ? "bg-cyan-500 shadow-lg shadow-cyan-500/30" : "bg-white/5 border border-white/8"}`}>
-                <span className={`text-[10px] uppercase font-semibold ${isToday ? "text-cyan-100" : "text-white/40"}`}>
+                ${isToday ? "bg-cyan-500 shadow-lg shadow-cyan-500/30" : "bg-ink/[0.04] border border-white/8"}`}>
+                <span className={`text-[10px] uppercase font-semibold ${isToday ? "text-cyan-100" : "text-ink/60"}`}>
                   {DAYS_ES[date.getDay()]}
                 </span>
-                <span className={`text-lg font-bold leading-tight ${isToday ? "text-white" : "text-white/70"}`}>
+                <span className={`text-lg font-bold leading-tight ${isToday ? "text-ink" : "text-ink/75"}`}>
                   {date.getDate()}
                 </span>
               </div>
               <div>
-                <p className={`font-semibold text-sm ${isToday ? "text-cyan-400" : "text-white/60"}`}>
+                <p className={`font-semibold text-sm ${isToday ? "text-cyan-400" : "text-ink/70"}`}>
                   {isToday ? "Hoy" : `${MONTHS_ES[date.getMonth()]} ${date.getFullYear()}`}
                 </p>
-                <p className="text-white/30 text-xs">{dayAppts.length} cita{dayAppts.length !== 1 ? "s" : ""}</p>
+                <p className="text-ink/60 text-xs">{dayAppts.length} cita{dayAppts.length !== 1 ? "s" : ""}</p>
               </div>
-              <div className="flex-1 h-px bg-white/5 ml-2" />
+              <div className="flex-1 h-px bg-ink/[0.04] ml-2" />
             </div>
 
             {/* Appointments */}
@@ -472,9 +472,9 @@ function ListView({
                         <p className={`font-semibold text-sm truncate ${st.text}`}>{safeName(appt.patient)}</p>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${st.badge}`}>{st.label}</span>
                       </div>
-                      <p className="text-white/50 text-xs">{appt.service?.name ?? "Cita dental"}</p>
+                      <p className="text-ink/65 text-xs">{appt.service?.name ?? "Cita dental"}</p>
                       {appt.specialist && (
-                        <p className="text-white/30 text-xs mt-0.5">{safeName(appt.specialist)}</p>
+                        <p className="text-ink/60 text-xs mt-0.5">{safeName(appt.specialist)}</p>
                       )}
                     </div>
 
@@ -540,18 +540,18 @@ export default function AgendaPage() {
       <div className="flex flex-col h-[calc(100vh-4rem)] -m-6 lg:-m-8">
 
         {/* ── Header ── */}
-        <div className="px-6 lg:px-8 pt-6 pb-4 border-b border-white/8 shrink-0">
+        <div className="px-6 lg:px-8 pt-6 pb-4 border-b border-ink/10 shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
 
             {/* Title + stats */}
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
-                  <Calendar size={17} className="text-white" />
+                <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                  <Calendar size={17} className="text-ink" />
                 </div>
                 <div>
-                  <h1 className="text-white font-bold text-lg">Mi Agenda</h1>
-                  <p className="text-white/40 text-xs">Citas pendientes y confirmadas</p>
+                  <h1 className="text-ink font-bold text-lg">Mi Agenda</h1>
+                  <p className="text-ink/60 text-xs">Citas pendientes y confirmadas</p>
                 </div>
               </div>
 
@@ -559,16 +559,16 @@ export default function AgendaPage() {
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-sm bg-amber-400/80 border-l-2 border-amber-400" />
-                  <span className="text-white/50 text-xs">Pendiente</span>
+                  <span className="text-ink/65 text-xs">Pendiente</span>
                   <span className="text-amber-400 font-bold text-sm ml-1">{pendingCount}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-sm bg-cyan-400/80 border-l-2 border-cyan-400" />
-                  <span className="text-white/50 text-xs">Confirmada</span>
+                  <span className="text-ink/65 text-xs">Confirmada</span>
                   <span className="text-cyan-400 font-bold text-sm ml-1">{scheduledCount}</span>
                 </div>
-                <div className="w-px h-4 bg-white/10" />
-                <span className="text-white/30 text-xs">Hoy: <span className="text-white/60 font-medium">{todayCount}</span></span>
+                <div className="w-px h-4 bg-ink/[0.06]" />
+                <span className="text-ink/60 text-xs">Hoy: <span className="text-ink/70 font-medium">{todayCount}</span></span>
               </div>
             </div>
 
@@ -576,15 +576,15 @@ export default function AgendaPage() {
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
 
               {/* View toggle */}
-              <div className="flex bg-white/5 rounded-xl p-1 border border-white/8">
+              <div className="flex bg-ink/[0.04] rounded-xl p-1 border border-ink/10">
                 <button onClick={() => setViewMode("week")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all
-                    ${viewMode === "week" ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"}`}>
+                    ${viewMode === "week" ? "bg-ink/[0.06] text-ink" : "text-ink/60 hover:text-ink/70"}`}>
                   <LayoutGrid size={13} /> Semana
                 </button>
                 <button onClick={() => setViewMode("list")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all
-                    ${viewMode === "list" ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"}`}>
+                    ${viewMode === "list" ? "bg-ink/[0.06] text-ink" : "text-ink/60 hover:text-ink/70"}`}>
                   <List size={13} /> Lista
                 </button>
               </div>
@@ -593,15 +593,15 @@ export default function AgendaPage() {
               {viewMode === "week" && (
                 <div className="flex items-center gap-1">
                   <button onClick={() => setWeekStart((w) => addDays(w, -7))}
-                    className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white flex items-center justify-center transition-all border border-white/8">
+                    className="w-8 h-8 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/65 hover:text-ink flex items-center justify-center transition-all border border-ink/10">
                     <ChevronLeft size={15} />
                   </button>
                   <button onClick={() => setWeekStart(startOfWeek(new Date()))}
-                    className="px-3 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white text-xs font-medium transition-all border border-white/8">
+                    className="px-3 h-8 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/65 hover:text-ink text-xs font-medium transition-all border border-ink/10">
                     Hoy
                   </button>
                   <button onClick={() => setWeekStart((w) => addDays(w, 7))}
-                    className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white flex items-center justify-center transition-all border border-white/8">
+                    className="w-8 h-8 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/65 hover:text-ink flex items-center justify-center transition-all border border-ink/10">
                     <ChevronRight size={15} />
                   </button>
                 </div>
@@ -609,7 +609,7 @@ export default function AgendaPage() {
 
               {/* Refresh */}
               <button onClick={() => load(true)}
-                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center transition-all border border-white/8"
+                className="w-8 h-8 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center transition-all border border-ink/10"
                 title="Actualizar">
                 <RefreshCw size={14} className={refreshing ? "animate-spin text-cyan-400" : ""} />
               </button>
@@ -618,7 +618,7 @@ export default function AgendaPage() {
 
           {/* Week label */}
           {viewMode === "week" && (
-            <p className="text-white/30 text-xs mt-3 font-medium">{weekLabel}</p>
+            <p className="text-ink/60 text-xs mt-3 font-medium">{weekLabel}</p>
           )}
         </div>
 
@@ -627,8 +627,8 @@ export default function AgendaPage() {
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="flex flex-col items-center gap-4">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center animate-pulse">
-                  <Calendar size={18} className="text-white" />
+                <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center animate-pulse">
+                  <Calendar size={18} className="text-ink" />
                 </div>
                 <div className="w-5 h-5 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin" />
               </div>
