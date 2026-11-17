@@ -29,7 +29,7 @@ function ToastNotif({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 const emptyForm = { first_name: "", last_name: "", specialty: "", license_number: "", phone: "" };
 
 const reqLabel = (label: string) => (
-  <p className="text-ink/65 text-xs mb-1">{label} <span className="text-red-400">*</span></p>
+  <p className="form-label">{label} <span className="text-red-500">*</span></p>
 );
 
 export default function EspecialistasPage() {
@@ -229,9 +229,9 @@ export default function EspecialistasPage() {
       {/* ── MODAL NUEVO ESPECIALISTA ── */}
       {showModal && (
         <Portal>
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-ink/50" onClick={() => setShowModal(false)} />
-            <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-lg flex flex-col">
+          <div className="modal-root z-[100]">
+            <div className="modal-backdrop" onClick={() => setShowModal(false)} />
+            <div className="modal-panel max-w-lg">
 
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10">
@@ -245,13 +245,13 @@ export default function EspecialistasPage() {
                   </div>
                 </div>
                 <button onClick={() => setShowModal(false)}
-                  className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">
+                  className="modal-close">
                   ×
                 </button>
               </div>
 
               {/* Body */}
-              <div className="px-6 py-5 space-y-4">
+              <div className="modal-body space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     {reqLabel("Nombre")}
@@ -282,7 +282,7 @@ export default function EspecialistasPage() {
                 </div>
 
                 <div>
-                  <p className="text-ink/65 text-xs mb-1">Teléfono <span className="text-ink/60">(opcional)</span></p>
+                  <p className="form-label">Teléfono <span className="text-ink/60">(opcional)</span></p>
                   <input type="tel" value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     placeholder="3001234567" className="form-input text-sm" />

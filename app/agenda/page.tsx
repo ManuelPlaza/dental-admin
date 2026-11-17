@@ -126,8 +126,8 @@ function AppointmentTooltip({ appt, onClose }: { appt: Appointment; onClose: () 
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" onClick={onClose}>
-        <div className="absolute inset-0 bg-ink/50" />
+      <div className="modal-root z-[200]" onClick={onClose}>
+        <div className="modal-backdrop" />
         <div
           className="relative z-10 bg-surface border border-ink/15 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
           onClick={(e) => e.stopPropagation()}

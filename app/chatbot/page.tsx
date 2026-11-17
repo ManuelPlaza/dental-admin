@@ -59,7 +59,7 @@ function Field({ icon, label, hint, children }: {
 }) {
   return (
     <div>
-      <label className="flex items-center gap-2 text-ink/65 text-xs mb-1.5">
+      <label className="flex items-center gap-2 form-label.5">
         <span className="text-ink/60">{icon}</span>
         {label}
       </label>

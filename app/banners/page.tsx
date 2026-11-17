@@ -72,9 +72,9 @@ function DeleteConfirmModal({
 }) {
   return (
     <Portal>
-      <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-ink/50" onClick={onCancel} />
-        <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-5">
+      <div className="modal-root z-[150]">
+        <div className="modal-backdrop" onClick={onCancel} />
+        <div className="modal-panel max-w-sm p-6 gap-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/25 flex items-center justify-center shrink-0">
               <AlertTriangle size={18} className="text-red-400" />
@@ -214,7 +214,7 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
   };
 
   const Label = ({ text, required, tooltip }: { text: string; required?: boolean; tooltip?: string }) => (
-    <p className="text-ink/65 text-xs mb-1 flex items-center gap-1.5">
+    <p className="form-label flex items-center gap-1.5">
       {text}
       {required && <span className="text-red-400">*</span>}
       {tooltip && (
@@ -225,12 +225,12 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-ink/50" onClick={onClose} />
-        <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: "92vh" }}>
+      <div className="modal-root z-[100]">
+        <div className="modal-backdrop" onClick={onClose} />
+        <div className="modal-panel max-w-2xl">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
+          <div className="modal-head">
             <div className="flex items-center gap-3">
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mode === "create" ? "bg-accent" : "bg-navy"}`}>
                 {mode === "create" ? <Plus size={16} className="text-ink" /> : <Edit2 size={15} className="text-ink" />}
@@ -241,13 +241,13 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
               </div>
             </div>
             <button onClick={onClose}
-              className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">
+              className="modal-close">
               ×
             </button>
           </div>
 
           {/* Body */}
-          <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+          <div className="modal-body space-y-4">
 
             {/* Título */}
             <div>
@@ -342,7 +342,7 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
 
               {/* Toggle Activo */}
               <div>
-                <p className="text-ink/65 text-xs mb-1">Estado</p>
+                <p className="form-label">Estado</p>
                 <div className="flex items-center justify-between py-2.5 px-4 rounded-xl bg-white/[0.03] border border-ink/10 h-[38px]">
                   <span className={`text-sm font-medium ${form.is_active ? "text-ink/85" : "text-ink/60"}`}>
                     {form.is_active ? "Activo" : "Inactivo"}
@@ -365,7 +365,7 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 px-6 py-4 border-t border-ink/10 shrink-0">
+          <div className="modal-foot">
             <Btn variant="secondary" onClick={onClose} disabled={saving}>Cancelar</Btn>
             <Btn variant="primary" onClick={handleSave} disabled={saving}>
               <Save size={14} />

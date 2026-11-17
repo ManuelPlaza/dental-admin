@@ -151,12 +151,12 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-ink/50" onClick={onClose} />
-        <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-lg flex flex-col" style={{ maxHeight: "90vh" }}>
+      <div className="modal-root z-[100]">
+        <div className="modal-backdrop" onClick={onClose} />
+        <div className="modal-panel max-w-lg">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
+          <div className="modal-head">
             <div className="flex items-center gap-3">
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mode === "create" ? "bg-accent" : "bg-navy"}`}>
                 {mode === "create" ? <Plus size={16} className="text-ink" /> : <Edit2 size={15} className="text-ink" />}
@@ -166,29 +166,29 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
                 <p className="text-ink/60 text-xs">{mode === "create" ? "Completa los datos del servicio" : initial?.name}</p>
               </div>
             </div>
-            <button onClick={onClose} className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">×</button>
+            <button onClick={onClose} className="modal-close">×</button>
           </div>
 
           {/* Body */}
-          <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+          <div className="modal-body space-y-4">
 
             {/* Nombre */}
             <div>
-              <p className="text-ink/65 text-xs mb-1">Nombre <span className="text-red-400">*</span></p>
+              <p className="form-label">Nombre <span className="text-red-400">*</span></p>
               <input type="text" placeholder="Ej: Limpieza dental" className={`form-input text-sm ${errors.name ? "border-red-500/50" : ""}`} {...field("name")} />
               {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
             </div>
 
             {/* Descripción */}
             <div>
-              <p className="text-ink/65 text-xs mb-1">Descripción <span className="text-ink/60">(opcional)</span></p>
+              <p className="form-label">Descripción <span className="text-ink/60">(opcional)</span></p>
               <textarea rows={3} placeholder="Describe el servicio..." className="form-input text-sm resize-none" {...field("description")} />
             </div>
 
             {/* Precio + Duración */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-ink/65 text-xs mb-1">Precio COP <span className="text-red-400">*</span></p>
+                <p className="form-label">Precio COP <span className="text-red-400">*</span></p>
                 <input type="number" min="0" placeholder="Ej: 120000" className={`form-input text-sm font-mono ${errors.price ? "border-red-500/50" : ""}`} {...field("price")} />
                 {errors.price && <p className="text-red-400 text-xs mt-1">{errors.price}</p>}
                 {form.price && Number(form.price) > 0 && (
@@ -196,7 +196,7 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
                 )}
               </div>
               <div>
-                <p className="text-ink/65 text-xs mb-1">Duración (min) <span className="text-red-400">*</span></p>
+                <p className="form-label">Duración (min) <span className="text-red-400">*</span></p>
                 <input type="number" min="1" placeholder="60" className={`form-input text-sm ${errors.duration_minutes ? "border-red-500/50" : ""}`} {...field("duration_minutes")} />
                 {errors.duration_minutes && <p className="text-red-400 text-xs mt-1">{errors.duration_minutes}</p>}
               </div>
@@ -234,7 +234,7 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
 
             {/* Categoría */}
             <div>
-              <p className="text-ink/65 text-xs mb-1">Categoría <span className="text-ink/60">(opcional)</span></p>
+              <p className="form-label">Categoría <span className="text-ink/60">(opcional)</span></p>
               <select
                 value={form.category_id}
                 onChange={(e) => {
@@ -252,7 +252,7 @@ function ServiceModal({ mode, initial, onClose, onSaved, showToast }: ServiceMod
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 px-6 py-4 border-t border-ink/10 shrink-0">
+          <div className="modal-foot">
             <Btn variant="secondary" onClick={onClose} disabled={saving}>Cancelar</Btn>
             <Btn variant="primary" onClick={handleSave} disabled={saving}>
               <Save size={14} />{saving ? "Guardando..." : mode === "create" ? "Crear Servicio" : "Guardar cambios"}

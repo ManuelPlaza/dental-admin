@@ -413,12 +413,12 @@ export default function PagosPage() {
       {/* ── Detail Modal ── */}
       {detailRecord && (
         <Portal>
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-ink/50" onClick={closeDetail} />
-            <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-3xl flex flex-col" style={{ maxHeight: "90vh" }}>
+          <div className="modal-root z-[100]">
+            <div className="modal-backdrop" onClick={closeDetail} />
+            <div className="modal-panel max-w-3xl">
 
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
+              <div className="modal-head">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
                     <CreditCard size={16} className="text-ink" />
@@ -428,14 +428,14 @@ export default function PagosPage() {
                     <p className="text-ink/60 text-xs">{fullName(detailRecord.appointment?.patient)} · Cita #{detailRecord.appointment_id}</p>
                   </div>
                 </div>
-                <button onClick={closeDetail} className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">×</button>
+                <button onClick={closeDetail} className="modal-close">×</button>
               </div>
 
               <div className="overflow-y-auto flex-1">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-ink/10">
 
                   {/* ── Left: payment info ── */}
-                  <div className="px-6 py-5 space-y-4">
+                  <div className="modal-body space-y-4">
                     <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest">Información del pago</p>
                     <div className="bg-ink/[0.025] rounded-xl p-4 border border-ink/[0.08]">
                       <p className="text-ink/60 text-xs mb-1">Paciente</p>
@@ -493,7 +493,7 @@ export default function PagosPage() {
                     {showPayForm && (
                       <div className="bg-ink/[0.025] rounded-xl p-4 border border-ink/10 space-y-3">
                         <div>
-                          <p className="text-ink/65 text-xs mb-1">Monto <span className="text-red-400">*</span></p>
+                          <p className="form-label">Monto <span className="text-red-400">*</span></p>
                           <input type="number" min="0" value={payForm.amount}
                             onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })}
                             placeholder="Ej: 90000" className="form-input text-sm" />
@@ -520,7 +520,7 @@ export default function PagosPage() {
                         </div>
                         {payForm.method === "nequi" && (
                           <div>
-                            <p className="text-ink/65 text-xs mb-1">Código de referencia <span className="text-red-400">*</span></p>
+                            <p className="form-label">Código de referencia <span className="text-red-400">*</span></p>
                             <input type="text" autoComplete="off" value={payForm.reference_code}
                               onChange={(e) => setPayForm({ ...payForm, reference_code: e.target.value })}
                               placeholder="Ej: NEQ-123456" className="form-input text-sm" />
@@ -579,7 +579,7 @@ export default function PagosPage() {
                       {showNequiForm && (
                         <div className="bg-ink/[0.025] rounded-xl p-4 border border-ink/10 space-y-3 mb-3">
                           <div>
-                            <p className="text-ink/65 text-xs mb-1">Monto <span className="text-red-400">*</span></p>
+                            <p className="form-label">Monto <span className="text-red-400">*</span></p>
                             <input type="number" min="0" value={nequiForm.amount}
                               onChange={(e) => setNequiForm({ ...nequiForm, amount: e.target.value })}
                               placeholder="Ej: 90000" className="form-input text-sm" />
@@ -588,7 +588,7 @@ export default function PagosPage() {
                             )}
                           </div>
                           <div>
-                            <p className="text-ink/65 text-xs mb-1">Número de celular <span className="text-red-400">*</span></p>
+                            <p className="form-label">Número de celular <span className="text-red-400">*</span></p>
                             <input type="text" autoComplete="off" value={nequiForm.phone}
                               onChange={(e) => setNequiForm({ ...nequiForm, phone: e.target.value })}
                               placeholder="Ej: 3001234567" className="form-input text-sm" />
@@ -666,7 +666,7 @@ export default function PagosPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end px-6 py-4 border-t border-ink/10 shrink-0">
+              <div className="modal-foot">
                 <Btn variant="secondary" onClick={closeDetail}>Cerrar</Btn>
               </div>
             </div>

@@ -46,7 +46,7 @@ function StatusBadge({ critical }: { critical: boolean }) {
 function FormField({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-ink/65 text-xs mb-1.5">
+      <p className="form-label.5">
         {label}{required && <span className="text-red-400 ml-0.5">*</span>}
       </p>
       {children}
@@ -118,9 +118,9 @@ function SupplyFormModal({
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-ink/50" onClick={onClose} aria-hidden="true" />
-        <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="modal-root z-[150]">
+        <div className="modal-backdrop" onClick={onClose} aria-hidden="true" />
+        <div className="modal-panel max-w-md">
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10">
             <div className="flex items-center gap-3">
@@ -135,7 +135,7 @@ function SupplyFormModal({
           </div>
 
           {/* Body */}
-          <div className="px-6 py-5 space-y-4">
+          <div className="modal-body space-y-4">
             <FormField label="Nombre" required>
               <input
                 type="text"
@@ -240,9 +240,9 @@ function SupplyDetailModal({
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-ink/50" onClick={onClose} aria-hidden="true" />
-        <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="modal-root z-[150]">
+        <div className="modal-backdrop" onClick={onClose} aria-hidden="true" />
+        <div className="modal-panel max-w-md">
           {/* Header */}
           <div className={`h-1.5 w-full rounded-t-2xl ${supply.critical ? "bg-red-600" : "bg-accent"}`} />
           <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10">
@@ -256,7 +256,7 @@ function SupplyDetailModal({
           </div>
 
           {/* Body */}
-          <div className="px-6 py-5 space-y-4">
+          <div className="modal-body space-y-4">
             {/* Stock visual */}
             <div className="glass-card rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">

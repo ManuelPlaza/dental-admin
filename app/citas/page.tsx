@@ -76,7 +76,7 @@ function ToastNotif({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 }
 
 const reqLabel = (label: string) => (
-  <p className="text-ink/65 text-xs mb-1">{label} <span className="text-red-400">*</span></p>
+  <p className="form-label">{label} <span className="text-red-500">*</span></p>
 );
 
 export default function CitasPage() {
@@ -607,12 +607,12 @@ export default function CitasPage() {
       {/* ── MODAL CANCELACIÓN ── */}
       {cancelTarget && (
         <Portal>
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-ink/50" />
+          <div className="modal-root z-[150]">
+            <div className="modal-backdrop" />
             <div className="relative z-10 bg-surface border border-red-500/20 rounded-2xl shadow-2xl w-full max-w-md flex flex-col">
 
               {/* Header */}
-              <div className="flex items-center gap-3 px-6 py-4 border-b border-ink/10">
+              <div className="modal-head justify-start">
                 <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center shrink-0">
                   <AlertTriangle size={18} className="text-red-400" />
                 </div>
@@ -623,7 +623,7 @@ export default function CitasPage() {
               </div>
 
               {/* Body */}
-              <div className="px-6 py-5 space-y-4">
+              <div className="modal-body space-y-4">
                 <div>
                   {reqLabel("Motivo de cancelación")}
                   <select
@@ -645,7 +645,7 @@ export default function CitasPage() {
                 </div>
 
                 <div>
-                  <p className="text-ink/65 text-xs mb-1">Notas adicionales <span className="text-ink/60">(opcional)</span></p>
+                  <p className="form-label">Notas adicionales <span className="text-ink/60">(opcional)</span></p>
                   <textarea rows={3} value={cancelForm.notes}
                     onChange={(e) => setCancelForm({ ...cancelForm, notes: e.target.value })}
                     placeholder="Detalles adicionales sobre la cancelación..."
@@ -654,7 +654,7 @@ export default function CitasPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex gap-3 px-6 py-4 border-t border-ink/10">
+              <div className="modal-foot">
                 <Btn variant="secondary" onClick={() => setCancelTarget(null)} disabled={savingCancel}>
                   Volver
                 </Btn>
@@ -671,24 +671,24 @@ export default function CitasPage() {
       {/* ── MODAL HISTORIA CLÍNICA ── */}
       {historiaAppt && (
         <Portal>
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-ink/50" onClick={() => setHistoriaAppt(null)} />
-            <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: "90vh" }}>
-              <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
+          <div className="modal-root z-[100]">
+            <div className="modal-backdrop" onClick={() => setHistoriaAppt(null)} />
+            <div className="modal-panel max-w-2xl">
+              <div className="modal-head">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-green-600 flex items-center justify-center"><FileText size={16} className="text-white" /></div>
                   <div><h2 className="text-ink font-bold">Nueva Historia Clínica</h2><p className="text-ink/60 text-xs">{fullName(historiaAppt.patient)} · {formatDate(historiaAppt.start_time)}</p></div>
                 </div>
-                <button onClick={() => setHistoriaAppt(null)} className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">×</button>
+                <button onClick={() => setHistoriaAppt(null)} className="modal-close">×</button>
               </div>
-              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+              <div className="modal-body space-y-4">
                 <div>{reqLabel("Diagnóstico")}<textarea rows={3} value={historiaForm.diagnosis} onChange={(e) => setHistoriaForm({ ...historiaForm, diagnosis: e.target.value })} placeholder="Describe el diagnóstico..." className="form-input text-sm resize-none" /></div>
                 <div>{reqLabel("Tratamiento realizado")}<textarea rows={3} value={historiaForm.treatment} onChange={(e) => setHistoriaForm({ ...historiaForm, treatment: e.target.value })} placeholder="Describe el tratamiento aplicado..." className="form-input text-sm resize-none" /></div>
-                <div><p className="text-ink/65 text-xs mb-1">Notas del doctor <span className="text-ink/60">(opcional)</span></p><textarea rows={2} value={historiaForm.doctor_notes} onChange={(e) => setHistoriaForm({ ...historiaForm, doctor_notes: e.target.value })} className="form-input text-sm resize-none" /></div>
-                <div><p className="text-ink/65 text-xs mb-1">Adjuntos <span className="text-ink/60">(opcional)</span></p><input type="text" value={historiaForm.attachments} onChange={(e) => setHistoriaForm({ ...historiaForm, attachments: e.target.value })} className="form-input text-sm" /></div>
-                <div><p className="text-ink/65 text-xs mb-1">Próxima cita <span className="text-ink/60">(opcional)</span></p><input type="datetime-local" value={historiaForm.next_appointment_date} onChange={(e) => setHistoriaForm({ ...historiaForm, next_appointment_date: e.target.value })} className="form-input text-sm" /></div>
+                <div><p className="form-label">Notas del doctor <span className="text-ink/60">(opcional)</span></p><textarea rows={2} value={historiaForm.doctor_notes} onChange={(e) => setHistoriaForm({ ...historiaForm, doctor_notes: e.target.value })} className="form-input text-sm resize-none" /></div>
+                <div><p className="form-label">Adjuntos <span className="text-ink/60">(opcional)</span></p><input type="text" value={historiaForm.attachments} onChange={(e) => setHistoriaForm({ ...historiaForm, attachments: e.target.value })} className="form-input text-sm" /></div>
+                <div><p className="form-label">Próxima cita <span className="text-ink/60">(opcional)</span></p><input type="datetime-local" value={historiaForm.next_appointment_date} onChange={(e) => setHistoriaForm({ ...historiaForm, next_appointment_date: e.target.value })} className="form-input text-sm" /></div>
               </div>
-              <div className="flex gap-3 px-6 py-4 border-t border-ink/10 shrink-0">
+              <div className="modal-foot">
                 <Btn variant="secondary" onClick={() => setHistoriaAppt(null)}>Cancelar</Btn>
                 <Btn variant="primary" onClick={handleCreateHistoria} disabled={savingHistoria}><FileText size={14} />{savingHistoria ? "Guardando..." : "Crear Historia Clínica"}</Btn>
               </div>
@@ -700,19 +700,19 @@ export default function CitasPage() {
       {/* ── MODAL NUEVA CITA ── */}
       {showNewModal && (
         <Portal>
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-ink/50" onClick={() => setShowNewModal(false)} />
-            <div className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: "90vh" }}>
-              <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
+          <div className="modal-root z-[100]">
+            <div className="modal-backdrop" onClick={() => setShowNewModal(false)} />
+            <div className="modal-panel max-w-2xl">
+              <div className="modal-head">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center"><Plus size={16} className="text-white" /></div>
                   <div><h2 className="text-ink font-bold">Nueva Cita</h2><p className="text-ink/60 text-xs">Completa los datos para agendar</p></div>
                 </div>
-                <button onClick={() => setShowNewModal(false)} className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all">×</button>
+                <button onClick={() => setShowNewModal(false)} className="modal-close">×</button>
               </div>
-              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+              <div className="modal-body space-y-5">
                 <div>
-                  <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Datos del paciente</p>
+                  <p className="modal-section">Datos del paciente</p>
                   <div className="mb-3">
                     {reqLabel("Número de Cédula")}
                     <div className="relative">
@@ -730,11 +730,11 @@ export default function CitasPage() {
                     <div>{reqLabel("Nombre")}<input type="text" value={newForm.first_name} onChange={(e) => setNewForm({ ...newForm, first_name: e.target.value })} disabled={patientLocked} placeholder="Juan" className={inputClass(patientLocked)} /></div>
                     <div>{reqLabel("Apellido")}<input type="text" value={newForm.last_name} onChange={(e) => setNewForm({ ...newForm, last_name: e.target.value })} disabled={patientLocked} placeholder="Pérez" className={inputClass(patientLocked)} /></div>
                     <div>{reqLabel("Teléfono")}<input type="tel" value={newForm.phone} onChange={(e) => setNewForm({ ...newForm, phone: e.target.value })} disabled={patientLocked} placeholder="3001234567" className={inputClass(patientLocked)} /></div>
-                    <div><p className="text-ink/65 text-xs mb-1">Email <span className="text-ink/60">(opcional)</span></p><input type="email" value={newForm.email} onChange={(e) => setNewForm({ ...newForm, email: e.target.value })} disabled={patientLocked} placeholder="correo@ejemplo.com" className={inputClass(patientLocked)} /></div>
+                    <div><p className="form-label">Email <span className="text-ink/60">(opcional)</span></p><input type="email" value={newForm.email} onChange={(e) => setNewForm({ ...newForm, email: e.target.value })} disabled={patientLocked} placeholder="correo@ejemplo.com" className={inputClass(patientLocked)} /></div>
                   </div>
                 </div>
                 <div>
-                  <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Detalles de la cita</p>
+                  <p className="modal-section">Detalles de la cita</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div>{reqLabel("Especialista")}<select value={newForm.specialist_id} onChange={(e) => setNewForm({ ...newForm, specialist_id: e.target.value })} className="form-input text-sm"><option value="" className="bg-surface">Seleccionar...</option>{specialists.map((s) => <option key={s.id} value={String(s.id)} className="bg-surface">{fullName(s)} — {s.specialty}</option>)}</select></div>
                     <div>{reqLabel("Servicio")}<select value={newForm.service_id} onChange={(e) => handleServiceChange(e.target.value)} className="form-input text-sm"><option value="" className="bg-surface">Seleccionar...</option>{services.map((s) => <option key={s.id} value={String(s.id)} className="bg-surface">{s.name} — {formatCOP(s.price)}</option>)}</select></div>
@@ -746,9 +746,9 @@ export default function CitasPage() {
                     </div>
                   </div>
                 </div>
-                <div><p className="text-ink/65 text-xs mb-1">Notas <span className="text-ink/60">(opcional)</span></p><textarea rows={3} value={newForm.notes} onChange={(e) => setNewForm({ ...newForm, notes: e.target.value })} placeholder="Información adicional..." className="form-input text-sm resize-none" /></div>
+                <div><p className="form-label">Notas <span className="text-ink/60">(opcional)</span></p><textarea rows={3} value={newForm.notes} onChange={(e) => setNewForm({ ...newForm, notes: e.target.value })} placeholder="Información adicional..." className="form-input text-sm resize-none" /></div>
               </div>
-              <div className="flex gap-3 px-6 py-4 border-t border-ink/10 shrink-0">
+              <div className="modal-foot">
                 <Btn variant="secondary" onClick={() => setShowNewModal(false)}>Cancelar</Btn>
                 <Btn variant="primary" onClick={handleCreateAppointment} disabled={creatingAppt}><Plus size={14} />{creatingAppt ? "Creando cita..." : "Crear Cita"}</Btn>
               </div>

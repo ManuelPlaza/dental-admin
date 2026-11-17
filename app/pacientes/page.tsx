@@ -245,20 +245,19 @@ export default function PacientesPage() {
       {/* ── MODAL via Portal ── */}
       {selected && (
         <Portal>
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="modal-root z-[100]">
             {/* Backdrop */}
             <div
-              className="absolute inset-0 bg-ink/50"
+              className="modal-backdrop"
               onClick={() => { if (!editMode) { setSelected(null); } }}
             />
 
             {/* Panel */}
             <div
-              className="relative z-10 bg-surface border border-ink/[0.12] rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col"
-              style={{ maxHeight: "88vh" }}
+              className="modal-panel max-w-2xl"
             >
               {/* Header fijo */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 shrink-0">
+              <div className="modal-head">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-accent/20 flex items-center justify-center text-cyan-400 font-bold text-lg shrink-0">
                     {selected.first_name?.[0]?.toUpperCase()}
@@ -283,7 +282,7 @@ export default function PacientesPage() {
                   )}
                   <button
                     onClick={() => { setSelected(null); setEditMode(false); }}
-                    className="w-7 h-7 rounded-lg bg-ink/[0.04] hover:bg-ink/[0.06] text-ink/60 hover:text-ink flex items-center justify-center text-xl leading-none transition-all"
+                    className="modal-close"
                   >
                     ×
                   </button>
@@ -291,11 +290,11 @@ export default function PacientesPage() {
               </div>
 
               {/* Cuerpo scrolleable */}
-              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-6">
+              <div className="modal-body space-y-6">
 
                 {/* Datos personales — siempre solo lectura */}
                 <div>
-                  <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Datos personales</p>
+                  <p className="modal-section">Datos personales</p>
                   <div className="grid grid-cols-2 gap-3">
                     <ROField label="Nombre completo" value={fullName(selected)} />
                     <ROField label="Cédula (CC)" value={selected.document_number} />
@@ -305,7 +304,7 @@ export default function PacientesPage() {
                 {/* Estado de identidad — solo si la verificación marcó fallecido */}
                 {isDeceased(selected) && (
                   <div>
-                    <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Estado de identidad</p>
+                    <p className="modal-section">Estado de identidad</p>
                     <div className="glass-card rounded-xl p-4 space-y-1">
                       <p className="text-ink/75 text-sm">
                         {selected.identity_note || "Marcado como fallecido por la verificación automática de identidad"}
@@ -319,7 +318,7 @@ export default function PacientesPage() {
 
                 {/* Contacto */}
                 <div>
-                  <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Información de contacto</p>
+                  <p className="modal-section">Información de contacto</p>
                   <div className="grid grid-cols-2 gap-3">
                     {editMode ? (
                       <>
@@ -341,7 +340,7 @@ export default function PacientesPage() {
 
                 {/* Contacto de emergencia */}
                 <div>
-                  <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Contacto de emergencia</p>
+                  <p className="modal-section">Contacto de emergencia</p>
                   <div className="grid grid-cols-3 gap-3">
                     {editMode ? (
                       <>
@@ -379,7 +378,7 @@ export default function PacientesPage() {
                 {/* Consentimiento Ley 1581 — solo en modo lectura */}
                 {!editMode && (
                   <div>
-                    <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">Tratamiento de datos · Ley 1581</p>
+                    <p className="modal-section">Tratamiento de datos · Ley 1581</p>
                     {consentLoading ? (
                       <div className="h-20 rounded-xl bg-white/[0.03] animate-pulse" />
                     ) : consentStatus ? (
@@ -448,7 +447,7 @@ export default function PacientesPage() {
                 {/* Historial — solo en modo lectura */}
                 {!editMode && (
                   <div>
-                    <p className="text-ink/60 text-[11px] font-semibold uppercase tracking-widest mb-3">
+                    <p className="modal-section">
                       Historial de citas ({patientAppts(selected.id).length})
                     </p>
                     {patientAppts(selected.id).length === 0 ? (
