@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { BrandMark } from "@/components/SplashScreen";
 import Sidebar from "./Sidebar";
 import { useAuth } from "@/lib/auth";
 
@@ -18,10 +18,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-page items-center justify-center" aria-busy="true">
-        <div className="flex flex-col items-center gap-5">
-          <Image src="/logo-dentaljc.png" alt="Dental JC" width={180} height={39} priority style={{ height: "auto" }} className="animate-pulse" />
-          <p className="text-ink/65 text-sm">Verificando sesión…</p>
+      <div className="boot" aria-busy="true" role="status" aria-label="Verificando sesión">
+        <div className="splash-glow" aria-hidden="true" />
+        <div className="boot-center">
+          <div className="boot-mark"><BrandMark /></div>
+          <p className="splash-word">Dental <span>JC</span></p>
+          <p className="boot-text">Verificando sesión…</p>
         </div>
       </div>
     );

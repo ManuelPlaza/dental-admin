@@ -1,34 +1,27 @@
 "use client";
 
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import { Eye, EyeOff, ShieldAlert, Clock } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { BrandMark } from "@/components/SplashScreen";
 
 /* ─── Pantalla de carga tras iniciar sesión ──────────────────────────────────── */
 function LoginSuccessOverlay() {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-page"
-      style={{ animation: "fadeInOverlay 0.25s ease forwards" }}
-      role="status"
-    >
-      <style>{`
-        @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes spinnerRing { to { transform: rotate(360deg); } }
-      `}</style>
-      <div className="flex flex-col items-center gap-8">
-        <Image src="/logo-dentaljc.png" alt="Dental JC" width={220} height={48} priority style={{ height: "auto" }} />
-        <div className="flex flex-col items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-full border-2 border-ink/10 border-t-accent"
-            style={{ animation: "spinnerRing 0.8s linear infinite" }}
-          />
-          <p className="text-ink/65 text-sm">Cargando tu panel…</p>
-        </div>
+  if (typeof document === "undefined") return null;
+  return createPortal(
+    <div className="boot boot-fade" style={{ zIndex: 70 }} role="status" aria-label="Cargando tu panel">
+      <div className="splash-glow" aria-hidden="true" />
+      <div className="boot-center">
+        <div className="boot-mark"><BrandMark /></div>
+        <p className="splash-word">Dental <span>JC</span></p>
+        <div className="boot-spinner" aria-hidden="true" />
+        <p className="boot-text">Cargando tu panel…</p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -60,7 +53,8 @@ function LoginForm() {
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [countdown, setCountdown]     = useState(0);
 
-  useEffect(() => { if (user && !loginSuccess) router.replace("/dashboard"); }, [user, router, loginSuccess]);
+  const signingIn = useRef(false);
+  useEffect(() => { if (user && !loginSuccess && !signingIn.current) router.replace("/dashboard"); }, [user, router, loginSuccess]);
   useEffect(() => { if (params?.get("expired") === "1") setExpired(true); }, [params]);
 
   useEffect(() => {
@@ -109,6 +103,7 @@ function LoginForm() {
     setLoading(true);
     setError("");
 
+    signingIn.current = true;
     try {
       await login(sanitizeEmail(form.email), form.password);
       setAttempts(0);
@@ -116,6 +111,7 @@ function LoginForm() {
       setTimeout(() => router.replace("/dashboard"), 1800);
       return;
     } catch (err: unknown) {
+      signingIn.current = false;
       const msg = err instanceof Error ? err.message : "";
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
