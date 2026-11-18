@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { PageHeader, EmptyState, Skeleton, Btn } from "@/components/ui";
 import Portal from "@/components/ui/Portal";
+import ImageUploader, { resolveMedia } from "@/components/banners/ImageUploader";
+import BannerPreview from "@/components/banners/BannerPreview";
 import { Banner } from "@/lib/api";
 import { authFetch } from "@/lib/auth";
 import { ImagePlay, Plus, Edit2, Trash2, Save, AlertTriangle, ExternalLink } from "lucide-react";
@@ -44,6 +46,7 @@ function formatDateRange(start: string, end: string): string {
 }
 
 function isValidUrl(url: string): boolean {
+  if (url.startsWith("/media/")) return true; // imagen subida desde el admin
   try { return Boolean(new URL(url)); } catch { return false; }
 }
 
@@ -157,7 +160,7 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
   const validate = () => {
     const e: Record<string, string> = {};
     if (!form.title.trim())               e.title = "El título es obligatorio";
-    if (!form.image_url_desktop.trim())   e.image_url_desktop = "La URL de imagen desktop es obligatoria";
+    if (!form.image_url_desktop.trim())   e.image_url_desktop = "Sube la imagen para computador";
     else if (!isValidUrl(form.image_url_desktop)) e.image_url_desktop = "URL no válida";
     if (form.image_url_mobile && !isValidUrl(form.image_url_mobile)) e.image_url_mobile = "URL no válida";
     if (form.redirect_url && !isValidUrl(form.redirect_url)) e.redirect_url = "URL no válida";
@@ -233,7 +236,7 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
           <div className="modal-head">
             <div className="flex items-center gap-3">
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mode === "create" ? "bg-accent" : "bg-navy"}`}>
-                {mode === "create" ? <Plus size={16} className="text-ink" /> : <Edit2 size={15} className="text-ink" />}
+                {mode === "create" ? <Plus size={16} className="text-white" /> : <Edit2 size={15} className="text-white" />}
               </div>
               <div>
                 <h2 className="text-ink font-bold">{mode === "create" ? "Nuevo Banner" : "Editar Banner"}</h2>
@@ -270,29 +273,22 @@ function BannerModal({ mode, initial, onClose, onSaved, showToast }: BannerModal
               />
             </div>
 
-            {/* Imagen Desktop */}
-            <div>
-              <Label text="URL Imagen Desktop" required />
-              <input
-                type="text" autoComplete="off"
-                placeholder="https://ejemplo.com/banner-1920x600.jpg"
-                value={form.image_url_desktop} onChange={(e) => set("image_url_desktop", e.target.value)}
-                className={`form-input text-sm ${errors.image_url_desktop ? "border-red-500/50" : ""}`}
-              />
-              {errors.image_url_desktop && <p className="text-red-400 text-xs mt-1">{errors.image_url_desktop}</p>}
-            </div>
+            {/* Imágenes (se suben directo; sin pegar enlaces) */}
+            <ImageUploader
+              label="Imagen para computador" required kind="desktop"
+              value={form.image_url_desktop} onChange={(u) => set("image_url_desktop", u)}
+              error={errors.image_url_desktop} sizeHint="1920 × 720 px" targetRatio={8 / 3}
+            />
+            <ImageUploader
+              label="Imagen para celular" kind="mobile" tooltip="opcional; si no la subes se usa la de computador"
+              value={form.image_url_mobile} onChange={(u) => set("image_url_mobile", u)}
+              error={errors.image_url_mobile} sizeHint="1080 × 1200 px" targetRatio={0.92}
+            />
 
-            {/* Imagen Mobile */}
-            <div>
-              <Label text="URL Imagen Mobile" tooltip="Si no se especifica, se usará la imagen desktop" />
-              <input
-                type="text" autoComplete="off"
-                placeholder="https://ejemplo.com/banner-600x400.jpg (opcional)"
-                value={form.image_url_mobile} onChange={(e) => set("image_url_mobile", e.target.value)}
-                className={`form-input text-sm ${errors.image_url_mobile ? "border-red-500/50" : ""}`}
-              />
-              {errors.image_url_mobile && <p className="text-red-400 text-xs mt-1">{errors.image_url_mobile}</p>}
-            </div>
+            <BannerPreview
+              title={form.title} description={form.description}
+              desktopUrl={form.image_url_desktop} mobileUrl={form.image_url_mobile}
+            />
 
             {/* URL Redirección */}
             <div>

@@ -80,8 +80,10 @@ export async function authFetch(
   onSessionExpired?: () => void,
 ): Promise<Response> {
   const access  = storage.getAccess();
+  const isForm = typeof FormData !== "undefined" && init.body instanceof FormData;
   const headers = {
-    "Content-Type": "application/json",
+    // Con FormData el navegador pone el Content-Type (con su boundary) por sí solo
+    ...(isForm ? {} : { "Content-Type": "application/json" }),
     ...(init.headers as Record<string, string>),
     ...(access ? { Authorization: `Bearer ${access}` } : {}),
   };

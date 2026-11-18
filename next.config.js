@@ -41,7 +41,8 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob:",
+              // Imágenes de banners: /media del backend (subidas) y https para la opción de pegar una URL
+              `img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"} https:`,
               `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"} ${process.env.NEXT_PUBLIC_INVENTORY_URL || "http://localhost:8081"}`,
               "frame-ancestors 'none'",
               "base-uri 'self'",
